@@ -1,0 +1,8 @@
+.board {
+	display: flex;
+	justify-content: space-between;
+}
+
+.recent-threads {
+	width: 33%;
+}

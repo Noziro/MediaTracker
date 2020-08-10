@@ -1,0 +1,10 @@
+# This uses mod_rewrite. https://www.digitalocean.com/community/tutorials/how-to-set-up-mod_rewrite
+
+RewriteEngine on
+
+# Provides access to static folder
+RewriteRule ^static - [L,NC]
+RewriteRule ^session session.php [L]
+
+# Redirects all to
+RewriteRule . index.php [L]
