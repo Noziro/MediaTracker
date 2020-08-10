@@ -3,11 +3,8 @@
 // GLOBAL VARIABLES
 
 define("FILEPATH", "/");
-define("MYSQL_HOST", "localhost");
-define("MYSQL_PORT", "3306");
-define("MYSQL_USER", "root");
-define("MYSQL_PASS", "");
-define("MYSQL_DB", "collections");
+include("keyring.php");
+// keys.php contains potentially sensitive information such as the MYSQL_HOST/USER/PASS/DB/PORT variables.
 
 $db = new mysqli(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB, MYSQL_PORT);
 
