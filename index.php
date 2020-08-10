@@ -136,7 +136,6 @@ if ($has_session) {
 				<div class="site-nav primary list horizontal">
 					<a class="item text" href="<?=FILEPATH?>database">Database</a>
 					<a class="item text" href="<?=FILEPATH?>forum">Forum</a>
-					<a class="item text" href="<?=FILEPATH?>discuss">Discuss</a>
 				</div>
 				
 				<div class="site-nav search">
