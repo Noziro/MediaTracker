@@ -1,0 +1,15 @@
+.threads {
+	background: var(--backing-1);
+}
+
+.thread {
+	display: flex;
+	padding: 16px 16px 8px;
+	justify-content: space-between;
+} .thread + .thread {
+	border-top: 2px solid var(--border);
+}
+
+.recent-replies {
+	width: 33%;
+}

@@ -47,22 +47,10 @@ $auth = new Authentication();
 $has_session = $auth->isLoggedIn();
 if ($has_session) {
 	$user = $auth->getCurrentUser();
+	$access_level = $user['permission_level'];
+} else {
+	$access_level = 0;
 }
-
-
-
-# User Login
-
-#Temporary 
-#$logged_in = False;
-
-#$userQ = mysqli_query($db, "SELECT id, username FROM users WHERE id=1");
-#if($userQ !== null) {
-#	$logged_in = True;
-#	$user = mysqli_fetch_assoc($userQ);
-#	$user_id = $user['id'];
-#	$username = $user['username'];
-#}
 
 ?>
 
@@ -87,7 +75,7 @@ if ($has_session) {
 		<link rel="stylesheet" href="<?=FILEPATH?>static/css/style.css">
 		
 		<?php if (file_exists(PATH."static/css/".$url_readable.".css")) : ?>
-		<link rel="stylesheet" href="<?=FILEPATH."static/css/".$url?>.css">
+		<link rel="stylesheet" href="<?=FILEPATH."static/css/".$url_readable?>.css">
 		<?php endif ?>
 		
 		<?php if (file_exists(PATH."static/js/".$url_readable.".js")) : ?>
@@ -99,23 +87,8 @@ if ($has_session) {
 		
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,400i,700,700i">
 		
-		<!-- Theme Selector -->
-		<script>
-			function setTheme(theme) {
-				var classes = document.documentElement.classList;
-				
-				for (var cls of classes) {
-					if (cls.startsWith('theme-')) {
-						classes.remove(cls);
-					}
-				}
-				
-				classes.add('theme-' + theme);
-			}
-			
-			if(localStorage.getItem('theme') !== null) {
-				setTheme(localstorage.getItem('theme'));
-			}
+		<script type="text/javascript">
+		<?php include(PATH . "static/js/include.js") ?>
 		</script>
 	</head>
 	<body class="<?php

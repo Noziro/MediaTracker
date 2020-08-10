@@ -1,5 +1,8 @@
 .board {
 	display: flex;
+	background: var(--backing-1);
+	padding: 16px 16px 8px;
+	margin: 10px 0;
 	justify-content: space-between;
 }
 

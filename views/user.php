@@ -41,6 +41,14 @@ if(isset($_GET["id"])) {
 		<div class="split mainbar">
 			<div class="about">
 				About this user.
+				
+				<span class="site-rank">
+					<?php
+					$rank = sqli_result("SELECT title FROM permission_levels WHERE permission_level <= ? ORDER BY permission_level DESC", "s", $user_page["permission_level"]);
+					$rank = $rank->fetch_row()[0];
+					echo $rank;
+					?>
+				</span>
 			</div>
 		</div>
 	</div>
