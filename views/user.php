@@ -33,8 +33,8 @@ if(isset($_GET["id"])) {
 	<div class="page-split">
 		<div class="split sidebar">
 			<div class="list vertical">
-				<a class="item link" href="<?=FILEPATH?>collection?user=<?=$page_owner_id?>">Collection</a>
-				<a class="item link" href="<?=FILEPATH?>report?user=<?=$page_owner_id?>">Report User</a>
+				<a class="item link" href="<?=FILEPATH?>collection?user=<?=$user_page['id']?>">Collection</a>
+				<a class="item link" href="<?=FILEPATH?>report?user=<?=$user_page['id']?>">Report User</a>
 			</div>
 		</div>
 		
