@@ -1,8 +1,8 @@
-<div class="container page-split">
+<div class="wrapper__inner page-split">
 	<div class="split sidebar">
-		<div class="list vertical">
-			<a class="item link" href="?section=profile">Profile</a>
-			<a class="item link" href="?section=security">Security</a>
+		<div class="">
+			<a class="" href="?section=profile">Profile</a>
+			<a class="" href="?section=security">Security</a>
 			<div class="divider"></div>
 			<form action="/session" method="POST" class="item text logout" >
 				<input type="hidden" name="action" value="logout">

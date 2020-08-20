@@ -12,6 +12,12 @@ function setTheme(theme) {
 	classes.add('theme-' + theme);
 }
 
-if(localStorage.getItem('theme') !== null) {
-	setTheme(localstorage.getItem('theme'));
+function selectTheme(theme) {
+	console.log(theme);
+	setTheme(theme);
+	localStorage.setItem('theme', theme);
+}
+
+if(window.localStorage.getItem('theme') !== null) {
+	setTheme(localStorage.getItem('theme'));
 }

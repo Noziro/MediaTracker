@@ -1,6 +1,7 @@
 <?php
 # Temp until site name is decided
-$website = "Collections.com";
+$website = "Collections";
+$domain = ".com";
 
 
 
@@ -55,7 +56,7 @@ if ($has_session) {
 ?>
 
 <!DOCTYPE HTML>
-<html lang="en" class="theme-dark">
+<html lang="en" class="theme-light">
 	<head>
 		<title><?php
 			echo $website . " - ";
@@ -85,47 +86,58 @@ if ($has_session) {
 		<!--<script type="text/javascript" src="<?=FILEPATH?>static/js/jquery-3.3.1.min.js" async></script>-->
 		<script type="text/javascript" src="<?=FILEPATH?>static/js/scripts.js" defer></script>
 		
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,400i,700,700i">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,400i,600,600i">
 		
 		<script type="text/javascript">
 		<?php include(PATH . "static/js/include.js") ?>
 		</script>
 	</head>
-	<body class="<?php
+	<body class="page page--<?php
 	
 	if ($url == "404") {
 		echo "error";
 	} else {
-		echo implode(" ", $url_split);
+		echo implode(" page--", $url_split);
 	}
 	?>">
-		<nav id="nav" class="wrapper">
-			<div class="container">
-				<a class="site-nav identity" href="<?=FILEPATH?>">
-					<!--<img class="logo" src="<?=FILEPATH?>static/img/logo.png" alt="website logo">-->
-					<span class="name"><?=$website?></span>
-				</a>
-				
-				<div class="site-nav primary list horizontal">
-					<a class="item text" href="<?=FILEPATH?>database">Database</a>
-					<a class="item text" href="<?=FILEPATH?>forum">Forum</a>
+		<nav id="nav" class="wrapper wrapper--site-nav">
+			<div class="wrapper__inner site-nav">
+				<div class="site-nav__section">
+					<a class="site-nav__identity" href="<?=FILEPATH?>">
+						<?=$website?>
+					</a>
 				</div>
 				
-				<div class="site-nav search">
+				<div class="site-nav__section">
+					<a class="site-nav__item" href="<?=FILEPATH?>database">Database</a>
+					<a class="site-nav__item" href="<?=FILEPATH?>forum">Forum</a>
+					<a class="site-nav__item" href="<?=FILEPATH?>groups">Groups</a>
+				</div>
+				
+				<div class="site-nav__section site-nav--search">
 					<input type="search" autocomplete="off" class="search-bar" placeholder="Search for Movies, Games, TV, Books, Anime, and more...">
 				</div>
 				
-				<div class="site-nav user list horizontal">
+				<div class="site-nav__section">
 					<?php if($has_session) : ?>
 					
-					<a class="item text" href="<?=FILEPATH?>collection">Collection</a>
+					<a class="site-nav__item" href="<?=FILEPATH?>collection">Collection</a>
 					
-					<div class="item dropdown">
-						<a class="item text user" href="<?=FILEPATH . "user?id=" . $user["id"]?>"><?=$user["nickname"]?></a>
+					<div class="dropdown notifications" style="display: none;">
+						<a class="site-nav__item" href="<?=FILEPATH?>collection">!</a>
 						
 						<div class="dropdown-menu list vertical">
-							<a class="item text" href="<?=FILEPATH?>account/settings">Settings</a>
-							<form action="/session" method="POST" class="item text logout" >
+							Notifications -TODO-
+						</div>
+					</div>
+					
+					<div class="dropdown profile">
+						<a class="site-nav__item" href="<?=FILEPATH."user?id=".$user["id"]?>"><?=$user["nickname"]?></a>
+						
+						<div class="dropdown-menu list vertical">
+							<a class="site-nav__item" href="<?=FILEPATH."user?id=".$user["id"]?>">Profile</a>
+							<a class="site-nav__item" href="<?=FILEPATH?>account/settings">Settings</a>
+							<form action="/session" method="POST" class="site-nav__item" >
 								<input type="hidden" name="action" value="logout">
 								<input type="submit" name="commit" value="Logout" class="link">
 							</form>
@@ -134,37 +146,34 @@ if ($has_session) {
 						
 					<?php else : ?>
 					
-					<a class="item text login" href="<?=FILEPATH?>login?action=login">Login</a>
-					<a class="item text register" href="<?=FILEPATH?>login?action=register">Register</a>
+					<a class="site-nav__item" href="<?=FILEPATH?>login?action=login">Login</a>
+					<a class="site-nav__item" href="<?=FILEPATH?>login?action=register">Register</a>
 					
 					<?php endif ?>
 				</div>
 			</div>
 		</nav>
-		<div class="js-scroll" style="visibility:hidden;"></div>
 		
 		<?php if(isset($_GET['notice'])) : ?>
 		
-		<div class="wrapper notice">
-			<div class="container center-text">
-				<p>
-					<?php
-					switch($_GET['notice']) {
-						case 'login-success':
-							echo "Successfully logged into your account. Welcome back!";
-							break;
-						case 'register-success':
-							echo "Successfully created your account. Have fun!";
-							break;
-						case 'logout-success':
-							echo "Successfully logged out of your account. Thanks for visiting.";
-							break;
-						default:
-							echo "This was meant to say something, but it doesn't! Our bad.";
-							break;
-					}
-					?>
-				</p>
+		<div class="wrapper wrapper--notice">
+			<div class="wrapper__inner notice">
+				<?php
+				switch($_GET['notice']) {
+					case 'login-success':
+						echo "Successfully logged into your account. Welcome back!";
+						break;
+					case 'register-success':
+						echo "Successfully created your account. Have fun!";
+						break;
+					case 'logout-success':
+						echo "Successfully logged out of your account. Thanks for visiting.";
+						break;
+					default:
+						echo "This was meant to say something, but it doesn't! Our bad.";
+						break;
+				}
+				?>
 			</div>
 		</div>
 		
@@ -172,79 +181,92 @@ if ($has_session) {
 		
 		<?php if(isset($_GET['error'])) : ?>
 		
-		<div class="wrapper notice error">
-			<div class="container center-text">
-				<p>
-					<?php
-					switch($_GET['error']) {
-						case 'required-field':
-							echo "Please fill out the required fields.";
-							break;
-						case 'login-bad':
-							echo "Incorrect login credentials. Please try again.";
-							break;
-						case 'register-exists':
-							echo "User already exists.";
-							break;
-						case 'register-match':
-							echo "Passwords do not match.";
-							break;
-						case 'register-invalid-name':
-							echo "Username contained invalid characters.";
-							break;
-						case 'logout-failure':
-							echo "Failed to log you out. Please try again or report the error to the admins.";
-							break;
-						default:
-							echo "Encountered an unknown error.";
-							break;
-					}
-					?>
-				</p>
+		<div class="wrapper wrapper--notice-error">
+			<div class="wrapper__inner notice">
+				
+				<?php
+				switch($_GET['error']) {
+					case 'required-field':
+						echo "Please fill out the required fields.";
+						break;
+					case 'login-bad':
+						echo "Incorrect login credentials. Please try again.";
+						break;
+					case 'register-exists':
+						echo "User already exists.";
+						break;
+					case 'register-match':
+						echo "Passwords do not match.";
+						break;
+					case 'register-invalid-name':
+						echo "Username contained invalid characters.";
+						break;
+					case 'logout-failure':
+						echo "Failed to log you out. Please try again or report the error to the admins.";
+						break;
+					default:
+						echo "Encountered an unknown error.";
+						break;
+				}
+				?>
 			</div>
 		</div>
 		
 		<?php endif ?>
 		
-		<main id="content" class="wrapper">
+		<main id="content" class="wrapper wrapper--content">
 			<?php 
 			include(PATH . "views/$url.php");
 			?>
 		</main>
 		
-		<footer id="footer" class="wrapper">
-			<div class="container">
-				<span class="signoff">
-					<?=$website?>
-				</span>
+		<footer id="footer" class="wrapper wrapper--footer">
+			<div class="wrapper__inner footer">
+				<div class="footer__section links">
+					<span class="footer__section-head"><?=$website.$domain?></span>
+					<!-- <span class="footer__item">A project by Noziro Red</span> -->
+					<a class="footer__item" href="<?=FILEPATH?>about">About</a>
+					<a class="footer__item" href="mailto:nozirored@gmail.com?subject=Contacting%20about%20Collections.com">Contact</a>
+				</div>
 				
-				<span class="links">
-					<a href="mailto:nozirored@gmail.com?subject=Contacting%20about%20Collections.com">Contact</a>
-				</span>
-				
-				<span class="theme-selector list horizontal">
-					<span class="item text"> Choose your theme:</span>
-					<a id="theme-dark" class="item text" role="button">Dark</a>
-					<a id="theme-light" class="item text" role="button">Light</a>
-				</span>
-				
-				<!--<span class="copyright">
-					&copy <?php echo date("Y"); ?> Noziro Red
-				</span>-->
+				<div class="footer__section">
+					<span class="footer__section-head"> Themes</span>
+					
+					<div class="footer__themes">
+						<?php $themes = [
+							'light',
+							'dark',
+							'blackout',
+							'contrast'
+						];
+						
+						foreach($themes as $theme) : ?>
+						
+						<a id="theme-<?=$theme?>" class="footer__theme-option theme-preview" role="button" onclick="selectTheme(this.getAttribute('data-value'))" data-value="<?=$theme?>">
+							<div class="theme-preview__backing theme-<?=$theme?>" aria-hidden="true">
+								<span class="theme-preview__text">Aa</span>
+							</div>
+							
+							<div class="global__accessibility-text">Select <?=$theme?> theme.</div>
+						</a>
+						
+						<?php endforeach; ?>
+					</div>
+				</div>
 			</div>
 		</footer>
 		
-		<div id="gdpr" class="wrapper <?php
-			if(isset($_COOKIE["gdpr"])) {
-				echo "hidden";
-			}
-		?>">
-			<div class="container">
-				<p>This website uses cookies to create a functioning user experience. By continuing to use this site, you agree to the use of these cookies.</p>
+		<?php if(!isset($_COOKIE["gdpr"])) : ?>
+		
+		<div id="gdpr" class="wrapper wrapper--gdpr">
+			<div class="wrapper__inner gdpr">
+				<p class="gdpr__dialogue">This website uses cookies to create a functioning user experience. By continuing to use this site, you agree to the use of these cookies.</p>
 				
-				<button id="gdpr-accept" class="button large">Dismiss</button>
+				<button id="gdpr-accept" class="button button--medium button--call-to-action">Dismiss</button>
 			</div>
 		</div>
+		
+		<?php endif ?>
 	</body>
 </html>
 

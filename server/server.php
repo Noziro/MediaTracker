@@ -10,8 +10,7 @@ $db = new mysqli(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB, MYSQL_PORT);
 
 
 
-// FUNCTIONS & CLASSES
-
+// DATABASE FUNCTIONS
 
 // Passes database an SQL statement and returns result.
 function sqli_result(string $sql, string $insert_type, string $insert_variable) {
@@ -41,7 +40,8 @@ function sqli_execute(string $sql, string $insert_type, string $insert_variable)
 }
 
 
-// Auth System
+
+// AUTH SYSTEM
 
 class Authentication {
 	private $db;

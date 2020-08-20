@@ -1,3 +1,16 @@
+// Header Scroll
+
+var $navObj = document.getElementById('nav');
+var $navLimit = 18;
+
+document.body.onscroll = function() {
+	if(window.scrollY >= $navLimit) {
+		$navObj.classList.add('js-fixed');
+	} else {
+		$navObj.classList.remove('js-fixed');
+	}
+}
+
 // Functions "borrowed" from this webpage: https://plainjs.com/javascript/utilities/set-cookie-get-cookie-and-delete-cookie-5/
 
 /*function getCookie(name) {
@@ -15,23 +28,12 @@ function setCookie(name, value, days) {
 	setCookie(name, '', -1);
 }*/
 
-// Theme selector
-
-document.getElementById('theme-dark').onclick = function(){
-	setTheme('dark');
-	localStorage.setItem('theme', 'dark');
-};
-document.getElementById('theme-light').onclick = function(){
-	setTheme('light');
-	localStorage.setItem('theme', 'light');
-};
-
 // GDPR Functions
 
 function acceptGDPR() {
 	document.cookie = "gdpr=1; expires=Fri, 31 Dec 9999 23:59:59 GMT; path=/"
 	
-	document.getElementById('gdpr').classList.add('hidden');
+	document.getElementById('gdpr').classList.add('js-hidden');
 }
 
 document.getElementById('gdpr-accept').onclick = acceptGDPR;

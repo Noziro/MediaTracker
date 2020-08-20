@@ -25,16 +25,16 @@ if(isset($_GET["id"])) {
 }
 ?>
 
-<div class="container">
+<div class="wrapper__inner">
 	<div class="user-banner">
 		<div class="user-avatar"></div>
 	</div>
 	
 	<div class="page-split">
 		<div class="split sidebar">
-			<div class="list vertical">
-				<a class="item link" href="<?=FILEPATH?>collection?user=<?=$user_page['id']?>">Collection</a>
-				<a class="item link" href="<?=FILEPATH?>report?user=<?=$user_page['id']?>">Report User</a>
+			<div class="">
+				<a class="" href="<?=FILEPATH?>collection?user=<?=$user_page['id']?>">Collection</a>
+				<a class="" href="<?=FILEPATH?>report?user=<?=$user_page['id']?>">Report User</a>
 			</div>
 		</div>
 		

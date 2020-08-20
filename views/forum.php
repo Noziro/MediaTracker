@@ -7,19 +7,21 @@ $boards = $boards->fetch_all(MYSQLI_ASSOC);
 
 ?>
 
-<div class="container forum">
-	<h2>Forum</h2>
+<div class="wrapper__inner">
+	<div class="content-header">
+		<h2 class="content-header__title">Forum</h2>
+	</div>
 	
-	<div class="boards">
+	<div class="forum-boards">
 		<?php foreach($boards as $board): ?>
-		<div class="board">
-			<div class="board-description">
+		<div class="forum-boards__board">
+			<div class="forum-boards__board-info">
 				<a href="<?=FILEPATH?>forum/board?id=<?=$board['id']?>">
-					<h6><?=$board['name']?></h6>
+					<b class="forum-boards__board-title"><?=$board['name']?></b>
 				</a>
-				<p><?=$board['description']?></p>
+				<div class="forum-boards__board-description"><?=$board['description']?></div>
 			</div>
-			<div class="recent-threads">
+			<div class="forum-boards__board-aside">
 				<?php 				
 				$threads = sqli_result("SELECT id, user_id, title, updated_at FROM threads WHERE board_id=? LIMIT 2", "s", $board['id']);
 				
@@ -32,19 +34,21 @@ $boards = $boards->fetch_all(MYSQLI_ASSOC);
 				$threads->fetch_all(MYSQLI_ASSOC);
 				
 				foreach($threads as $thread) : ?>
-				<div class="thread">
-					<b class="title">
+				
+				<div class="forum-boards__recent-thread">
+					<b class="forum-boards__thread-title">
 						<a href="<?=FILEPATH."forum/thread?id=".$thread['id']?>"><?=$thread['title']?></a>
 					</b> -
-						<span class="user">
+					<span class="forum-boards__thread-author">
 						<?php
 						$user = sqli_result("SELECT nickname FROM users WHERE id=?", "s", $thread['user_id']);
 						echo $user->fetch_row()[0];
 						?>
-						</span>
+					</span>
 					<br />
-					<span class="date"><?=$thread['updated_at']?></span>
+					<span class="forum-boards__thread-date"><?=$thread['updated_at']?></span>
 				</div>
+				
 				<?php endforeach; endif ?>
 			</div>
 		</div>

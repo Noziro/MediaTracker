@@ -30,37 +30,56 @@ $replies = $stmt->get_result();
 $replies = $replies->fetch_all(MYSQLI_ASSOC);
 ?>
 
-<div class="container forum thread">
-	<div class="breadcrumb">
-		<a href="<?=FILEPATH."forum"?>">Forum</a> >
-		<a href="<?=FILEPATH."forum/board?id=".$board['id']?>"><?=$board['name']?></a> >
-		<span><?=$thread['title']?></span>
+<div class="wrapper__inner forum thread">
+	<div class="content-header">
+		<div class="content-header__breadcrumb">
+			<a href="<?=FILEPATH."forum"?>">Forum</a> >
+			<a href="<?=FILEPATH."forum/board?id=".$board['id']?>"><?=$board['name']?></a> >
+			<span><?=$thread['title']?></span>
+		</div>
+		
+		<h2 class="content-header__title"><?=$thread['title']?></h2>
 	</div>
 	
-	<h3><?=$thread['title']?></h3>
+	<?php if($has_session) : ?>
+	<div class="page-actions">
+		<button id="js-newreply" class="page-actions__action button" type="button">
+			New Reply
+		</button>
+		
+		<button id="js-watchthread" class="page-actions__action button button--disabled" type="button" disabled>
+			Watch Thread
+		</button>
+	</div>
+	<?php endif ?>
 	
-	<div class="replies">
-		<?php foreach($replies as $reply): ?>
-		<div class="reply">
-			<div class="reply-info">
-				<?php
-				$reply_user = sqli_result("SELECT id, nickname FROM users WHERE id=?", "s", $reply['user_id']);
-				$reply_user = $reply_user->fetch_assoc();
-				?>
-				<a class="user" href="<?=FILEPATH."user?id=".$reply_user['id']?>">
-					<?=$reply_user['nickname']?>
-				</a>
-				<br />
-				<?=$reply['created_at']?>
-				<br />
-				<?=$reply['updated_at']?>
-			</div>
-			<div class="reply-content">
-				<p>
-					<?=$reply['body']?>
-				</p>
-			</div>
+	<?php foreach($replies as $reply): ?>
+	<div class="thread-reply">
+		<div class="thread-reply__info">
+			<?php
+			$reply_user = sqli_result("SELECT id, nickname FROM users WHERE id=?", "s", $reply['user_id']);
+			$reply_user = $reply_user->fetch_assoc();
+			?>
+			<a class="user" href="<?=FILEPATH."user?id=".$reply_user['id']?>">
+				<?=$reply_user['nickname']?>
+			</a>
+			<br />
+			<?=$reply['created_at']?>
+			<br />
+			<?=$reply['updated_at']?>
 		</div>
-		<?php endforeach ?>
+		<div class="thread-reply__content">
+			<p class="thread-reply__text global__long-text">
+				<?=$reply['body']?>
+			</p>
+		</div>
+	</div>
+	<?php endforeach ?>
+	
+	<div id="js-hidetoggle" class="submission-form">
+		<form>
+			<input type="text">
+			<input type="submit" value="Reply">
+		</form>
 	</div>
 </div>

@@ -2,9 +2,7 @@
 http_response_code(404);
 ?>
 
-<div class="container">
-	<div class="message error center-text">
-		<h1>404</h1>
-		<h4>Not Found</h4>
-	</div>
+<div class="wrapper__inner page-failure">
+	<h1 class="page-failure__title">404</h1>
+	<h4 class="page-failure__subtitle">Not Found</h4>
 </div>

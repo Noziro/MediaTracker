@@ -26,21 +26,32 @@ $threads = $stmt->get_result();
 $threads = $threads->fetch_all(MYSQLI_ASSOC);
 ?>
 
-<div class="container forum board">
-	<div class="breadcrumb">
-		<a href="<?=FILEPATH."forum"?>">Forum</a> >
-		<span><?=$board['name']?></span>
+<div class="wrapper__inner">
+	<div class="content-header">
+		<div class="content-header__breadcrumb">
+			<a href="<?=FILEPATH."forum"?>">Forum</a> >
+			<span><?=$board['name']?></span>
+		</div>
+		
+		<h2 class="content-header__title"><?=$board['name']?></h2>
+		
+		<h6 class="content-header__subtitle"><?=$board['description']?></h2>
 	</div>
 	
-	<h3><?=$board['name']?></h3>
-	<h6><?=$board['description']?></h6>
+	<?php if($has_session) : ?>
+	<div class="page-actions">
+		<button id="js-newthread" class="page-actions__action button" type="button">
+			New Thread
+		</button>
+	</div>
+	<?php endif ?>
 	
-	<div class="threads">
+	<div class="forum-threads">
 		<?php foreach($threads as $thread): ?>
-		<div class="thread">
-			<div class="thread-description">
+		<div class="forum-threads__thread">
+			<div class="forum-threads__thread-description">
 				<a href="<?=FILEPATH?>forum/thread?id=<?=$thread['id']?>">
-					<h6><?=$thread['title']?></h6>
+					<h6 class="forum-threads__thread-title"><?=$thread['title']?></h6>
 				</a>
 				<p>
 					<?=$thread['created_at']?>
@@ -54,7 +65,7 @@ $threads = $threads->fetch_all(MYSQLI_ASSOC);
 					</a>
 				</p>
 			</div>
-			<div class="recent-replies">
+			<div class="forum-threads__recent-replies">
 				<?php 				
 				$replies = sqli_result("SELECT id, user_id, updated_at FROM thread_replies WHERE thread_id=? ORDER BY created_at DESC LIMIT 1", "s", $thread['id']);
 				
