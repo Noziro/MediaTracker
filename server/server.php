@@ -13,7 +13,18 @@ $db = new mysqli(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB, MYSQL_PORT);
 // DATABASE FUNCTIONS
 
 // Passes database an SQL statement and returns result.
-function sqli_result(string $sql, string $insert_type, string $insert_variable) {
+function sqli_result(string $sql) {
+	$db = $GLOBALS['db'];
+	
+	$q = $db->prepare($sql);
+	$q->execute();
+	$r = $q->get_result();
+	$q->close();
+	return $r;
+}
+
+// Passes database an SQL statement with sanitized variable and returns result.
+function sqli_result_bindvar(string $sql, string $insert_type, string $insert_variable) {
 	$db = $GLOBALS['db'];
 	
 	$q = $db->prepare($sql);
@@ -39,6 +50,14 @@ function sqli_execute(string $sql, string $insert_type, string $insert_variable)
 	return true;
 }
 
+// For use on user POST pages. Closes relevant pieces and redirects user to a page.
+function finalize(string $return_to = '/') {
+	$db = $GLOBALS['db'];
+	
+	$db->close();
+	header('Location: '.$return_to);
+	exit();
+}
 
 
 // AUTH SYSTEM
@@ -120,7 +139,7 @@ class Authentication {
 			return false;
 		}
 		
-		$que = sqli_result("SELECT expiry FROM sessions WHERE id=?", "s", $_COOKIE['session']);
+		$que = sqli_result_bindvar("SELECT expiry FROM sessions WHERE id=?", "s", $_COOKIE['session']);
 		$res = $que->fetch_assoc();
 		if($que->num_rows > 0) {
 			if($res["expiry"] < time()) {
@@ -171,7 +190,7 @@ class Authentication {
 		$id = bin2hex(random_bytes(16));
 		
 		// If ID exists, get new one
-		if (sqli_result("SELECT id FROM sessions WHERE id=?", "s", $id)->num_rows > 0) {
+		if (sqli_result_bindvar("SELECT id FROM sessions WHERE id=?", "s", $id)->num_rows > 0) {
 			$id = generateSessionID();
 		}
 		

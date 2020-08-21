@@ -5,6 +5,7 @@ RewriteEngine on
 # Provides access to static folder
 RewriteRule ^static - [L,NC]
 RewriteRule ^session session.php [L]
+RewriteRule ^interface interface.php [L]
 
 # Redirects all to
 RewriteRule . index.php [L]

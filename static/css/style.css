@@ -154,6 +154,10 @@ small {
 .button:hover {
 	opacity: 0.7;
 }
+.button--small {
+	padding: 3px 6px;
+	font-size: 12px;
+}
 .button--medium {
 	padding: 6px 12px;
 	font-size: 17px;
@@ -435,9 +439,9 @@ body {
 }
 
 .content-header__subtitle {
-	margin: 0;
-	font-size: 1.1em;
-	margin-top: 4px;
+	margin: 4px 0 0;
+	font-size: 16px;
+	font-weight: 600;
 }
 
 /* Breadcrumb */
@@ -516,14 +520,19 @@ body {
 
 
 
-.forum-threads {
-	background: var(--backing-content);
+.forum-threads__thread-header {
+	display: flex;
+	justify-content: space-between;
+	padding: 16px 16px 8px;
+	border-bottom: 2px solid var(--border-light);
+	font-size: 16px;
+	font-weight: 600;
 }
-
 .forum-threads__thread {
 	display: flex;
-	padding: 16px 16px 8px;
 	justify-content: space-between;
+	padding: 16px 16px 8px;
+	background: var(--backing-content);
 }
 .forum-threads__thread + .forum-threads__thread {
 	border-top: 2px solid var(--border-light);
@@ -535,6 +544,9 @@ body {
 	font-weight: 600;
 }
 
+.forum-threads__recent-replies-header {
+	width: 33%;
+}
 .forum-threads__recent-replies {
 	width: 33%;
 }
@@ -561,6 +573,34 @@ body {
 
 .thread-reply__text {
 	margin: 0;
+}
+
+
+.forum-submit {
+	width: 80%;
+	margin: 20px auto 0;
+}
+
+.forum-submit__label {
+	display: block;
+	margin: 16px 0 4px;
+	color: var(--text-medium);
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.forum-submit__title {
+	width: 40%;
+}
+
+.forum-submit__body-text {
+	width: 100%;
+	min-height: 4em;
+	resize: vertical;
+}
+
+.forum-submit__button {
+	display: block;
 }
 
 /* Login - still needs work to make this less jank */
@@ -668,7 +708,12 @@ input[type="password"]:focus ~ .reqs--password {
 }
 
 .page-failure__subtitle {
-	margin: 0;
+	margin: 4px 0 0;
 	font-size: 22px;
 	font-weight: 600;
+}
+
+.page-failure__description {
+	margin: 8px 0 0;
+	font-size: 16px;
 }

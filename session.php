@@ -5,7 +5,7 @@ $auth = new Authentication();
 
 $action = $_POST['action'];
 
-if($action == "login") {
+if($action === "login") {
 	$login = $auth->login($_POST['username'], $_POST['password']);
 	
 	if ($login) {
@@ -15,7 +15,7 @@ if($action == "login") {
 	}
 }
 
-elseif($action == "register") {
+elseif($action === "register") {
 	function valid_name(string $str) {
 		$okay = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_";
 		$okay = str_split($okay);
@@ -48,7 +48,7 @@ elseif($action == "register") {
 	}
 }
 
-elseif($action == "logout") {
+elseif($action === "logout") {
 	$logout = $auth->logout();
 	
 	if($logout) {

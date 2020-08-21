@@ -44,13 +44,28 @@ $url_readable = end($url_split);
 # USER AUTH
 
 $auth = new Authentication();
-
 $has_session = $auth->isLoggedIn();
+
 if ($has_session) {
 	$user = $auth->getCurrentUser();
-	$access_level = $user['permission_level'];
+	$permission_level = $user['permission_level'];
 } else {
-	$access_level = 0;
+	$permission_level = 0;
+}
+
+
+
+# ACCESS LEVEL
+
+$permission_levels_temp = sqli_result('SELECT title, permission_level FROM permission_levels ORDER BY permission_level ASC');
+$permission_levels_temp = $permission_levels_temp->fetch_all(MYSQLI_ASSOC);
+$permission_levels = [];
+
+foreach($permission_levels_temp as $perm_pair) {
+	$title = $perm_pair['title'];
+	$level = $perm_pair['permission_level'];
+	
+	$permission_levels[$title] = $level;
 }
 
 ?>
@@ -203,6 +218,15 @@ if ($has_session) {
 						break;
 					case 'logout-failure':
 						echo "Failed to log you out. Please try again or report the error to the admins.";
+						break;
+					case 'require-sign-in':
+						echo "Please sign in before attempting this action.";
+						break;
+					case 'database-failure':
+						echo "An error occured in the server database while performing your request.";
+						break;
+					case 'disallowed-action':
+						echo "Attempted to perform an invalid or unrecognized action.";
 						break;
 					default:
 						echo "Encountered an unknown error.";

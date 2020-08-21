@@ -1,5 +1,5 @@
 <div class="wrapper__inner login-flow">
-	<?php if(isset($_COOKIE["session"]) && sqli_result("SELECT id FROM sessions WHERE id=?", "s", $_COOKIE["session"])->num_rows > 0) :
+	<?php if(isset($_COOKIE["session"]) && sqli_result_bindvar("SELECT id FROM sessions WHERE id=?", "s", $_COOKIE["session"])->num_rows > 0) :
 	
 	header("Location: /");
 	exit();
@@ -21,6 +21,7 @@
 				maxlength="50"
 				spellcheck="false"
 				autocomplete="username"
+				required
 				autofocus>
 			<div class="reqs reqs--username">
 				<!-- TODO - This requirements section does not follow any style guide and has a bunch of classes which have no styling as of yet. -->
@@ -40,7 +41,8 @@
 				name="email"
 				maxlength="254"
 				spellcheck="false"
-				autocomplete="email">
+				autocomplete="email"
+				required>
 			
 			<label class="login-flow__label" for="login-password">Password</label>
 			<input
@@ -50,7 +52,8 @@
 				name="password"
 				maxlength="100"
 				spellcheck="false"
-				autocomplete="password">
+				autocomplete="password"
+				required>
 			
 			<label class="login-flow__label" for="login-password-confirm">Confirm Password</label>
 			<input
@@ -60,7 +63,8 @@
 				name="password-confirm"
 				maxlength="100"
 				spellcheck="false"
-				autocomplete="password">
+				autocomplete="password"
+				required>
 			<div class="reqs reqs--password">
 				<h6>Your password must...</h6>
 				<ul class="checkmark-list">
@@ -95,6 +99,7 @@
 				name="username"
 				spellcheck="false"
 				autocomplete="username"
+				required
 				autofocus>
 				
 			<a class="login-flow__subtext" href="/forgot?q=username">Forgot username?</a>
@@ -106,7 +111,8 @@
 				type="password"
 				name="password"
 				spellcheck="false"
-				autocomplete="password">
+				autocomplete="password"
+				required>
 				
 			<a class="login-flow__subtext" href="/forgot?q=password" class="forgot-login">Forgot password?</a>
 			

@@ -1,6 +1,6 @@
 <?php
 if(isset($_GET["id"])) {
-	$thread = sqli_result("SELECT id, board_id, title FROM threads WHERE id=?", "s", $_GET["id"]);
+	$thread = sqli_result_bindvar("SELECT id, board_id, title FROM threads WHERE id=?", "s", $_GET["id"]);
 	
 	if($thread->num_rows < 1) {
 		header('Location: /404');
@@ -9,13 +9,13 @@ if(isset($_GET["id"])) {
 	
 	$thread = $thread->fetch_assoc();
 	
-	$board = sqli_result("SELECT id, name, permission_level FROM boards WHERE id=?", "s", $thread['board_id']);
+	$board = sqli_result_bindvar("SELECT id, name, permission_level FROM boards WHERE id=?", "s", $thread['board_id']);
 	$board = $board->fetch_assoc();
 	$board_permission_level = $board['permission_level'];
 	
 	// redirect if user lacks access
-	if($access_level < $board_permission_level) {
-		header('Location: /404');
+	if($permission_level < $board_permission_level) {
+		header('Location: /403');
 		exit();
 	}
 } else {
@@ -50,6 +50,16 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 		<button id="js-watchthread" class="page-actions__action button button--disabled" type="button" disabled>
 			Watch Thread
 		</button>
+		
+		<?php if($permission_level >= $permission_levels['Moderator']) : ?>
+		<button id="js-lockthread" class="page-actions__action button button--disabled" type="button" disabled>
+			Lock Thread
+		</button>
+		
+		<button id="js-deletethread" class="page-actions__action button button--disabled" type="button" disabled>
+			Delete Thread
+		</button>
+		<?php endif ?>
 	</div>
 	<?php endif ?>
 	
@@ -57,7 +67,7 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 	<div class="thread-reply">
 		<div class="thread-reply__info">
 			<?php
-			$reply_user = sqli_result("SELECT id, nickname FROM users WHERE id=?", "s", $reply['user_id']);
+			$reply_user = sqli_result_bindvar("SELECT id, nickname FROM users WHERE id=?", "s", $reply['user_id']);
 			$reply_user = $reply_user->fetch_assoc();
 			?>
 			<a class="user" href="<?=FILEPATH."user?id=".$reply_user['id']?>">
@@ -72,14 +82,33 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 			<p class="thread-reply__text global__long-text">
 				<?=$reply['body']?>
 			</p>
+			
+			<?php if($has_session) : ?>
+			<div class="thread-reply__actions">
+				<button id="js-reply-<?=$reply['id']?>" class="button button--small button--disabled" type="button" disabled>
+					Reply
+				</button>
+				
+				<?php if($permission_level >= $permission_levels['Moderator'] || $reply['user-id'] == $user['id']) : ?>
+				<button id="js-deletereply-<?=$reply['id']?>" class="page-actions__action button button--small button--disabled" type="button" disabled>
+					Delete Thread
+				</button>
+				<?php endif ?>
+			</div>
+			<?php endif ?>
 		</div>
 	</div>
 	<?php endforeach ?>
 	
-	<div id="js-hidetoggle" class="submission-form">
-		<form>
-			<input type="text">
-			<input type="submit" value="Reply">
+	<div id="js-hidetoggle" class="forum-submit">
+		<form action="/interface" method="POST">
+			<input type="hidden" name="action" value="forum-thread-reply">
+			<input type="hidden" name="thread-id" value="<?=$thread['id']?>">
+			
+			<label class="forum-submit__label" for="reply-body">Body</label>
+			<textarea id="reply-body" class="forum-submit__body-text" name="body" required></textarea>
+			
+			<input class="forum-submit__button button" type="submit" value="Reply">
 		</form>
 	</div>
 </div>
