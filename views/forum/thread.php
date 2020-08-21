@@ -64,7 +64,7 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 	<?php endif ?>
 	
 	<?php foreach($replies as $reply): ?>
-	<div class="thread-reply">
+	<div id="reply-<?=$reply['id']?>" class="thread-reply">
 		<div class="thread-reply__info">
 			<?php
 			$reply_user = sqli_result_bindvar("SELECT id, nickname FROM users WHERE id=?", "s", $reply['user_id']);
@@ -74,9 +74,15 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 				<?=$reply_user['nickname']?>
 			</a>
 			<br />
-			<?=$reply['created_at']?>
+			<span class="thread-reply__date" title="<?=$reply['created_at']?>">
+				<?=readable_date($reply['created_at'])?>
+			</span>
 			<br />
-			<?=$reply['updated_at']?>
+			<?php if($reply['updated_at'] !== $reply['created_at']) : ?>
+			<span class="thread-reply__date" title="<?=$reply['updated_at']?>">
+				<?=readable_date($reply['updated_at'])?>
+			</span>
+			<?php endif ?>
 		</div>
 		<div class="thread-reply__content">
 			<p class="thread-reply__text global__long-text">

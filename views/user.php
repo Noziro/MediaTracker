@@ -40,7 +40,17 @@ if(isset($_GET["id"])) {
 		
 		<div class="split mainbar">
 			<div class="about">
-				About this user.
+				<p class="about__text">
+					About this user.
+				</p>
+				
+				<br />
+				
+				<span title="User for <?=$user_page['created_at']?>.">
+					User for <?=readable_date($user_page['created_at'], false)?>.
+				</span>
+				
+				<br />
 				
 				<span class="site-rank">
 					<?php

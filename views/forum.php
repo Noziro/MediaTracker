@@ -33,15 +33,21 @@ $boards = $boards->fetch_all(MYSQLI_ASSOC);
 				<div class="forum-boards__recent-thread">
 					<b class="forum-boards__thread-title">
 						<a href="<?=FILEPATH."forum/thread?id=".$thread['id']?>"><?=$thread['title']?></a>
-					</b> -
-					<span class="forum-boards__thread-author">
-						<?php
-						$user = sqli_result_bindvar("SELECT nickname FROM users WHERE id=?", "s", $thread['user_id']);
-						echo $user->fetch_row()[0];
-						?>
-					</span>
+					</b>
 					<br />
-					<span class="forum-boards__thread-date"><?=$thread['updated_at']?></span>
+					
+					<div class="forum-boards__thread-description">
+						<span class="forum-boards__thread-date" title="<?=$thread['updated_at']?>">
+							<?=readable_date($thread['updated_at'])?>
+						</span>
+						by
+						<span class="forum-boards__thread-author">
+							<?php
+							$user = sqli_result_bindvar("SELECT nickname FROM users WHERE id=?", "s", $thread['user_id']);
+							echo $user->fetch_row()[0];
+							?>
+						</span>
+					</div>
 				</div>
 				
 				<?php endforeach; endif ?>

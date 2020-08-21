@@ -64,7 +64,9 @@ $threads = $threads->fetch_all(MYSQLI_ASSOC);
 					<h6 class="forum-threads__thread-title"><?=$thread['title']?></h6>
 				</a>
 				<p>
-					<?=$thread['created_at']?>
+					<span class="forum-threads__date" title="<?=$thread['created_at']?>">
+						<?=readable_date($thread['created_at'])?>
+					</span>
 					by
 					<?php
 					$thread_user = sqli_result_bindvar("SELECT id, nickname FROM users WHERE id=?", "s", $thread['user_id']);
@@ -79,24 +81,24 @@ $threads = $threads->fetch_all(MYSQLI_ASSOC);
 				<?php 				
 				$replies = sqli_result_bindvar("SELECT id, user_id, updated_at FROM thread_replies WHERE thread_id=? ORDER BY created_at DESC LIMIT 1", "s", $thread['id']);
 				
-				if($replies->num_rows < 1) : ?>
-				
-				<span>No recent replies.</span>
-				
-				<?php else :
+				if($replies->num_rows > 0) :
 				
 				$reply = $replies->fetch_assoc(); ?>
+				
 				<div class="reply">
 					<?php $post_user = sqli_result_bindvar("SELECT id, nickname FROM users WHERE id=?", "s", $reply['user_id']);
 					$post_user = $post_user->fetch_assoc(); ?>
+					
+					<span class="forum-threads__date" title="<?=$thread['updated_at']?>">
+						<?=readable_date($thread['updated_at'])?>
+					</span>
+					by
 					<a class="user" href="<?=FILEPATH."user?id=".$post_user['id']?>">
 						<?=$post_user['nickname']?>
 					</a>
-					<a class="goto-reply" href="<?=FILEPATH."forum/thread?id=".$thread['id']."&reply=".$reply['id']?>">
+					<a class="goto-reply" href="<?=FILEPATH."forum/thread?id=".$thread['id']."#reply-".$reply['id']?>">
 						>>
 					</a>
-					<br />
-					<span class="date"><?=$thread['updated_at']?></span>
 				</div>
 				<?php endif ?>
 			</div>

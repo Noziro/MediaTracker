@@ -518,6 +518,15 @@ body {
 	margin-top: 8px;
 }
 
+.forum-boards__recent-thread + .forum-boards__recent-thread {
+	margin-top: 8px;
+}
+
+.forum-boards__thread-description {
+	margin-top: 3px;
+	font-size: 12px;
+}
+
 
 
 .forum-threads__thread-header {

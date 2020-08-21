@@ -60,6 +60,44 @@ function finalize(string $return_to = '/') {
 }
 
 
+// OTHER FUNCTIONS
+
+// Returns inputted date in a user-readable format i.e. 2 hours ago, 3 months ago
+function readable_date($date, $suffix = true, $verbose = false) {
+	$now = new DateTime;
+	$then = new DateTime($date);
+	$diff = $now->diff($then);
+	
+	$diff->w = floor($diff->d / 7);
+    $diff->d -= $diff->w * 7;
+	
+	$string = [
+        'y' => 'year',
+        'm' => 'month',
+        'w' => 'week',
+        'd' => 'day',
+        'h' => 'hour',
+        'i' => 'minute',
+        's' => 'second',
+    ];
+	
+    foreach ($string as $k => &$v) {
+        if ($diff->$k) {
+            $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? 's' : '');
+        } else {
+            unset($string[$k]);
+        }
+    }
+	
+    if(!$verbose) $string = array_slice($string, 0, 1);
+	if(!$suffix) {
+		return $string ? implode(', ', $string) : 'just now';
+	}
+    return $string ? implode(', ', $string) . ' ago' : 'just now';
+}
+
+
+
 // AUTH SYSTEM
 
 class Authentication {
