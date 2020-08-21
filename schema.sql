@@ -3,13 +3,11 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 10, 2020 at 08:18 AM
+-- Generation Time: Aug 21, 2020 at 08:24 AM
 -- Server version: 10.3.16-MariaDB
 -- PHP Version: 7.3.6
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
-SET AUTOCOMMIT = 0;
-START TRANSACTION;
 SET time_zone = "+00:00";
 
 
@@ -46,7 +44,31 @@ CREATE TABLE `boards` (
 CREATE TABLE `collections` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `contents` longtext NOT NULL
+  `name` varchar(50) NOT NULL,
+  `type` varchar(50) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `media`
+--
+
+CREATE TABLE `media` (
+  `id` int(15) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `collection_id` int(11) NOT NULL,
+  `name` tinytext NOT NULL,
+  `score` int(3) DEFAULT NULL,
+  `episodes` smallint(6) DEFAULT NULL,
+  `user_started_at` timestamp NULL DEFAULT NULL,
+  `user_finished_at` timestamp NULL DEFAULT NULL,
+  `release_date` timestamp NULL DEFAULT NULL,
+  `started_at` date DEFAULT NULL,
+  `finished_at` date DEFAULT NULL,
+  `comments` text NOT NULL,
+  `companies` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `storage` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -86,7 +108,8 @@ CREATE TABLE `threads` (
   `board_id` int(11) NOT NULL,
   `title` tinytext NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `deleted` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -101,7 +124,8 @@ CREATE TABLE `thread_replies` (
   `thread_id` int(11) NOT NULL,
   `body` text NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `deleted` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -127,7 +151,8 @@ CREATE TABLE `users` (
 --
 
 CREATE TABLE `user_preferences` (
-  `user_id` int(11) NOT NULL
+  `user_id` int(11) NOT NULL,
+  `rating_system` int(3) NOT NULL DEFAULT 10
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -146,6 +171,12 @@ ALTER TABLE `boards`
 --
 ALTER TABLE `collections`
   ADD UNIQUE KEY `id` (`id`);
+
+--
+-- Indexes for table `media`
+--
+ALTER TABLE `media`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `permission_levels`
@@ -195,6 +226,12 @@ ALTER TABLE `collections`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `media`
+--
+ALTER TABLE `media`
+  MODIFY `id` int(15) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `threads`
 --
 ALTER TABLE `threads`
@@ -211,7 +248,6 @@ ALTER TABLE `thread_replies`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
