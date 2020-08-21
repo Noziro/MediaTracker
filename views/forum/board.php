@@ -19,10 +19,28 @@ if(isset($_GET["id"])) {
 	exit();
 }
 
-$stmt = $db->prepare("SELECT id, user_id, title, created_at, updated_at FROM threads WHERE board_id=? ORDER BY updated_at DESC LIMIT 20");
-$stmt->bind_param("s", $board['id']);
+$stmt = $db->prepare('SELECT id FROM threads WHERE board_id=?');
+$stmt->bind_param('s', $_GET['id']);
+$stmt->execute();
+$total_threads = $stmt->get_result();
+$stmt->free_result();
+$total_threads = $total_threads->num_rows;
+
+$pagination_offset = 15;
+
+if(isset($_GET["page"])) {
+	$pagination_offset_current = ($_GET['page'] - 1) * $pagination_offset;
+	
+	$stmt = $db->prepare("SELECT id, user_id, title, created_at, updated_at FROM threads WHERE board_id=? ORDER BY updated_at DESC LIMIT ?, ?");
+	$stmt->bind_param("sii", $board['id'], $pagination_offset_current, $pagination_offset);
+} else {
+	$stmt = $db->prepare("SELECT id, user_id, title, created_at, updated_at FROM threads WHERE board_id=? ORDER BY updated_at DESC LIMIT 20");
+	$stmt->bind_param("s", $board['id']);
+}
+
 $stmt->execute();
 $threads = $stmt->get_result();
+$stmt->free_result();
 $threads = $threads->fetch_all(MYSQLI_ASSOC);
 ?>
 
@@ -38,11 +56,54 @@ $threads = $threads->fetch_all(MYSQLI_ASSOC);
 		<h6 class="content-header__subtitle"><?=$board['description']?></h2>
 	</div>
 	
-	<?php if($has_session) : ?>
+	<?php if($has_session || $total_threads > $pagination_offset) : ?>
 	<div class="page-actions">
-		<button id="js-newthread" class="page-actions__action button" type="button">
-			New Thread
-		</button>
+		<?php if($has_session) : ?>
+		<div class="page-actions__button-list">
+			<button id="js-newthread" class="page-actions__action button" type="button">
+				New Thread
+			</button>
+		</div>
+		<?php endif ?>
+		
+		<?php if($total_threads > $pagination_offset) : ?>
+		<div class="page-actions__pagination">
+			Page: 
+			
+			<?php
+			$pagination_pages = ceil($total_threads / $pagination_offset);
+			
+			// Replaces all "page=#" from URL query 
+			$normalized_query = preg_replace("/\&page\=.+?(?=(\&|$))/", "", $_SERVER['QUERY_STRING']);
+			
+			if($pagination_pages < 8) :
+			
+			$i = 0;
+			while($i < $pagination_pages) :
+			$i++;
+			?>
+			
+			<a class="page-actions__pagination-link" href="board?<?=$normalized_query.'&page='.$i?>">
+				<?=$i?>
+			</a>
+			
+			<?php endwhile; elseif($pagination_pages >= 8) :
+			
+			$pages = [1, 2, 3, 4, $pagination_pages-2, $pagination_pages-1, $pagination_pages];
+			
+			foreach($pages as $p) :
+			
+			if($p === 4) { echo ' … '; }
+			else {
+			?>
+			
+			<a class="page-actions__pagination-link" href="board?<?=$normalized_query.'&page='.$p?>">
+				<?=$p?>
+			</a>
+			
+			<?php } endforeach; endif ?>
+		</div>
+		<?php endif ?>
 	</div>
 	<?php endif ?>
 	

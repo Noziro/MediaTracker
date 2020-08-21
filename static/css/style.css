@@ -453,12 +453,26 @@ body {
 /* PAGE ACTIONS */
 
 .page-actions {
-	display: flex;
+	display: flow-root;
 	margin: 20px 0;
+}
+
+.page-actions__button-list {
+	display: flex;
+	float: left;
 }
 
 .page-actions__action + .page-actions__action {
 	margin-left: 8px;
+}
+
+.page-actions__pagination {
+	display: inline-block;
+	padding: 4px 8px;
+	background: var(--backing-content);
+	border-radius: var(--rounding);
+	float: right;
+	font-size: 15px;
 }
 
 /* COMMON TEMPLATES */
@@ -532,7 +546,7 @@ body {
 .forum-threads__thread-header {
 	display: flex;
 	justify-content: space-between;
-	padding: 16px 16px 8px;
+	padding: 8px 16px;
 	border-bottom: 2px solid var(--border-light);
 	font-size: 16px;
 	font-weight: 600;
@@ -540,7 +554,7 @@ body {
 .forum-threads__thread {
 	display: flex;
 	justify-content: space-between;
-	padding: 16px 16px 8px;
+	padding: 16px;
 	background: var(--backing-content);
 }
 .forum-threads__thread + .forum-threads__thread {
