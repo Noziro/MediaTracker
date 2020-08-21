@@ -85,13 +85,13 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 			
 			<?php if($has_session) : ?>
 			<div class="thread-reply__actions">
-				<button id="js-reply-<?=$reply['id']?>" class="button button--small button--disabled" type="button" disabled>
+				<button id="js-reply-<?=$reply['id']?>" class="thread-reply__action button button--small button--disabled" type="button" disabled>
 					Reply
 				</button>
 				
 				<?php if($permission_level >= $permission_levels['Moderator'] || $reply['user-id'] == $user['id']) : ?>
-				<button id="js-deletereply-<?=$reply['id']?>" class="page-actions__action button button--small button--disabled" type="button" disabled>
-					Delete Thread
+				<button id="js-deletereply-<?=$reply['id']?>" class="thread-reply__action button button--small button--disabled" type="button" disabled>
+					Delete
 				</button>
 				<?php endif ?>
 			</div>

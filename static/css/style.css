@@ -457,7 +457,7 @@ body {
 	margin: 20px 0;
 }
 
-.page-actions .page-actions__action + .page-actions__action {
+.page-actions__action + .page-actions__action {
 	margin-left: 8px;
 }
 
@@ -573,6 +573,15 @@ body {
 
 .thread-reply__text {
 	margin: 0;
+}
+
+.thread-reply__actions {
+	display: flex;
+	margin: 6px 0 0;
+}
+
+.thread-reply__action + .thread-reply__action {
+	margin-left: 8px;
 }
 
 
