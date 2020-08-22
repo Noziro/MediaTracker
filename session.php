@@ -9,9 +9,9 @@ if($action === "login") {
 	$login = $auth->login($_POST['username'], $_POST['password']);
 	
 	if ($login) {
-		header('Location: /?notice=login-success');
+		finalize('/?notice=login-success');
 	} else {
-		header('Location: /login?action=login&error=login-bad');
+		finalize('/login?action=login&error=login-bad');
 	}
 }
 
@@ -43,7 +43,7 @@ elseif($action === "register") {
 		if (!$register) {
 			header('Location: /login?action=register&error=register-exists');
 		} else {
-			header('Location: /?notice=register-success');
+			header('Location: /welcome');
 		}
 	}
 }

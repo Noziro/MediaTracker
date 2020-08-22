@@ -220,6 +220,4 @@ elseif($action === "forum-reply-undelete") {
 
 // File should only reach this point if no other actions have reached finalization.
 finalize('/?error=disallowed-action');
-
-$auth->cleanup();
 ?>
