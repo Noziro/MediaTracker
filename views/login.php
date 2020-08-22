@@ -52,8 +52,7 @@
 				name="password"
 				maxlength="100"
 				spellcheck="false"
-				autocomplete="password"
-				required>
+				autocomplete="password">
 			
 			<label class="login-flow__label" for="login-password-confirm">Confirm Password</label>
 			<input

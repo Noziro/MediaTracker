@@ -34,7 +34,7 @@
 	--backing-head: hsl(0, 0%, 100%);
 	--backing-footer: hsl(0, 0%, 88%);
 	--backing-content: hsl(0, 0%, 100%);
-	--backing-subcontent: #f8f8f8;
+	--backing-subcontent: hsl(0, 0%, 88%);
 	--backing-button: hsl(0, 0%, 88%);
 	--backing-3: #aaa;
 	--backing-input: hsl(0, 30%, 97%);
@@ -245,7 +245,7 @@ body {
 	height: 70%;
 	margin: 0 10px;
 }
-.site-nav__section + .site-nav__section {
+.site-nav__section ~ .site-nav__section {
 	padding-left: 10px;
 	border-left: 2px solid var(--border-head);
 }
@@ -310,7 +310,7 @@ body {
 	display: flex;
 	flex-flow: column nowrap;
 }
-.footer__section + .footer__section {
+.footer__section ~ .footer__section {
 	margin-left: 30px;
 }
 
@@ -320,7 +320,7 @@ body {
 	padding: 0 0 6px;
 }
 
-.footer__item + .footer__item {
+.footer__item ~ .footer__item {
 	padding-top: 6px;
 }
 
@@ -332,7 +332,7 @@ body {
 }
 
 /* this is rather jank. Relies on a single class for this specific behaviour, refusing to interface with .theme-preview */
-.footer__theme-option + .footer__theme-option {
+.footer__theme-option ~ .footer__theme-option {
 	margin-left: 8px;
 }
 
@@ -462,7 +462,7 @@ body {
 	float: left;
 }
 
-.page-actions__action + .page-actions__action {
+.page-actions__action ~ .page-actions__action {
 	margin-left: 8px;
 }
 
@@ -486,7 +486,7 @@ body {
 	padding: 10px;
 	background: var(--backing-content);
 	border-radius: var(--rounding);
-} .page-split .split + .split {
+} .page-split .split ~ .split {
 	margin-left: 20px;
 }
 
@@ -499,6 +499,30 @@ body {
 	width: 80%;
 	background: var(--backing-content);
 	flex: 1 1 auto;
+}
+
+/* USER RANK */
+
+.user-rank {
+	display: inline-block;
+	padding: 3px 6px;
+	background: var(--backing-subcontent);
+	border-radius: var(--rounding);
+	font-size: 12px;
+	font-weight: 600;
+}
+.user-rank--vip {
+	
+}
+.user-rank--moderator {
+	
+}
+.user-rank--administrator {
+	
+}
+.user-rank--owner {
+	background: var(--identity);
+	color: var(--backing-content);
 }
 
 /* FORMS */
@@ -515,7 +539,7 @@ body {
 	padding: 16px;
 	justify-content: space-between;
 }
-.forum-boards__board + .forum-boards__board {
+.forum-boards__board ~ .forum-boards__board {
 	margin-top: 10px;
 }
 
@@ -532,7 +556,7 @@ body {
 	margin-top: 8px;
 }
 
-.forum-boards__recent-thread + .forum-boards__recent-thread {
+.forum-boards__recent-thread ~ .forum-boards__recent-thread {
 	margin-top: 8px;
 }
 
@@ -557,7 +581,7 @@ body {
 	padding: 16px;
 	background: var(--backing-content);
 }
-.forum-threads__thread + .forum-threads__thread {
+.forum-threads__thread ~ .forum-threads__thread {
 	border-top: 2px solid var(--border-light);
 }
 
@@ -565,6 +589,9 @@ body {
 	margin: 0;
 	font-size: 16px;
 	font-weight: 600;
+}
+.forum-threads__description {
+	margin: 6px 0 0;
 }
 
 .forum-threads__recent-replies-header {
@@ -580,8 +607,13 @@ body {
 	padding: 10px;
 	background: var(--backing-content);
 	justify-content: left;
-} .thread-reply + .thread-reply {
+} .thread-reply ~ .thread-reply {
 	border-top: 2px solid var(--border-light);
+}
+
+.thread-reply__deleted {
+	font-size: 12px;
+	font-style: italic;
 }
 
 .thread-reply__info {
@@ -589,13 +621,34 @@ body {
 	padding-right: 10px;
 	border-right: 2px solid var(--border-light);
 }
+.thread-reply__username {
+	display: block;
+	margin-bottom: 6px;
+	font-weight: 600;
+}
+.thread-reply__info-line:not(:last-of-type) {
+	display: block;
+	margin-bottom: 6px;
+}
 
 .thread-reply__content {
 	padding-left: 10px;
+	flex: 1 1 auto;
 }
 
 .thread-reply__text {
 	margin: 0;
+}
+
+.thread-reply__edit {
+	
+}
+.thread-reply__edit-form {
+	
+}
+.thread-reply__edit-body {
+	width: 66%;
+	resize: vertical;
 }
 
 .thread-reply__actions {
@@ -603,7 +656,7 @@ body {
 	margin: 6px 0 0;
 }
 
-.thread-reply__action + .thread-reply__action {
+.thread-reply__action ~ .thread-reply__action {
 	margin-left: 8px;
 }
 

@@ -2,99 +2,13 @@
 
 // GLOBAL VARIABLES
 
+date_default_timezone_set('UTC');
+
 define("FILEPATH", "/");
 include("keyring.php");
 // keys.php contains potentially sensitive information such as the MYSQL_HOST/USER/PASS/DB/PORT variables.
 
 $db = new mysqli(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB, MYSQL_PORT);
-
-
-
-// DATABASE FUNCTIONS
-
-// Passes database an SQL statement and returns result.
-function sqli_result(string $sql) {
-	$db = $GLOBALS['db'];
-	
-	$q = $db->prepare($sql);
-	$q->execute();
-	$r = $q->get_result();
-	$q->close();
-	return $r;
-}
-
-// Passes database an SQL statement with sanitized variable and returns result.
-function sqli_result_bindvar(string $sql, string $insert_type, string $insert_variable) {
-	$db = $GLOBALS['db'];
-	
-	$q = $db->prepare($sql);
-	$q->bind_param($insert_type, $insert_variable);
-	$q->execute();
-	$r = $q->get_result();
-	$q->close();
-	return $r;
-}
-
-// Executes an SQL statement. Returns TRUE for success and STRING for error.
-function sqli_execute(string $sql, string $insert_type, string $insert_variable) {
-	$db = $GLOBALS['db'];
-	
-	$q = $db->prepare($sql);
-	$q->bind_param($insert_type, $insert_variable);
-	$q->execute();
-	$error = $q->error;
-	$q->close();
-	if($error !== "") {
-		return $error;
-	}
-	return true;
-}
-
-// For use on user POST pages. Closes relevant pieces and redirects user to a page.
-function finalize(string $return_to = '/') {
-	$db = $GLOBALS['db'];
-	
-	$db->close();
-	header('Location: '.$return_to);
-	exit();
-}
-
-
-// OTHER FUNCTIONS
-
-// Returns inputted date in a user-readable format i.e. 2 hours ago, 3 months ago
-function readable_date($date, $suffix = true, $verbose = false) {
-	$now = new DateTime;
-	$then = new DateTime($date);
-	$diff = $now->diff($then);
-	
-	$diff->w = floor($diff->d / 7);
-    $diff->d -= $diff->w * 7;
-	
-	$string = [
-        'y' => 'year',
-        'm' => 'month',
-        'w' => 'week',
-        'd' => 'day',
-        'h' => 'hour',
-        'i' => 'minute',
-        's' => 'second',
-    ];
-	
-    foreach ($string as $k => &$v) {
-        if ($diff->$k) {
-            $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? 's' : '');
-        } else {
-            unset($string[$k]);
-        }
-    }
-	
-    if(!$verbose) $string = array_slice($string, 0, 1);
-	if(!$suffix) {
-		return $string ? implode(', ', $string) : 'just now';
-	}
-    return $string ? implode(', ', $string) . ' ago' : 'just now';
-}
 
 
 
@@ -163,6 +77,11 @@ class Authentication {
 		$stmt = $this->db->prepare("INSERT INTO users (username, nickname, email, password) VALUES (?, ?, ?, ?)");
 		$stmt->bind_param("ssss", strtolower($user), $user, $email, $hash);
 		$stmt->execute();
+		
+		// Setup basic user preferences
+		$stmt = $this->db->prepare("INSERT INTO user_preferences (user_id) VALUES (LAST_INSERT_ID())");
+		$stmt->execute();
+		
 		$stmt->close();
 		
 		// Automatically login after registration.
@@ -235,5 +154,112 @@ class Authentication {
 		return $id;
 	}
 }
+
+
+
+// TIME FUNCTIONS
+
+// Set user timezone
+// WIP Disabled - currently throws an error on timezone set.
+//$auth = new Authentication;
+//
+//if($auth->isLoggedIn()) {
+//	$user = $auth->getCurrentUser();
+//	$user_timezone = sqli_result_bindvar('SELECT timezone FROM user_preferences WHERE user_id=?', 's', $user['id']);
+//	$user_timezone = $user_timezone->fetch_row()[0];
+//	
+//	date_default_timezone_set($user_timezone);
+//}
+
+// Returns inputted date in a user-readable format i.e. 2 hours ago, 3 months ago
+function readable_date($date, $suffix = true, $verbose = false) {
+	$now = new DateTime;
+	$then = new DateTime($date);
+	$diff = $now->diff($then);
+	
+	$diff->w = floor($diff->d / 7);
+    $diff->d -= $diff->w * 7;
+	
+	$string = [
+        'y' => 'year',
+        'm' => 'month',
+        'w' => 'week',
+        'd' => 'day',
+        'h' => 'hour',
+        'i' => 'minute',
+        's' => 'second',
+    ];
+	
+    foreach ($string as $k => &$v) {
+        if ($diff->$k) {
+            $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? 's' : '');
+        } else {
+            unset($string[$k]);
+        }
+    }
+	
+    if(!$verbose) $string = array_slice($string, 0, 1);
+	if(!$suffix) {
+		return $string ? implode(', ', $string) : 'just now';
+	}
+    return $string ? implode(', ', $string) . ' ago' : 'just now';
+}
+
+
+
+// DATABASE FUNCTIONS
+
+// Passes database an SQL statement and returns result.
+function sqli_result(string $sql) {
+	$db = $GLOBALS['db'];
+	
+	$q = $db->prepare($sql);
+	$q->execute();
+	$r = $q->get_result();
+	$q->close();
+	return $r;
+}
+
+// Passes database an SQL statement with sanitized variable and returns result.
+function sqli_result_bindvar(string $sql, string $insert_type, string $insert_variable) {
+	$db = $GLOBALS['db'];
+	
+	$q = $db->prepare($sql);
+	$q->bind_param($insert_type, $insert_variable);
+	$q->execute();
+	$r = $q->get_result();
+	$q->close();
+	return $r;
+}
+
+// Executes an SQL statement. Returns TRUE for success and STRING for error.
+function sqli_execute(string $sql, string $insert_type, string $insert_variable) {
+	$db = $GLOBALS['db'];
+	
+	$q = $db->prepare($sql);
+	$q->bind_param($insert_type, $insert_variable);
+	$q->execute();
+	$error = $q->error;
+	$q->close();
+	if($error !== "") {
+		return $error;
+	}
+	return true;
+}
+
+// For use on user POST pages. Closes relevant pieces and redirects user to a page.
+function finalize(string $return_to = '/') {
+	$db = $GLOBALS['db'];
+	
+	$db->close();
+	header('Location: '.$return_to);
+	exit();
+}
+
+
+// OTHER FUNCTIONS
+
+
+
 
 ?>

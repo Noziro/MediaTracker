@@ -95,7 +95,7 @@ foreach($permission_levels_temp as $perm_pair) {
 		<?php endif ?>
 		
 		<?php if (file_exists(PATH."static/js/".$url_readable.".js")) : ?>
-		<script type="text/javascript" src="<?=FILEPATH."static/js/".$url_readable.".js"?>">
+		<script type="text/javascript" src="<?=FILEPATH."static/js/".$url_readable.".js"?>" defer></script>
 		<?php endif ?>
 		
 		<!--<script type="text/javascript" src="<?=FILEPATH?>static/js/jquery-3.3.1.min.js" async></script>-->
@@ -152,10 +152,15 @@ foreach($permission_levels_temp as $perm_pair) {
 						<div class="dropdown-menu list vertical">
 							<a class="site-nav__item" href="<?=FILEPATH."user?id=".$user["id"]?>">Profile</a>
 							<a class="site-nav__item" href="<?=FILEPATH?>account/settings">Settings</a>
-							<form action="/session" method="POST" class="site-nav__item" >
+							
+							<form id="form-logout"style="display:none" action="/session" method="POST">
 								<input type="hidden" name="action" value="logout">
 								<input type="submit" name="commit" value="Logout" class="link">
 							</form>
+							
+							<button form="form-logout" class="site-nav__item" type="submit">
+								Logout
+							</button>
 						</div>
 					</div>
 						
@@ -184,8 +189,11 @@ foreach($permission_levels_temp as $perm_pair) {
 					case 'logout-success':
 						echo "Successfully logged out of your account. Thanks for visiting.";
 						break;
+					case 'success':
+						echo "Action performed successfully.";
+						break;
 					default:
-						echo "This was meant to say something, but it doesn't! Our bad.";
+						echo "This was meant to say something, but it doesn't!";
 						break;
 				}
 				?>

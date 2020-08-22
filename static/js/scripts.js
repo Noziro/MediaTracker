@@ -36,4 +36,7 @@ function acceptGDPR() {
 	document.getElementById('gdpr').classList.add('js-hidden');
 }
 
-document.getElementById('gdpr-accept').onclick = acceptGDPR;
+var gdpr = document.getElementById('gdpr-accept')
+if (gdpr) {
+	gdpr.onclick = acceptGDPR;
+}

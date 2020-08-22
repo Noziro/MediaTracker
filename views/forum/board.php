@@ -19,7 +19,7 @@ if(isset($_GET["id"])) {
 	exit();
 }
 
-$stmt = $db->prepare('SELECT id FROM threads WHERE board_id=?');
+$stmt = $db->prepare('SELECT id FROM threads WHERE board_id=? AND deleted=FALSE');
 $stmt->bind_param('s', $_GET['id']);
 $stmt->execute();
 $total_threads = $stmt->get_result();
@@ -31,10 +31,10 @@ $pagination_offset = 15;
 if(isset($_GET["page"])) {
 	$pagination_offset_current = ($_GET['page'] - 1) * $pagination_offset;
 	
-	$stmt = $db->prepare("SELECT id, user_id, title, created_at, updated_at FROM threads WHERE board_id=? ORDER BY updated_at DESC LIMIT ?, ?");
+	$stmt = $db->prepare("SELECT id, user_id, title, created_at, updated_at FROM threads WHERE board_id=? AND deleted=FALSE ORDER BY updated_at DESC LIMIT ?, ?");
 	$stmt->bind_param("sii", $board['id'], $pagination_offset_current, $pagination_offset);
 } else {
-	$stmt = $db->prepare("SELECT id, user_id, title, created_at, updated_at FROM threads WHERE board_id=? ORDER BY updated_at DESC LIMIT 20");
+	$stmt = $db->prepare("SELECT id, user_id, title, created_at, updated_at FROM threads WHERE board_id=? AND deleted=FALSE ORDER BY updated_at DESC LIMIT 20");
 	$stmt->bind_param("s", $board['id']);
 }
 
@@ -124,7 +124,7 @@ $threads = $threads->fetch_all(MYSQLI_ASSOC);
 				<a href="<?=FILEPATH?>forum/thread?id=<?=$thread['id']?>">
 					<h6 class="forum-threads__thread-title"><?=$thread['title']?></h6>
 				</a>
-				<p>
+				<p class="forum-threads__description">
 					<span class="forum-threads__date" title="<?=$thread['created_at']?>">
 						<?=readable_date($thread['created_at'])?>
 					</span>
