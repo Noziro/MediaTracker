@@ -5,13 +5,28 @@ $auth = new Authentication();
 
 $action = $_POST['action'];
 
+if(isset($_POST['return_to'])) {
+	$return_to = $_POST['return_to'];
+	
+	$return_to = preg_replace("/\&(notice|error)\=.+?(?=(\&|$))/", "", $return_to);
+	
+	$return_to_page = $return_to;
+	if(strpos($return_to_page, '?') === false) {
+		$return_to_page = $return_to_page.'?';
+	}
+	$return_to_login = '/login?action=login&return_to='.$return_to;
+} else {
+	$return_to_page = '/?';
+	$return_to_login = '/login?action=login';
+}
+
 if($action === "login") {
 	$login = $auth->login($_POST['username'], $_POST['password']);
 	
 	if ($login) {
-		finalize('/?notice=login-success');
+		finalize($return_to_page.'&notice=login-success');
 	} else {
-		finalize('/login?action=login&error=login-bad');
+		finalize($return_to_login.'&error=login-bad');
 	}
 }
 
@@ -30,20 +45,20 @@ elseif($action === "register") {
 	}
 	
 	if(strlen($_POST['username']) == 0 || strlen($_POST['password']) == 0 || strlen($_POST['password-confirm']) == 0) {
-		header('Location: /login?action=register&error=required-field');
+		finalize('/login?action=register&error=required-field');
 	} elseif($_POST['password'] != $_POST['password-confirm']) {
-		header("Location: /login?action=register&error=register-match");
+		finalize('/login?action=register&error=register-match');
 	} elseif(!valid_name($_POST["username"])) {
 		// Validate username
-		header('Location: /login?action=register&error=register-invalid-name');
+		finalize('/login?action=register&error=register-invalid-name');
 	} else {
 		// Carry on if all fields good
 		$register = $auth->register($_POST['username'], $_POST['email'], $_POST['password']);
 		
 		if (!$register) {
-			header('Location: /login?action=register&error=register-exists');
+			finalize('/login?action=register&error=register-exists');
 		} else {
-			header('Location: /welcome');
+			finalize('/welcome');
 		}
 	}
 }
@@ -52,16 +67,12 @@ elseif($action === "logout") {
 	$logout = $auth->logout();
 	
 	if($logout) {
-		header('Location: /?notice=logout-success');
+		finalize($return_to_page.'&notice=logout-success');
 	} else {
-		header('Location: /?error=logout-failure');
+		finalize($return_to_page.'&error=logout-failure');
 	}
 }
 
-else {
-	header('Location: /');
-	exit();
-}
-
-$auth->cleanup();
+// File should only reach this point if no other actions have reached finalization.
+finalize('/?error=disallowed-action');
 ?>

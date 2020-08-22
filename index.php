@@ -155,7 +155,7 @@ foreach($permission_levels_temp as $perm_pair) {
 							
 							<form id="form-logout"style="display:none" action="/session" method="POST">
 								<input type="hidden" name="action" value="logout">
-								<input type="submit" name="commit" value="Logout" class="link">
+								<input type="hidden" name="return_to" value="<?=$_SERVER["REQUEST_URI"]?>">
 							</form>
 							
 							<button form="form-logout" class="site-nav__item" type="submit">
@@ -166,7 +166,7 @@ foreach($permission_levels_temp as $perm_pair) {
 						
 					<?php else : ?>
 					
-					<a class="site-nav__item" href="<?=FILEPATH?>login?action=login">Login</a>
+					<a class="site-nav__item" href="<?=FILEPATH?>login?action=login&return_to=<?=urlencode($_SERVER["REQUEST_URI"])?>">Login</a>
 					<a class="site-nav__item" href="<?=FILEPATH?>login?action=register">Register</a>
 					
 					<?php endif ?>

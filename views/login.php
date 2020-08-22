@@ -41,8 +41,7 @@
 				name="email"
 				maxlength="254"
 				spellcheck="false"
-				autocomplete="email"
-				required>
+				autocomplete="email">
 			
 			<label class="login-flow__label" for="login-password">Password</label>
 			<input
@@ -89,6 +88,7 @@
 		
 		<form action="/session" method="POST">
 			<input type="hidden" name="action" value="login">
+			<input type="hidden" name="return_to" value="<?=$_GET['return_to']?>">
 			
 			<label class="login-flow__label" for="login-username">Username</label>
 			<input
