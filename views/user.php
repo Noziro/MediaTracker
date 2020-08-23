@@ -46,7 +46,7 @@ if(isset($_GET["id"])) {
 				
 				<br />
 				
-				<span title="User for <?=$user_page['created_at']?>.">
+				<span title="User since <?=utc_date_to_user($user_page['created_at'])?>.">
 					User for <?=readable_date($user_page['created_at'], false)?>.
 				</span>
 				

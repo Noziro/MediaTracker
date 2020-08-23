@@ -34,7 +34,7 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 
 
 
-<div class="wrapper__inner forum thread">
+<div class="wrapper__inner">
 	<div class="content-header">
 		<div class="content-header__breadcrumb">
 			<a href="<?=FILEPATH."forum"?>">Forum</a> >
@@ -120,7 +120,7 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 			</div>
 			
 			<div class="thread-reply__info-line">
-				<span title="<?=$reply['created_at']?>">
+				<span title="<?=utc_date_to_user($reply['created_at'])?>">
 				<?=readable_date($reply['created_at'])?>
 				</span>
 			</div>
@@ -128,7 +128,7 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 			<?php if($reply['updated_at'] !== $reply['created_at']) : ?>
 			
 			<div class="thread-reply__info-line">
-				<i>Edited <span title="<?=$reply['updated_at']?>">
+				<i>Edited <span title="<?=utc_date_to_user($reply['updated_at'])?>">
 				<?=readable_date($reply['updated_at'])?>
 				</span></i>
 			</div>

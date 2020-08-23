@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 22, 2020 at 08:58 AM
+-- Generation Time: Aug 23, 2020 at 10:34 AM
 -- Server version: 10.3.16-MariaDB
 -- PHP Version: 7.3.6
 
@@ -93,7 +93,8 @@ CREATE TABLE `sessions` (
   `id` varchar(32) NOT NULL,
   `started` timestamp NOT NULL DEFAULT current_timestamp(),
   `expiry` int(11) NOT NULL DEFAULT 0,
-  `user_id` int(11) NOT NULL
+  `user_id` int(11) NOT NULL,
+  `user_ip` varchar(45) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -209,6 +210,12 @@ ALTER TABLE `thread_replies`
 ALTER TABLE `users`
   ADD UNIQUE KEY `id` (`id`),
   ADD UNIQUE KEY `username` (`username`);
+
+--
+-- Indexes for table `user_preferences`
+--
+ALTER TABLE `user_preferences`
+  ADD PRIMARY KEY (`user_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables

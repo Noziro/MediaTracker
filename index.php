@@ -101,7 +101,7 @@ foreach($permission_levels_temp as $perm_pair) {
 		<!--<script type="text/javascript" src="<?=FILEPATH?>static/js/jquery-3.3.1.min.js" async></script>-->
 		<script type="text/javascript" src="<?=FILEPATH?>static/js/scripts.js" defer></script>
 		
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,400i,600,600i">
+		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,400i,600,600i|Roboto+Mono">
 		
 		<script type="text/javascript">
 		<?php include(PATH . "static/js/include.js") ?>

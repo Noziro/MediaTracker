@@ -37,7 +37,7 @@ $boards = $boards->fetch_all(MYSQLI_ASSOC);
 					<br />
 					
 					<div class="forum-boards__thread-description">
-						<span class="forum-boards__thread-date" title="<?=$thread['updated_at']?>">
+						<span class="forum-boards__thread-date" title="<?=utc_date_to_user($thread['updated_at'])?>">
 							<?=readable_date($thread['updated_at'])?>
 						</span>
 						by

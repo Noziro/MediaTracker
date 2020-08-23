@@ -125,7 +125,7 @@ $threads = $threads->fetch_all(MYSQLI_ASSOC);
 					<h6 class="forum-threads__thread-title"><?=$thread['title']?></h6>
 				</a>
 				<p class="forum-threads__description">
-					<span class="forum-threads__date" title="<?=$thread['created_at']?>">
+					<span class="forum-threads__date" title="<?=utc_date_to_user($thread['created_at'])?>">
 						<?=readable_date($thread['created_at'])?>
 					</span>
 					by
@@ -150,7 +150,7 @@ $threads = $threads->fetch_all(MYSQLI_ASSOC);
 					<?php $post_user = sqli_result_bindvar("SELECT id, nickname FROM users WHERE id=?", "s", $reply['user_id']);
 					$post_user = $post_user->fetch_assoc(); ?>
 					
-					<span class="forum-threads__date" title="<?=$thread['updated_at']?>">
+					<span class="forum-threads__date" title="<?=utc_date_to_user($thread['updated_at'])?>">
 						<?=readable_date($thread['updated_at'])?>
 					</span>
 					by

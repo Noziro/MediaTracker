@@ -48,10 +48,11 @@ class Authentication {
 		}
 		
 		// Create new user session
-		$stmt = $this->db->prepare("INSERT INTO sessions (id, user_id, expiry) VALUES (?, ?, ?)");
+		$stmt = $this->db->prepare("INSERT INTO sessions (id, user_id, expiry, user_ip) VALUES (?, ?, ?, ?)");
 		$id = $this->generateSessionID();
 		$user_id = $resData['id'];
-		$stmt->bind_param("sss", $id, $user_id, $expiry);
+		$user_ip = $_SERVER['REMOTE_ADDR'];
+		$stmt->bind_param("ssss", $id, $user_id, $expiry, $user_ip);
 		$stmt->execute();
 		
 		setcookie('session', $id, $expiry);
@@ -159,17 +160,25 @@ class Authentication {
 
 // TIME FUNCTIONS
 
-// Set user timezone
-// WIP Disabled - currently throws an error on timezone set.
-//$auth = new Authentication;
-//
-//if($auth->isLoggedIn()) {
-//	$user = $auth->getCurrentUser();
-//	$user_timezone = sqli_result_bindvar('SELECT timezone FROM user_preferences WHERE user_id=?', 's', $user['id']);
-//	$user_timezone = $user_timezone->fetch_row()[0];
-//	
-//	date_default_timezone_set($user_timezone);
-//}
+// Get user timezone
+$auth = new Authentication;
+
+if($auth->isLoggedIn()) {
+	$user = $auth->getCurrentUser();
+	$user_timezone = sqli_result_bindvar('SELECT timezone FROM user_preferences WHERE user_id=?', 's', $user['id']);
+	$user_timezone = $user_timezone->fetch_row()[0];
+} else {
+	$user_timezone = 'UTC';
+}
+
+function utc_date_to_user($utc) {
+	$timezone_utc = new DateTimeZone('UTC');
+	$timezone = new DateTimeZone($GLOBALS['user_timezone']);
+	$date = new DateTime($utc, $timezone_utc);
+	$date->setTimezone($timezone);
+	return $date->format('Y-m-d H:i:s O');
+}
+
 
 // Returns inputted date in a user-readable format i.e. 2 hours ago, 3 months ago
 function readable_date($date, $suffix = true, $verbose = false) {
