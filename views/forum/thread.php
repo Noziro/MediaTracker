@@ -208,7 +208,7 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 			$reply_user = $reply_user->fetch_assoc();
 			?>
 			
-			- Deleted - Posted <span title="<?=$reply['created_at']?>">
+			- Deleted - Posted <span title="<?=utc_date_to_user($reply['created_at'])?>">
 				<?=readable_date($reply['created_at'])?>
 			</span>
 			
