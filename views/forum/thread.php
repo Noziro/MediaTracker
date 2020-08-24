@@ -143,7 +143,7 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 				<?=$reply['body']?>
 			</p>
 			
-			<?php if($reply['user_id'] === $user['id']) : ?>
+			<?php if($has_session && $reply['user_id'] === $user['id']) : ?>
 			
 			<div id="js-reply-edit-<?=$reply['id']?>" class="thread-reply__edit js-reply-edit" style="display:none">
 				<form id="form-edit-reply-<?=$reply['id']?>" style="display:none" action="/interface" method="POST">
@@ -212,7 +212,7 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 				<?=readable_date($reply['created_at'])?>
 			</span>
 			
-			<?php if($permission_level >= $permission_levels['Moderator'] || $reply['user_id'] === $user['id']) : ?>
+			<?php if($permission_level >= $permission_levels['Moderator'] || $has_session && $reply['user_id'] === $user['id']) : ?>
 			
 			<div class="thread-reply__actions">
 				<form id="form-undelete-reply-<?=$reply['id']?>" style="display:none" action="/interface" method="POST">

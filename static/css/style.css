@@ -810,19 +810,55 @@ input[type="password"]:focus ~ .reqs--password {
 }
 
 .settings__header {
-	margin: 5px 0 10px;
+	margin: 0 0 10px;
 	color: var(--text-medium);
 	font-size: 16px;
 	font-weight: 600;
 }
+.settings__header ~ .settings__header {
+	margin-top: 20px;
+}
 
-.active-sesions {
+.settings__label {
+	display: block;
+	margin: 16px 0 4px;
+	color: var(--text-medium);
+	font-size: 14px;
+	font-weight: 600;
+}
+.settings__input {
+	display: block;
+	width: 100%;
+	padding: 5px;
+	margin: 5px 0;
+	background: var(--backing-subcontent);
+	border-radius: var(--rounding);
+	border: 1px solid var(--border-light);
+	color: var(--text);
+}
+.settings__input:focus {
+	border-color: var(--border-active);
+	outline: none;
+}
+.settings__subtext {
+	font-size: 12px;
+}
+
+.settings__button-list {
+	display: flex;
+	margin: 10px 0;
+}
+.settings__button + .settings__button {
+	margin-left: 8px;
+}
+
+.active-sessions {
 	width: 100%;
 	border: 2px solid var(--border-light);
 	border-collapse: collapse;
 }
 
-.active-sesions__row {
+.active-sessions__row {
 	
 }
 

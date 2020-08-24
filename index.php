@@ -41,20 +41,6 @@ $url_readable = end($url_split);
 
 
 
-# USER AUTH
-
-$auth = new Authentication();
-$has_session = $auth->isLoggedIn();
-
-if ($has_session) {
-	$user = $auth->getCurrentUser();
-	$permission_level = $user['permission_level'];
-} else {
-	$permission_level = 0;
-}
-
-
-
 # ACCESS LEVEL
 
 $permission_levels_temp = sqli_result('SELECT title, permission_level FROM permission_levels ORDER BY permission_level ASC');
@@ -191,6 +177,9 @@ foreach($permission_levels_temp as $perm_pair) {
 						break;
 					case 'success':
 						echo "Action performed successfully.";
+						break;
+					case 'no-change-detected':
+						echo "No changes were applied, as none were detected.";
 						break;
 					default:
 						echo "This was meant to say something, but it doesn't!";

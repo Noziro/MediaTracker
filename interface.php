@@ -218,6 +218,89 @@ elseif($action === "forum-reply-undelete") {
 	finalize($return_to.'&notice=success');
 }
 
+
+
+elseif($action === "change-settings") {
+	$return_to = '/account/settings';
+	$changed = False;
+
+	// ALL SETTINGS
+	if(!$has_session) {
+		finalize('/?error=require-sign-in');
+	}
+
+	// TIMEZONE
+	if(isset($_POST['change-timezone'])) {
+		$tz = $_POST['change-timezone'];
+
+		// If value the same as before
+		if($tz === $user_timezone) {
+			goto skip_timezone;
+		}
+
+		// If not valid input
+		$needle = False;
+		foreach($valid_timezones as $zone_group) {
+			if(in_array($tz, $zone_group)) {
+				$needle = True;
+				break;
+			}
+		}
+
+		if($needle === False) {
+			finalize($return_to.'?error=disallowed-action');
+		}
+
+		// If valid, continue
+		$stmt = $db->prepare('UPDATE user_preferences SET timezone=? WHERE user_id=?');
+		$stmt->bind_param('ss', $tz, $user['id']);
+		$stmt->execute();
+		$error = $stmt->error;
+		if($error !== '') {
+			finalize($return_to.'?error=database-failure');
+		}
+		$changed = True;
+	}
+	skip_timezone:
+
+
+	// RATING SYSTEM
+	if(isset($_POST['change-rating-system'])) {
+		$ratsys = $_POST['change-rating-system'];
+
+		// If value the same as before
+		if($ratsys === $prefs['rating_system']) {
+			goto skip_rating_system;
+		}
+
+		// If not valid input
+		if(!in_array($ratsys, [3,5,10,20,100])) {
+			finalize($return_to.'?error=disallowed-action');
+		}
+
+		// If valid, continue
+		$stmt = $db->prepare('UPDATE user_preferences SET rating_system=? WHERE user_id=?');
+		$stmt->bind_param('ss', $ratsys, $user['id']);
+		$stmt->execute();
+		$error = $stmt->error;
+		if($error !== '') {
+			finalize($return_to.'?error=database-failure');
+		}
+		$changed = True;
+	}
+	skip_rating_system:
+
+
+	// FINALIZE - should only reach this point after clearing all conditions
+	if($changed === True) {
+		finalize($return_to.'?notice=success');
+	} else {
+		finalize($return_to.'?notice=no-change-detected');
+	}
+}
+
+
+
 // File should only reach this point if no other actions have reached finalization.
 finalize('/?error=disallowed-action');
 ?>

@@ -10,20 +10,20 @@ if(!$has_session) {
 		<div class="">
 			<a class="" href="?section=profile">Profile</a>
 			<a class="" href="?section=security">Security</a>
+			<a class="" href="?section=preferences">Preferences</a>
 			<div class="divider"></div>
-			<form action="/session" method="POST" class="item text logout" >
-				<input type="hidden" name="action" value="logout">
-				<input type="submit" name="commit" value="Logout" class="link">
-			</form>
+			
+			<button form="form-logout" class="item text logout" type="submit">Logout</button>
+			
 		</div>
 	</div>
 	
 	<div class="split mainbar settings">
-		<?php
+		<form id="form-settings" style="display:none" action="/interface" method="POST">
+			<input type="hidden" name="action" value="change-settings">
+		</form>
 		
-		if(!isset($_GET['section']) || $_GET['section'] === 'profile') : ?>
-		
-		
+		<?php if(!isset($_GET['section']) || $_GET['section'] === 'profile') : ?>
 		
 		Change nickname<br />
 		<br />
@@ -32,6 +32,16 @@ if(!$has_session) {
 		Change avatar<br />
 		<br />
 		Change banner
+
+		<div class="settings__button button-list">
+			<button form="form-settings" class="settings__button button" type="submit">
+				Apply
+			</button>
+			
+			<!--<button class="settings__button button" type="button" onclick="location.reload()">
+				Discard
+			</button>-->
+		</div>
 		
 		
 		
@@ -39,14 +49,25 @@ if(!$has_session) {
 		
 		<h3 class="settings__header">Modify Account</h3>
 		
-		Change email<br />
-		<br />
-		Change password<br />
-		<br />
+		<label for="change-email" class="settings__label">Change email</label>
+		
+		
+		<label for="change-password" class="settings__label">Change password</label>
+		
+
+		<div class="settings__button button-list">
+			<button form="form-settings" class="settings__button button" type="submit">
+				Apply
+			</button>
+			
+			<!--<button class="settings__button button" type="button" onclick="location.reload()">
+				Discard
+			</button>-->
+		</div>
 		
 		<h3 class="settings__header">Active Sessions</h3>
 		
-		<table class="active-sesions">
+		<table class="active-sessions">
 			<tr class="active-sesions__row">
 				<th class="active-sessions__cell active-sessions__cell--header">Session ID</th>
 				<th class="active-sessions__cell active-sessions__cell--header">Date Started</th>
@@ -77,6 +98,64 @@ if(!$has_session) {
 			
 			<?php endforeach; ?>
 		</table>
+		
+		
+		
+		<?php elseif($_GET['section'] === 'preferences') : ?>
+		
+		<h3 class="settings__header">User Experience</h3>
+		
+		<label for="change-timezone" class="settings__label">Change timezone</label>
+		<select id="change-timezone" form="form-settings" name="change-timezone">
+			<?php foreach($valid_timezones as $zone_group_label => $zone_group) : ?>
+			<optgroup label="<?=$zone_group_label?>">
+				<?php foreach($zone_group as $zone) : ?>
+				<option <?php if($zone === $prefs['timezone']) { echo "selected"; } ?>>
+					<?=$zone?>
+				</option>
+				<?php endforeach; ?>
+			</optgroup>
+			<?php endforeach; ?>
+		</select>
+		
+		<h3 class="settings__header">Collections</h3>
+		
+		<label for="change-rating-system" class="settings__label">Change rating system</label>
+		<select id="change-rating-system" form="form-settings" name="change-rating-system">
+			<?php
+			$rating_systems = [
+				3 => '3 Star',
+				5 => '5 Star',
+				10 => '10 Point',
+				20 => '20 Point',
+				100 => '100 Point'
+			];
+
+			foreach($rating_systems as $value => $label) {
+				echo '<option value="'.$value.'"';
+				
+				if($value === $prefs['rating_system']) {
+					echo 'selected';
+				}
+
+				echo '>'.$label.'</option>';
+			}
+			?>
+		</select>
+		
+		<div class="settings__button button-list">
+			<button form="form-settings" class="settings__button button" type="submit">
+				Apply
+			</button>
+			
+			<!--<button class="settings__button button" type="button" onclick="location.reload()">
+				Discard
+			</button>-->
+		</div>
+		
+		
+		
+		
 		
 		<?php
 		else :
