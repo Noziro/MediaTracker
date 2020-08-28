@@ -843,6 +843,25 @@ input[type="password"]:focus ~ .reqs--password {
 .settings__subtext {
 	font-size: 12px;
 }
+.settings__notice {
+	display: block;
+	padding: 10px;
+	border: 1px solid var(--border-light);
+	margin: 10px 0;
+	width: max-content;
+}
+.settings__notice::before {
+	content: "?";
+	display: inline-block;
+	width: 1.5em;
+	height: 1.5em;
+	border: 1px solid var(--text-regular);
+	border-radius: 50%;
+	margin-right: 5px;
+	line-height: 1.5em;
+	font-weight: 600;
+	text-align: center;
+}
 
 .settings__button-list {
 	display: flex;

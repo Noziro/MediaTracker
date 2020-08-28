@@ -190,6 +190,30 @@ elseif($action === "forum-reply-delete") {
 		finalize($return_to.'&error=database-failure');
 	}
 	
+	// Set thread anonymous if deleting first post.
+	$stmt = $db->prepare("SELECT id FROM thread_replies WHERE thread_id=? ORDER BY created_at ASC LIMIT 1");
+	$stmt->bind_param("s", $reply['thread_id']);
+	$stmt->execute();
+	$res = $stmt->get_result();
+	$res = $res->fetch_assoc();
+	$first_reply_id = $res['id'];
+	$error = $stmt->error;
+	$stmt->free_result();
+	if($error !== "") {
+		finalize($return_to.'&error=database-failure');
+	}
+
+	if($first_reply_id === $reply['id']) {
+		$stmt = $db->prepare('UPDATE threads SET anonymous=TRUE WHERE id=?');
+		$stmt->bind_param('s', $reply['thread_id']);
+		$stmt->execute();
+		$error = $stmt->error;
+		$stmt->free_result();
+		if($error !== "") {
+			finalize($return_to.'&error=database-failure');
+		}
+	}
+	
 	finalize($return_to.'&notice=success');
 }
 
@@ -215,6 +239,31 @@ elseif($action === "forum-reply-undelete") {
 	if($error !== "") {
 		finalize($return_to.'&error=database-failure');
 	}
+	
+	// Set thread un-anonymous if un-deleting first post.
+	$stmt = $db->prepare("SELECT id FROM thread_replies WHERE thread_id=? ORDER BY created_at ASC LIMIT 1");
+	$stmt->bind_param("s", $reply['thread_id']);
+	$stmt->execute();
+	$res = $stmt->get_result();
+	$res = $res->fetch_assoc();
+	$first_reply_id = $res['id'];
+	$error = $stmt->error;
+	$stmt->free_result();
+	if($error !== "") {
+		finalize($return_to.'&error=database-failure');
+	}
+
+	if($first_reply_id === $reply['id']) {
+		$stmt = $db->prepare('UPDATE threads SET anonymous=FALSE WHERE id=?');
+		$stmt->bind_param('s', $reply['thread_id']);
+		$stmt->execute();
+		$error = $stmt->error;
+		$stmt->free_result();
+		if($error !== "") {
+			finalize($return_to.'&error=database-failure');
+		}
+	}
+
 	finalize($return_to.'&notice=success');
 }
 

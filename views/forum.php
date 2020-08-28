@@ -20,7 +20,7 @@ $boards = $boards->fetch_all(MYSQLI_ASSOC);
 			</div>
 			<div class="forum-boards__board-aside">
 				<?php 				
-				$threads = sqli_result_bindvar("SELECT id, user_id, title, updated_at FROM threads WHERE board_id=? ORDER BY updated_at DESC LIMIT 2", "s", $board['id']);
+				$threads = sqli_result_bindvar("SELECT id, user_id, title, updated_at, anonymous FROM threads WHERE board_id=? ORDER BY updated_at DESC LIMIT 2", "s", $board['id']);
 				
 				if($threads->num_rows > 0) :
 				
@@ -41,12 +41,23 @@ $boards = $boards->fetch_all(MYSQLI_ASSOC);
 							<?=readable_date($thread['updated_at'])?>
 						</span>
 						by
+
+						<?php
+						if($thread['anonymous'] !== 1) :
+						$thread_username = sqli_result_bindvar("SELECT nickname FROM users WHERE id=?", "s", $thread['user_id']);
+						$thread_username = $thread_username->fetch_row()[0];
+						?>
+
 						<span class="forum-boards__thread-author">
-							<?php
-							$user = sqli_result_bindvar("SELECT nickname FROM users WHERE id=?", "s", $thread['user_id']);
-							echo $user->fetch_row()[0];
-							?>
+							<?=$thread_username?>
 						</span>
+
+						<?php else : ?>
+
+						<i>- deleted -</i>
+
+						<?php endif; ?>
+						
 					</div>
 				</div>
 				

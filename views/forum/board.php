@@ -31,10 +31,10 @@ $pagination_offset = 15;
 if(isset($_GET["page"])) {
 	$pagination_offset_current = ($_GET['page'] - 1) * $pagination_offset;
 	
-	$stmt = $db->prepare("SELECT id, user_id, title, created_at, updated_at FROM threads WHERE board_id=? AND deleted=FALSE ORDER BY updated_at DESC LIMIT ?, ?");
+	$stmt = $db->prepare("SELECT id, user_id, title, created_at, updated_at, anonymous FROM threads WHERE board_id=? AND deleted=FALSE ORDER BY updated_at DESC LIMIT ?, ?");
 	$stmt->bind_param("sii", $board['id'], $pagination_offset_current, $pagination_offset);
 } else {
-	$stmt = $db->prepare("SELECT id, user_id, title, created_at, updated_at FROM threads WHERE board_id=? AND deleted=FALSE ORDER BY updated_at DESC LIMIT 20");
+	$stmt = $db->prepare("SELECT id, user_id, title, created_at, updated_at, anonymous FROM threads WHERE board_id=? AND deleted=FALSE ORDER BY updated_at DESC LIMIT 20");
 	$stmt->bind_param("s", $board['id']);
 }
 
@@ -129,13 +129,22 @@ $threads = $threads->fetch_all(MYSQLI_ASSOC);
 						<?=readable_date($thread['created_at'])?>
 					</span>
 					by
+
 					<?php
+					if($thread['anonymous'] !== 1) :
 					$thread_user = sqli_result_bindvar("SELECT id, nickname FROM users WHERE id=?", "s", $thread['user_id']);
 					$thread_user = $thread_user->fetch_assoc();
 					?>
+
 					<a class="user" href="<?=FILEPATH."user?id=".$thread_user['id']?>">
 						<?=$thread_user['nickname']?>
 					</a>
+
+					<?php else : ?>
+
+					<i>- deleted -</i>
+
+					<?php endif; ?>
 				</p>
 			</div>
 			<div class="forum-threads__recent-replies">

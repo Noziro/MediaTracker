@@ -25,13 +25,15 @@ if(!$has_session) {
 		
 		<?php if(!isset($_GET['section']) || $_GET['section'] === 'profile') : ?>
 		
-		Change nickname<br />
-		<br />
-		Change about<br />
-		<br />
-		Change avatar<br />
-		<br />
-		Change banner
+		<label for="change-nickname" class="settings__label">Change nickname</label>
+		<input form="form-settings" id="change-nickname" class="settings__input input input--disabled" type="text" placeholder="<?=$user['nickname']?>" disabled>
+
+		<span class="settings__subtext">Your nickname is <b>not</b> your username! You will still sign in with your original username, but publicly you will your new nickname will display.</span>
+
+		<label for="change-about" class="settings__label">Change about</label>
+		<input form="form-settings" id="change-about" class="settings__input input input--disabled" type="text" value="" disabled>
+
+		<span class="settings__notice">Avatar & banner functionality will come in the future.</span>
 
 		<div class="settings__button button-list">
 			<button form="form-settings" class="settings__button button" type="submit">
