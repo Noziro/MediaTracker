@@ -28,10 +28,10 @@ if($url == '/') {
 	#500
 	http_response_code(500);
 	$url = '500';
-} /*elseif(file_exists("views/$url.php") != 1) {
+} elseif(file_exists("views/$url.php") != 1) {
 	#404
 	header('Location: /404');
-}*/ else {
+} else {
 	#generic pages - strips the / off the beginning
 	$url = substr($url, 1);
 }
