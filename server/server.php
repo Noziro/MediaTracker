@@ -18,6 +18,12 @@ function to_int($s) {
 	return intval(round($s));
 }
 
+// Formats text that is retrieved from SQL database.
+function format_user_text($s) {
+	// encode BB here
+	return nl2br(htmlspecialchars($s));
+}
+
 
 
 // AUTH SYSTEM
@@ -739,16 +745,27 @@ function sqli_execute(string $sql, string $insert_type, string $insert_variable)
 }
 
 // For use on user POST pages. Closes relevant pieces and redirects user to a page.
-function finalize(string $return_to = '/') {
+function finalize(string $page = '/', array $params = []) {
 	global $db;
 	$db->close();
 
-	header('Location: '.$return_to);
+	if(count($params) > 0) {
+		if(strpos($page, '?') === True) {
+			$params_str = '&';
+		} else {
+			$params_str = '?';
+		}
+		$params_str .= implode('&', $params);
+	} else {
+		$params_str = '';
+	}
+
+	header('Location: '.$page.$params_str);
 	exit();
 }
 
 
-// COLLECTIOn FUNCTIONS
+// COLLECTION FUNCTIONS
 
 $valid_coll_types = ['video', 'game', 'literature', 'other'];
 

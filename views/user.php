@@ -20,7 +20,7 @@ if(!isset($_GET["id"])) {
 	$page_user__id = $_GET["id"];
 }
 
-$page_user = sqli_result_bindvar("SELECT id, username, nickname, permission_level, created_at FROM users WHERE id=?", "s", $page_user__id);
+$page_user = sqli_result_bindvar("SELECT id, username, nickname, created_at, permission_level, about FROM users WHERE id=?", "s", $page_user__id);
 
 if($page_user->num_rows < 1) {
 	header('Location: /404');
@@ -46,7 +46,11 @@ $page_user = $page_user->fetch_assoc();
 		<div class="split mainbar">
 			<div class="about">
 				<p class="about__text">
-					About this user.
+					<?php if(strlen(trim($page_user['about'])) === 0) : ?>
+					This user hasn't told told us about them yet!
+					<?php else : ?>
+					<?=format_user_text($page_user['about'])?>
+					<?php endif; ?>
 				</p>
 				
 				<br />

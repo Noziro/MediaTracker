@@ -122,7 +122,7 @@ $threads = $threads->fetch_all(MYSQLI_ASSOC);
 		<div class="forum-threads__thread">
 			<div class="forum-threads__thread-description">
 				<a href="<?=FILEPATH?>forum/thread?id=<?=$thread['id']?>">
-					<h6 class="forum-threads__thread-title"><?=$thread['title']?></h6>
+					<h6 class="forum-threads__thread-title"><?=htmlspecialchars($thread['title'])?></h6>
 				</a>
 				<p class="forum-threads__description">
 					<span class="forum-threads__date" title="<?=utc_date_to_user($thread['created_at'])?>">

@@ -62,6 +62,10 @@
 			<div class="collection__header-column">
 				Status
 			</div>
+			
+			<div class="collection__header-column collection__header-column--comments">
+				Comments
+			</div>
 		</div>
 		
 		<?php
@@ -83,16 +87,20 @@
 				</a>
 			</div>
 
-			<div class="media__column media__column">
+			<div class="media__column">
 				<?=score_extrapolate($item['score'], $page_user_prefs['rating_system'])?>
 			</div>
 
-			<div class="media__column media__column">
+			<div class="media__column">
 				<?=$item['episodes']?>
 			</div>
 
-			<div class="media__column media__column">
+			<div class="media__column">
 				<?=$item['status']?>
+			</div>
+
+			<div class="media__column media__column--comments">
+				<?=format_user_text($item['comments'])?>
 			</div>
 		</div>
 

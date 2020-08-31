@@ -933,3 +933,12 @@ input[type="password"]:focus ~ .reqs--password {
 .media__column--name {
 	width: 50%;
 }
+.collection__header-column--comments,
+.media__column--comments {
+	width: 300px;
+	max-height: 150px;
+	overflow: hidden;
+}
+.media__column--comments:hover {
+	max-height: initial;
+}

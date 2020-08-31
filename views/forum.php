@@ -32,7 +32,7 @@ $boards = $boards->fetch_all(MYSQLI_ASSOC);
 				
 				<div class="forum-boards__recent-thread">
 					<b class="forum-boards__thread-title">
-						<a href="<?=FILEPATH."forum/thread?id=".$thread['id']?>"><?=$thread['title']?></a>
+						<a href="<?=FILEPATH."forum/thread?id=".$thread['id']?>"><?=htmlspecialchars($thread['title'])?></a>
 					</b>
 					<br />
 					

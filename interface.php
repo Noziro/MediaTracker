@@ -9,19 +9,23 @@ include 'server/server.php';
 // AUTH
 
 if(!$has_session)  {
-	finalize('/?error=require-sign-in'); 
+	finalize('/', ['?error=require-sign-in']); 
 }
 
 $action = $_POST['action'];
+
+
+
+
 
 // ACTIONS
 
 if($action === "forum-thread-create") {
 	if(!isset($_POST['board-id'])) {
-		finalize('/forum?error=disallowed-action');
+		finalize('/forum', ['error=disallowed-action']);
 	}
 	
-	$return_to = '/forum/board?id='.$_POST['board-id'];
+	$rpage = '/forum/board?id='.$_POST['board-id'];
 
 	// Check user authority - WHY DOESNT THIS WORK FIX THIS LATER - TODO
 
@@ -30,18 +34,18 @@ if($action === "forum-thread-create") {
 	$stmt->execute();
 	$error = $stmt->error;
 	if($error !== "") {
-		finalize('/forum?error=database-failure');
+		finalize('/forum', ['error=database-failure']);
 	}
 	$board = $stmt->get_result();
 	$stmt->free_result();
 	$board = $board->fetch_assoc();
 	
 	if($permission_level < $board['permission_level']) {
-		finalize('/forum?error=unauthorized');
+		finalize('/forum', ['error=unauthorized']);
 	}
 	
 	if(!isset($_POST['title']) || !isset($_POST['body']) || trim($_POST['body']) === '') {
-		finalize($return_to.'?error=required-field');
+		finalize($rpage, ['error=required-field']);
 	} else {
 		// Add thread to DB
 		$stmt = $db->prepare('INSERT INTO threads (user_id, board_id, title) VALUES (?, ?, ?)');
@@ -49,7 +53,7 @@ if($action === "forum-thread-create") {
 		$stmt->execute();
 		$error = $stmt->error;
 		if($error !== "") {
-			finalize($return_to.'?error=database-failure');
+			finalize($rpage, ['error=database-failure']);
 		}
 		
 		// Get newly added thread ID
@@ -64,23 +68,27 @@ if($action === "forum-thread-create") {
 		$stmt->execute();
 		$error = $stmt->error;
 		if($error !== "") {
-			finalize($return_to.'?error=database-failure');
+			finalize($rpage, ['error=database-failure']);
 		}
 		
 		$stmt->close();
-		finalize($return_to);
+		finalize($rpage);
 	}
 }
 
+
+
+
+
 elseif($action === "forum-thread-reply") {
 	if(!isset($_POST['thread-id'])) {
-		finalize('/forum?error=disallowed-action');
+		finalize('/forum', ['error=disallowed-action']);
 	}
 	
-	$return_to = '/forum/thread?id='.$_POST['thread-id'];
+	$rpage = '/forum/thread?id='.$_POST['thread-id'];
 	
 	if(!isset($_POST['body']) || trim($_POST['body']) === '') {
-		finalize($return_to.'?error=required-field');
+		finalize($rpage, ['error=required-field']);
 	} else {
 		// Add post to DB
 		$stmt = $db->prepare('INSERT INTO thread_replies (user_id, thread_id, body) VALUES (?, ?, ?)');
@@ -88,7 +96,7 @@ elseif($action === "forum-thread-reply") {
 		$stmt->execute();
 		$error = $stmt->error;
 		if($error !== "") {
-			finalize($return_to.'?error=database-failure');
+			finalize($rpage, ['error=database-failure']);
 		}
 		
 		// Set thread updated_at date for sorting purposes
@@ -97,17 +105,21 @@ elseif($action === "forum-thread-reply") {
 		$stmt->execute();
 		$error = $stmt->error;
 		if($stmt->error!== "") {
-			finalize($return_to.'?error=database-failure');
+			finalize($rpage, ['error=database-failure']);
 		}
 		
 		$stmt->close();
-		finalize($return_to);
+		finalize($rpage);
 	}
 }
 
+
+
+
+
 elseif($action === "forum-thread-delete") {
 	if(!isset($_POST['thread-id'])) {
-		finalize('/forum?error=disallowed-action');
+		finalize('/forum', ['error=disallowed-action']);
 	}
 	
 	$stmt = $db->prepare('SELECT id, board_id FROM threads WHERE id=?');
@@ -117,38 +129,45 @@ elseif($action === "forum-thread-delete") {
 	$stmt->free_result();
 	$thread = $thread->fetch_assoc();
 	
-	$return_to = '/forum/board?id='.$thread['board_id'];
+	$rpage = '/forum/board?id='.$thread['board_id'];
 	
 	$stmt = $db->prepare('UPDATE threads SET deleted=TRUE WHERE id=?');
 	$stmt->bind_param('s', $_POST['thread-id']);
 	$stmt->execute();
 	$error = $stmt->error;
 	if($error !== "") {
-		finalize($return_to.'&error=database-failure');
+		finalize($rpage, ['error=database-failure']);
 	}
-	finalize($return_to.'&notice=success');
+	finalize($rpage, ['notice=success']);
 }
+
+
+
 
 elseif($action === "forum-thread-undelete") {
 	if(!isset($_POST['thread-id'])) {
-		finalize('/forum?error=disallowed-action');
+		finalize('/forum', ['error=disallowed-action']);
 	}
 	
-	$return_to = '/forum/thread?id='.$_POST['thread-id'];
+	$rpage = '/forum/thread?id='.$_POST['thread-id'];
 	
 	$stmt = $db->prepare('UPDATE threads SET deleted=FALSE WHERE id=?');
 	$stmt->bind_param('s', $_POST['thread-id']);
 	$stmt->execute();
 	$error = $stmt->error;
 	if($error !== "") {
-		finalize($return_to.'&error=database-failure');
+		finalize($rpage, ['error=database-failure']);
 	}
-	finalize($return_to.'&notice=success');
+	finalize($rpage, ['notice=success']);
 }
+
+
+
+
 
 elseif($action === "forum-reply-edit") {
 	if(!isset($_POST['reply-id'])) {
-		finalize('/forum?error=disallowed-action');
+		finalize('/forum', ['error=disallowed-action']);
 	}
 	
 	$stmt = $db->prepare('SELECT id, thread_id FROM thread_replies WHERE id=?');
@@ -158,10 +177,10 @@ elseif($action === "forum-reply-edit") {
 	$stmt->free_result();
 	$reply = $reply->fetch_assoc();
 	
-	$return_to = '/forum/thread?id='.$reply['thread_id'].'#reply-'.$_POST['reply-id'];
+	$rpage = '/forum/thread?id='.$reply['thread_id'].'#reply-'.$_POST['reply-id'];
 	
 	if(!isset($_POST['body']) || trim($_POST['body']) === '') {
-		finalize($return_to.'?error=required-field');
+		finalize($rpage, ['error=required-field']);
 	}
 	
 	$stmt = $db->prepare('UPDATE thread_replies SET body=?, updated_at=CURRENT_TIMESTAMP WHERE id=?');
@@ -169,15 +188,17 @@ elseif($action === "forum-reply-edit") {
 	$stmt->execute();
 	$error = $stmt->error;
 	if($error !== "") {
-		finalize($return_to.'&error=database-failure');
+		finalize($rpage, ['error=database-failure']);
 	}
 	
-	finalize($return_to.'&notice=success');
+	finalize($rpage, ['notice=success']);
 }
+
+
 
 elseif($action === "forum-reply-delete") {
 	if(!isset($_POST['reply-id'])) {
-		finalize('/forum?error=disallowed-action');
+		finalize('/forum', ['error=disallowed-action']);
 	}
 	
 	$stmt = $db->prepare('SELECT id, thread_id FROM thread_replies WHERE id=?');
@@ -187,14 +208,14 @@ elseif($action === "forum-reply-delete") {
 	$stmt->free_result();
 	$reply = $reply->fetch_assoc();
 	
-	$return_to = '/forum/thread?id='.$reply['thread_id'];
+	$rpage = '/forum/thread?id='.$reply['thread_id'];
 	
 	$stmt = $db->prepare('UPDATE thread_replies SET deleted=TRUE WHERE id=?');
 	$stmt->bind_param('s', $_POST['reply-id']);
 	$stmt->execute();
 	$error = $stmt->error;
 	if($error !== "") {
-		finalize($return_to.'&error=database-failure');
+		finalize($rpage, ['error=database-failure']);
 	}
 	
 	// Set thread anonymous if deleting first post.
@@ -207,7 +228,7 @@ elseif($action === "forum-reply-delete") {
 	$error = $stmt->error;
 	$stmt->free_result();
 	if($error !== "") {
-		finalize($return_to.'&error=database-failure');
+		finalize($rpage, ['error=database-failure']);
 	}
 
 	if($first_reply_id === $reply['id']) {
@@ -216,16 +237,18 @@ elseif($action === "forum-reply-delete") {
 		$stmt->execute();
 		$error = $stmt->error;
 		if($error !== "") {
-			finalize($return_to.'&error=database-failure');
+			finalize($rpage, ['error=database-failure']);
 		}
 	}
 	
-	finalize($return_to.'&notice=success');
+	finalize($rpage, ['notice=success']);
 }
+
+
 
 elseif($action === "forum-reply-undelete") {
 	if(!isset($_POST['reply-id'])) {
-		finalize('/forum?error=disallowed-action');
+		finalize('/forum', ['error=disallowed-action']);
 	}
 	
 	$stmt = $db->prepare('SELECT id, thread_id FROM thread_replies WHERE id=?');
@@ -235,14 +258,14 @@ elseif($action === "forum-reply-undelete") {
 	$stmt->free_result();
 	$reply = $reply->fetch_assoc();
 	
-	$return_to = '/forum/thread?id='.$reply['thread_id'];
+	$rpage = '/forum/thread?id='.$reply['thread_id'];
 	
 	$stmt = $db->prepare('UPDATE thread_replies SET deleted=FALSE WHERE id=?');
 	$stmt->bind_param('s', $_POST['reply-id']);
 	$stmt->execute();
 	$error = $stmt->error;
 	if($error !== "") {
-		finalize($return_to.'&error=database-failure');
+		finalize($rpage, ['error=database-failure']);
 	}
 	
 	// Set thread un-anonymous if un-deleting first post.
@@ -255,7 +278,7 @@ elseif($action === "forum-reply-undelete") {
 	$error = $stmt->error;
 	$stmt->free_result();
 	if($error !== "") {
-		finalize($return_to.'&error=database-failure');
+		finalize($rpage, ['error=database-failure']);
 	}
 
 	if($first_reply_id === $reply['id']) {
@@ -264,27 +287,29 @@ elseif($action === "forum-reply-undelete") {
 		$stmt->execute();
 		$error = $stmt->error;
 		if($error !== "") {
-			finalize($return_to.'&error=database-failure');
+			finalize($rpage, ['error=database-failure']);
 		}
 	}
 
-	finalize($return_to.'&notice=success');
+	finalize($rpage, ['notice=success']);
 }
 
 
 
+
+
 elseif($action === "collection-create") {
-	$return_to = '/collection';
+	$rpage = '/collection';
 	
 	if(!isset($_POST['name']) || !isset($_POST['type'])) {
-		finalize($return_to.'?error=required-field');
+		finalize($rpage, ['error=required-field']);
 	} else {
 		// Define variables
 		$name = trim($_POST['name']);
 
 		$type = trim($_POST['type']);
 		if(!in_array((string)$type, $valid_coll_types, True)) {
-			finalize($return_to.'?error=invalid-value');
+			finalize($rpage, ['error=invalid-value']);
 		}
 
 		if(!isset($_POST['private']) || !in_array((int)$_POST['private'], [0,9], True)) {
@@ -299,19 +324,21 @@ elseif($action === "collection-create") {
 		$stmt->execute();
 		$error = $stmt->error;
 		if($error !== "") {
-			finalize($return_to.'?error=database-failure');
+			finalize($rpage, ['error=database-failure']);
 		}
 		
 		$stmt->close();
-		finalize($return_to.'?notice=success');
+		finalize($rpage, ['notice=success']);
 	}
 }
 
 
 
+
+
 elseif($action === "collection-item-create") {
 	$collection__id = $_POST['collection'];
-	$return_to = '/collection?id='.$collection__id;
+	$rpage = '/collection?id='.$collection__id;
 
 	// Check user authority - TEST THIS WORKS - NOT CURRENTLY TESTED - TODO
 
@@ -320,25 +347,25 @@ elseif($action === "collection-item-create") {
 	$stmt->execute();
 	$error = $stmt->error;
 	if($error !== "") {
-		finalize($return_to.'&error=database-failure');
+		finalize($rpage, ['error=database-failure']);
 	}
 	$collection = $stmt->get_result();
 	$stmt->free_result();
 	$collection = $collection->fetch_assoc();
 
 	if($user['id'] !== $collection['user_id']) {
-		finalize($return_to.'&error=unauthorized');
+		finalize($rpage, ['error=unauthorized']);
 	}
 	
 	if(!isset($_POST['name']) || !isset($_POST['status'])) {
-		finalize($return_to.'&error=required-field');
+		finalize($rpage, ['error=required-field']);
 	}
 
 	// Define base variables
 	$status = 'planned';
 	$name = trim($_POST['name']);
-	$score = null;
-	$episodes = null;
+	$score = 0;
+	$episodes = 0;
 	$user_started = null;
 	$user_finished = null;
 	$release_date = null;
@@ -352,7 +379,7 @@ elseif($action === "collection-item-create") {
 		$status = (string)$_POST['status'];
 
 		if(!in_array($status, $valid_status, True)) {
-			finalize($return_to.'&error=invalid-value');
+			finalize($rpage, ['error=invalid-value']);
 		}
 	}
 
@@ -362,7 +389,7 @@ elseif($action === "collection-item-create") {
 		$score = (int)$_POST['score'];
 
 		if($score < 0 || $score > $prefs['rating_system']) {
-			finalize($return_to.'&error=invalid-value');
+			finalize($rpage, ['error=invalid-value']);
 		}
 
 		$score = score_normalize($score, $prefs['rating_system']);
@@ -373,7 +400,7 @@ elseif($action === "collection-item-create") {
 	if(array_key_exists('episodes', $_POST)) {
 		$episodes = (int)$_POST['episodes'];
 		if($episodes < 0) {
-			finalize($return_to.'&error=invalid-value');
+			finalize($rpage, ['error=invalid-value']);
 		}
 	}
 
@@ -402,7 +429,7 @@ elseif($action === "collection-item-create") {
 			|| (int)$d < 1
 			|| (int)$d > 31 // yes, this will accept invalid day ranges. will fix with a different if statement when/if it becomes a problem (such as SQL refusing the date). This requires some testing.
 			) {
-				finalize($return_to.'&error=invalid-value');
+				finalize($rpage, ['error=invalid-value']);
 		}
 
 		// if all check passed, return
@@ -435,7 +462,7 @@ elseif($action === "collection-item-create") {
 		$comments = $_POST['comments'];
 		$maxlen = pow(2,16) - 1;
 		if(strlen($comments) > $maxlen) {
-			finalize($return_to.'&error=invalid-value');
+			finalize($rpage, ['error=invalid-value']);
 		}
 	}
 
@@ -476,21 +503,24 @@ elseif($action === "collection-item-create") {
 	$stmt->execute();
 	$error = $stmt->error;
 	if($error !== "") {
-		finalize($return_to.'&error=database-failure&cause='.$error);
+		finalize($rpage, ['error=database-failure']);
 	}
 	
 	$stmt->close();
-	finalize($return_to.'&notice=success');
+	finalize($rpage, ['notice=success']);
 }
 
 
+
+
+
 elseif($action === "change-settings") {
-	$return_to = '/account/settings';
+	$rpage = '/account/settings';
 	$changed = False;
 
 	// ALL SETTINGS
 	if(!$has_session) {
-		finalize('/?error=require-sign-in');
+		finalize('/', ['error=require-sign-in']);
 	}
 
 	// TIMEZONE
@@ -512,7 +542,7 @@ elseif($action === "change-settings") {
 		}
 
 		if($needle === False) {
-			finalize($return_to.'?error=invalid-value');
+			finalize($rpage, ['error=invalid-value']);
 		}
 
 		// If valid, continue
@@ -521,7 +551,7 @@ elseif($action === "change-settings") {
 		$stmt->execute();
 		$error = $stmt->error;
 		if($error !== '') {
-			finalize($return_to.'?error=database-failure');
+			finalize($rpage, ['error=database-failure']);
 		}
 		$changed = True;
 	}
@@ -539,7 +569,7 @@ elseif($action === "change-settings") {
 
 		// If not valid input
 		if(!in_array((int)$ratsys, [3,5,10,20,100], True)) {
-			finalize($return_to.'?error=invalid-value');
+			finalize($rpage, ['error=invalid-value']);
 		}
 
 		// If valid, continue
@@ -548,7 +578,7 @@ elseif($action === "change-settings") {
 		$stmt->execute();
 		$error = $stmt->error;
 		if($error !== '') {
-			finalize($return_to.'?error=database-failure');
+			finalize($rpage, ['error=database-failure']);
 		}
 		$changed = True;
 	}
@@ -557,14 +587,16 @@ elseif($action === "change-settings") {
 
 	// FINALIZE - should only reach this point after clearing all conditions
 	if($changed === True) {
-		finalize($return_to.'?notice=success');
+		finalize($rpage, ['notice=success']);
 	} else {
-		finalize($return_to.'?notice=no-change-detected');
+		finalize($rpage, ['notice=no-change-detected']);
 	}
 }
 
 
 
+
+
 // File should only reach this point if no other actions have reached finalization.
-finalize('/?error=disallowed-action');
+finalize('/', ['error=disallowed-action']);
 ?>

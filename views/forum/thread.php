@@ -39,10 +39,10 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 		<div class="content-header__breadcrumb">
 			<a href="<?=FILEPATH."forum"?>">Forum</a> >
 			<a href="<?=FILEPATH."forum/board?id=".$board['id']?>"><?=$board['name']?></a> >
-			<span><?=$thread['title']?></span>
+			<span><?=htmlspecialchars($thread['title'])?></span>
 		</div>
 		
-		<h2 class="content-header__title"><?=$thread['title']?></h2>
+		<h2 class="content-header__title"><?=htmlspecialchars($thread['title'])?></h2>
 	</div>
 	
 	
@@ -140,7 +140,7 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 		
 		<div class="thread-reply__content">
 			<p id="js-reply-body-<?=$reply['id']?>" class="thread-reply__text global__long-text js-reply-body">
-				<?=$reply['body']?>
+				<?=format_user_text($reply['body'])?>
 			</p>
 			
 			<?php if($has_session && $reply['user_id'] === $user['id']) : ?>
