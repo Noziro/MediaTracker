@@ -28,10 +28,10 @@ if($url == '/') {
 	#500
 	http_response_code(500);
 	$url = '500';
-} elseif(file_exists("views/$url.php") != 1) {
+} /*elseif(file_exists("views/$url.php") != 1) {
 	#404
 	header('Location: /404');
-} else {
+}*/ else {
 	#generic pages - strips the / off the beginning
 	$url = substr($url, 1);
 }
@@ -101,6 +101,7 @@ foreach($permission_levels_temp as $perm_pair) {
 		echo implode(" page--", $url_split);
 	}
 	?>">
+		<?php if(!isset($_GET['frame'])) : ?> 
 		<nav id="nav" class="wrapper wrapper--site-nav">
 			<div class="wrapper__inner site-nav">
 				<div class="site-nav__section">
@@ -159,6 +160,7 @@ foreach($permission_levels_temp as $perm_pair) {
 				</div>
 			</div>
 		</nav>
+		<?php endif; ?>
 		
 		<?php if(isset($_GET['notice'])) : ?>
 		
@@ -225,6 +227,12 @@ foreach($permission_levels_temp as $perm_pair) {
 					case 'disallowed-action':
 						echo "Attempted to perform an invalid or unrecognized action.";
 						break;
+					case 'unauthorized':
+						echo "Attempted operation outside of user authority.";
+						break;
+					case 'invalid-value':
+						echo "A value you entered was invalid or out of expected bounds. Please try again.";
+						break;
 					default:
 						echo "Encountered an unknown error.";
 						break;
@@ -241,6 +249,7 @@ foreach($permission_levels_temp as $perm_pair) {
 			?>
 		</main>
 		
+		<?php if(!isset($_GET['frame'])) : ?> 
 		<footer id="footer" class="wrapper wrapper--footer">
 			<div class="wrapper__inner footer">
 				<div class="footer__section links">
@@ -276,6 +285,7 @@ foreach($permission_levels_temp as $perm_pair) {
 				</div>
 			</div>
 		</footer>
+		<?php endif; ?>
 		
 		<?php if(!isset($_COOKIE["gdpr"])) : ?>
 		

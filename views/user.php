@@ -10,19 +10,24 @@
 }
 sqli_result_bindvar($db, "SELECT id, username FROM users WHERE id=?", "s", $_GET["id"])->num_rows < 1*/
 
-if(isset($_GET["id"])) {
-	$user_page = sqli_result_bindvar("SELECT id, username, nickname, permission_level, created_at FROM users WHERE id=?", "s", $_GET["id"]);
-	
-	if($user_page->num_rows < 1) {
-		header('Location: /404');
-		exit();
+if(!isset($_GET["id"])) {
+	if($has_session) {
+		$page_user__id = $user['id'];
+	} else {
+		finalize('/404');
 	}
-	
-	$user_page = $user_page->fetch_assoc();
 } else {
+	$page_user__id = $_GET["id"];
+}
+
+$page_user = sqli_result_bindvar("SELECT id, username, nickname, permission_level, created_at FROM users WHERE id=?", "s", $page_user__id);
+
+if($page_user->num_rows < 1) {
 	header('Location: /404');
 	exit();
 }
+
+$page_user = $page_user->fetch_assoc();
 ?>
 
 <div class="wrapper__inner">
@@ -33,8 +38,8 @@ if(isset($_GET["id"])) {
 	<div class="page-split">
 		<div class="split sidebar">
 			<div class="">
-				<a class="" href="<?=FILEPATH?>collection?user=<?=$user_page['id']?>">Collection</a>
-				<a class="" href="<?=FILEPATH?>report?user=<?=$user_page['id']?>">Report User</a>
+				<a class="" href="<?=FILEPATH?>collection?user=<?=$page_user['id']?>">Collection</a>
+				<a class="" href="<?=FILEPATH?>report?user=<?=$page_user['id']?>">Report User</a>
 			</div>
 		</div>
 		
@@ -46,15 +51,15 @@ if(isset($_GET["id"])) {
 				
 				<br />
 				
-				<span title="User since <?=utc_date_to_user($user_page['created_at'])?>.">
-					User for <?=readable_date($user_page['created_at'], false)?>.
+				<span title="User since <?=utc_date_to_user($page_user['created_at'])?>.">
+					User for <?=readable_date($page_user['created_at'], false)?>.
 				</span>
 				
 				<br />
 				
 				<span class="site-rank">
 					<?php
-					$rank = sqli_result_bindvar("SELECT title FROM permission_levels WHERE permission_level <= ? ORDER BY permission_level DESC", "s", $user_page["permission_level"]);
+					$rank = sqli_result_bindvar("SELECT title FROM permission_levels WHERE permission_level <= ? ORDER BY permission_level DESC", "s", $page_user["permission_level"]);
 					$rank = $rank->fetch_row()[0];
 					echo $rank;
 					?>

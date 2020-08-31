@@ -1,8 +1,6 @@
 <?php
 include 'server/server.php';
 
-$auth = new Authentication();
-
 $action = $_POST['action'];
 
 if(isset($_POST['return_to'])) {

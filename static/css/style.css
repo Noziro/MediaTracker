@@ -191,7 +191,7 @@ html {
 body {
 	min-width: 600px;
 	background: var(--backing-page);
-	padding: 70px 0 0;
+	padding: 0;
 	margin: 0;
 }
 
@@ -217,6 +217,9 @@ body {
 		/* calc(page height minus header minus footer allowance minus margins)
 		Should approximate the correct height */;
 	margin: 20px 0;
+}
+.wrapper--site-nav + .wrapper--content {
+	margin-top: 90px;
 }
 .wrapper--footer {
 	background: var(--backing-footer);
@@ -892,4 +895,44 @@ input[type="password"]:focus ~ .reqs--password {
 .active-sessions__cell--content {
 	font-size: 12px;
 	font-family: 'Roboto Mono', monospace;
+}
+
+/* COLLECTIONS - this CSS is awful please make it better - TODO */
+
+.collection__header {
+	display: flex;
+	padding: 0 8px;
+}
+
+.media {
+	display: flex;
+	padding: 0 8px;
+	background: var(--backing-content);
+}
+
+.collection__header-column {
+	display: flex;
+	width: 90px;
+	min-height: 32px;
+	padding: 8px;
+	border-bottom: 2px solid var(--border-light);
+	flex: 1 1 auto;
+	justify-content: space-between;
+	font-size: 14px;
+	font-weight: 600;
+}
+.media__column {
+	width: 90px;
+	padding: 8px;
+	flex: 1 1 auto;
+}
+.collection__item + .collection__item {
+	border-top: 2px solid var(--border-light);
+}
+
+.collection__header-column--name,
+.media__column--name {
+	width: 50%;
+}
+
 }

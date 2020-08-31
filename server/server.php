@@ -12,6 +12,14 @@ $db = new mysqli(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB, MYSQL_PORT);
 
 
 
+// GENERIC FUNCTIONS
+
+function to_int($s) {
+	return intval(round($s));
+}
+
+
+
 // AUTH SYSTEM
 
 class Authentication {
@@ -740,9 +748,47 @@ function finalize(string $return_to = '/') {
 }
 
 
-// OTHER FUNCTIONS
+// COLLECTIOn FUNCTIONS
 
+$valid_coll_types = ['video', 'game', 'literature', 'other'];
 
+$valid_status = ['current', 'completed', 'paused', 'dropped', 'planned', 'other'];
+
+// Input a score from a certain rating system and convert to 100-scale
+function score_normalize(int $score, int $system) {
+	switch($system) {
+		case 3:
+			return $score * 30;
+		case 5:
+			return $score * 20;
+		case 10:
+			return $score * 10;
+		case 20:
+			return $score * 5;
+		case 100:
+			return $score;
+		default:
+			return 0;
+	}
+}
+
+// Input a score from a 100-scale to a certain rating system
+function score_extrapolate(int $score, int $system) {
+	switch($system) {
+		case 3:
+			return to_int($score / 30);
+		case 5:
+			return to_int($score / 20);
+		case 10:
+			return to_int($score / 10);
+		case 20:
+			return to_int($score / 5);
+		case 100:
+			return to_int($score);
+		default:
+			return 0;
+	}
+}
 
 
 ?>

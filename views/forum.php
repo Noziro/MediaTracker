@@ -20,7 +20,7 @@ $boards = $boards->fetch_all(MYSQLI_ASSOC);
 			</div>
 			<div class="forum-boards__board-aside">
 				<?php 				
-				$threads = sqli_result_bindvar("SELECT id, user_id, title, updated_at, anonymous FROM threads WHERE board_id=? ORDER BY updated_at DESC LIMIT 2", "s", $board['id']);
+				$threads = sqli_result_bindvar("SELECT id, user_id, title, updated_at, anonymous FROM threads WHERE board_id=? AND deleted=FALSE ORDER BY updated_at DESC LIMIT 2", "s", $board['id']);
 				
 				if($threads->num_rows > 0) :
 				

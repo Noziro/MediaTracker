@@ -8,13 +8,7 @@ include 'server/server.php';
 
 // AUTH
 
-$auth = new Authentication();
-$has_session = $auth->isLoggedIn();
-
-if ($has_session) {
-	$user = $auth->getCurrentUser();
-	$permission_level = $user['permission_level'];
-} else {
+if(!$has_session)  {
 	finalize('/?error=require-sign-in'); 
 }
 
@@ -28,6 +22,23 @@ if($action === "forum-thread-create") {
 	}
 	
 	$return_to = '/forum/board?id='.$_POST['board-id'];
+
+	// Check user authority - WHY DOESNT THIS WORK FIX THIS LATER - TODO
+
+	$stmt = $db->prepare('SELECT id, permission_level FROM boards WHERE id=?');
+	$stmt->bind_param('i', $_POST['board_id']);
+	$stmt->execute();
+	$error = $stmt->error;
+	if($error !== "") {
+		finalize('/forum?error=database-failure');
+	}
+	$board = $stmt->get_result();
+	$stmt->free_result();
+	$board = $board->fetch_assoc();
+	
+	if($permission_level < $board['permission_level']) {
+		finalize('/forum?error=unauthorized');
+	}
 	
 	if(!isset($_POST['title']) || !isset($_POST['body']) || trim($_POST['body']) === '') {
 		finalize($return_to.'?error=required-field');
@@ -85,7 +96,7 @@ elseif($action === "forum-thread-reply") {
 		$stmt->bind_param('s', $_POST['thread-id']);
 		$stmt->execute();
 		$error = $stmt->error;
-		if($error !== "") {
+		if($stmt->error!== "") {
 			finalize($return_to.'?error=database-failure');
 		}
 		
@@ -112,7 +123,6 @@ elseif($action === "forum-thread-delete") {
 	$stmt->bind_param('s', $_POST['thread-id']);
 	$stmt->execute();
 	$error = $stmt->error;
-	$stmt->free_result();
 	if($error !== "") {
 		finalize($return_to.'&error=database-failure');
 	}
@@ -130,7 +140,6 @@ elseif($action === "forum-thread-undelete") {
 	$stmt->bind_param('s', $_POST['thread-id']);
 	$stmt->execute();
 	$error = $stmt->error;
-	$stmt->free_result();
 	if($error !== "") {
 		finalize($return_to.'&error=database-failure');
 	}
@@ -159,7 +168,6 @@ elseif($action === "forum-reply-edit") {
 	$stmt->bind_param('ss', $_POST['body'], $_POST['reply-id']);
 	$stmt->execute();
 	$error = $stmt->error;
-	$stmt->free_result();
 	if($error !== "") {
 		finalize($return_to.'&error=database-failure');
 	}
@@ -185,7 +193,6 @@ elseif($action === "forum-reply-delete") {
 	$stmt->bind_param('s', $_POST['reply-id']);
 	$stmt->execute();
 	$error = $stmt->error;
-	$stmt->free_result();
 	if($error !== "") {
 		finalize($return_to.'&error=database-failure');
 	}
@@ -208,7 +215,6 @@ elseif($action === "forum-reply-delete") {
 		$stmt->bind_param('s', $reply['thread_id']);
 		$stmt->execute();
 		$error = $stmt->error;
-		$stmt->free_result();
 		if($error !== "") {
 			finalize($return_to.'&error=database-failure');
 		}
@@ -235,7 +241,6 @@ elseif($action === "forum-reply-undelete") {
 	$stmt->bind_param('s', $_POST['reply-id']);
 	$stmt->execute();
 	$error = $stmt->error;
-	$stmt->free_result();
 	if($error !== "") {
 		finalize($return_to.'&error=database-failure');
 	}
@@ -258,7 +263,6 @@ elseif($action === "forum-reply-undelete") {
 		$stmt->bind_param('s', $reply['thread_id']);
 		$stmt->execute();
 		$error = $stmt->error;
-		$stmt->free_result();
 		if($error !== "") {
 			finalize($return_to.'&error=database-failure');
 		}
@@ -267,6 +271,217 @@ elseif($action === "forum-reply-undelete") {
 	finalize($return_to.'&notice=success');
 }
 
+
+
+elseif($action === "collection-create") {
+	$return_to = '/collection';
+	
+	if(!isset($_POST['name']) || !isset($_POST['type'])) {
+		finalize($return_to.'?error=required-field');
+	} else {
+		// Define variables
+		$name = trim($_POST['name']);
+
+		$type = trim($_POST['type']);
+		if(!in_array((string)$type, $valid_coll_types, True)) {
+			finalize($return_to.'?error=invalid-value');
+		}
+
+		if(!isset($_POST['private']) || !in_array((int)$_POST['private'], [0,9], True)) {
+			$private = 0;
+		} else {
+			$private = $_POST['private'];
+		}
+
+		// Add collection to DB
+		$stmt = $db->prepare('INSERT INTO collections (user_id, name, type, private) VALUES (?, ?, ?, ?)');
+		$stmt->bind_param('ssss', $user['id'], $name, $type, $private);
+		$stmt->execute();
+		$error = $stmt->error;
+		if($error !== "") {
+			finalize($return_to.'?error=database-failure');
+		}
+		
+		$stmt->close();
+		finalize($return_to.'?notice=success');
+	}
+}
+
+
+
+elseif($action === "collection-item-create") {
+	$collection__id = $_POST['collection'];
+	$return_to = '/collection?id='.$collection__id;
+
+	// Check user authority - TEST THIS WORKS - NOT CURRENTLY TESTED - TODO
+
+	$stmt = $db->prepare('SELECT id, user_id FROM collections WHERE id=?');
+	$stmt->bind_param('i', $collection__id);
+	$stmt->execute();
+	$error = $stmt->error;
+	if($error !== "") {
+		finalize($return_to.'&error=database-failure');
+	}
+	$collection = $stmt->get_result();
+	$stmt->free_result();
+	$collection = $collection->fetch_assoc();
+
+	if($user['id'] !== $collection['user_id']) {
+		finalize($return_to.'&error=unauthorized');
+	}
+	
+	if(!isset($_POST['name']) || !isset($_POST['status'])) {
+		finalize($return_to.'&error=required-field');
+	}
+
+	// Define base variables
+	$status = 'planned';
+	$name = trim($_POST['name']);
+	$score = null;
+	$episodes = null;
+	$user_started = null;
+	$user_finished = null;
+	$release_date = null;
+	$started_at = null;
+	$finished_at = null;
+	$comments = null;
+
+
+	// Validate status
+	if(array_key_exists('status', $_POST)) {
+		$status = (string)$_POST['status'];
+
+		if(!in_array($status, $valid_status, True)) {
+			finalize($return_to.'&error=invalid-value');
+		}
+	}
+
+
+	// Validate Score
+	if(array_key_exists('score', $_POST)) {
+		$score = (int)$_POST['score'];
+
+		if($score < 0 || $score > $prefs['rating_system']) {
+			finalize($return_to.'&error=invalid-value');
+		}
+
+		$score = score_normalize($score, $prefs['rating_system']);
+	}
+
+
+	// Validate Episodes
+	if(array_key_exists('episodes', $_POST)) {
+		$episodes = (int)$_POST['episodes'];
+		if($episodes < 0) {
+			finalize($return_to.'&error=invalid-value');
+		}
+	}
+
+
+	// Validate Dates
+	function validate_date($date) {
+		// strings should match this format: YYYY-MM-DD
+
+		$split = explode('-', $date);
+		$y = $split[0];
+		$m = $split[1];
+		$d = $split[2];
+
+		if(
+			// total length
+			count($split) !== 3
+			// basic length formatting
+			|| strlen((string)$y) !== 4
+			|| strlen((string)$m) !== 2
+			|| strlen((string)$d) !== 2
+			// valid ranges - min and max dates are as defined in SQL: 1000-01-01 to 9999-12-31
+			|| (int)$y < 1000
+			|| (int)$y > 9999
+			|| (int)$m < 1
+			|| (int)$m > 12
+			|| (int)$d < 1
+			|| (int)$d > 31 // yes, this will accept invalid day ranges. will fix with a different if statement when/if it becomes a problem (such as SQL refusing the date). This requires some testing.
+			) {
+				finalize($return_to.'&error=invalid-value');
+		}
+
+		// if all check passed, return
+		return $date;
+	}
+
+	if(array_key_exists('user_started_at', $_POST) && $_POST['user_started_at'] !== '') {
+		$user_started_at = validate_date($_POST['user_started_at']);
+	}
+
+	if(array_key_exists('user_finished_at', $_POST) && $_POST['user_finished_at'] !== '') {
+		$user_finished_at = validate_date($_POST['user_finished_at']);
+	}
+
+	if(array_key_exists('release_date', $_POST) && $_POST['release_date'] !== '') {
+		$release_date = validate_date($_POST['release_date']);
+	}
+
+	if(array_key_exists('started_at', $_POST) && $_POST['started_at'] !== '') {
+		$started_at = validate_date($_POST['started_at']);
+	}
+
+	if(array_key_exists('finished_at', $_POST) && $_POST['finished_at'] !== '') {
+		$finished_at = validate_date($_POST['finished_at']);
+	}
+
+
+	// Validate comments
+	if(array_key_exists('comments', $_POST)) {
+		$comments = $_POST['comments'];
+		$maxlen = pow(2,16) - 1;
+		if(strlen($comments) > $maxlen) {
+			finalize($return_to.'&error=invalid-value');
+		}
+	}
+
+
+	// Add item to DB
+	$stmt = $db->prepare('
+		INSERT INTO media (
+			user_id,
+			collection_id,
+			status,
+			name,
+			score,
+			episodes,
+			user_started_at,
+			user_finished_at,
+			release_date,
+			started_at,
+			finished_at,
+			comments
+		)
+		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+	');
+	$stmt->bind_param(
+		'ssssssssssss',
+		$user['id'],
+		$collection__id,
+		$status,
+		$name,
+		$score,
+		$episodes,
+		$user_started,
+		$user_finished,
+		$release_date,
+		$started,
+		$finished,
+		$comments
+	);
+	$stmt->execute();
+	$error = $stmt->error;
+	if($error !== "") {
+		finalize($return_to.'&error=database-failure&cause='.$error);
+	}
+	
+	$stmt->close();
+	finalize($return_to.'&notice=success');
+}
 
 
 elseif($action === "change-settings") {
@@ -290,14 +505,14 @@ elseif($action === "change-settings") {
 		// If not valid input
 		$needle = False;
 		foreach($valid_timezones as $zone_group) {
-			if(in_array($tz, $zone_group)) {
+			if(in_array($tz, $zone_group, True)) {
 				$needle = True;
 				break;
 			}
 		}
 
 		if($needle === False) {
-			finalize($return_to.'?error=disallowed-action');
+			finalize($return_to.'?error=invalid-value');
 		}
 
 		// If valid, continue
@@ -323,8 +538,8 @@ elseif($action === "change-settings") {
 		}
 
 		// If not valid input
-		if(!in_array($ratsys, [3,5,10,20,100])) {
-			finalize($return_to.'?error=disallowed-action');
+		if(!in_array((int)$ratsys, [3,5,10,20,100], True)) {
+			finalize($return_to.'?error=invalid-value');
 		}
 
 		// If valid, continue
