@@ -213,7 +213,10 @@ foreach($permission_levels_temp as $perm_pair) {
 						echo "Passwords do not match.";
 						break;
 					case 'register-invalid-name':
-						echo "Username contained invalid characters.";
+						echo "Username contains invalid characters.";
+						break;
+					case 'register-invalid-pass':
+						echo "Password does not meet requirements.";
 						break;
 					case 'logout-failure':
 						echo "Failed to log you out. Please try again or report the error to the admins.";

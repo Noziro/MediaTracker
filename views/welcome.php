@@ -1,5 +1,11 @@
 <!-- if USER SETUP == completed -->
 
+<?php
+if(!$has_session) {
+    finalize('/');
+}
+?>
+
 Welcome, <?=$user['nickname']?>!
 <br>
 <br>

@@ -49,9 +49,10 @@
 				class="login-flow__input"
 				type="password"
 				name="password"
-				maxlength="100"
+				maxlength="72"
 				spellcheck="false"
-				autocomplete="password">
+				autocomplete="password"
+				required>
 			
 			<label class="login-flow__label" for="login-password-confirm">Confirm Password</label>
 			<input
@@ -59,15 +60,15 @@
 				class="login-flow__input"
 				type="password"
 				name="password-confirm"
-				maxlength="100"
+				maxlength="72"
 				spellcheck="false"
 				autocomplete="password"
 				required>
 			<div class="reqs reqs--password">
 				<h6>Your password must...</h6>
 				<ul class="checkmark-list">
-					<li><span class="checkmark"></span> Be X or more characters long</li>
-					<li><span class="checkmark"></span> Not be more than X characters</li>
+					<li><span class="checkmark"></span> Be 6 or more characters long</li>
+					<li><span class="checkmark"></span> Not be more than 72 characters</li>
 					<li><span class="checkmark"></span> Match</li>
 				</ul>
 				<small>Please do not use the same password as another service.</small>
@@ -101,7 +102,7 @@
 				required
 				autofocus>
 				
-			<a class="login-flow__subtext" href="/forgot?q=username">Forgot username?</a>
+			<a class="login-flow__subtext" href="/login?action=forgot&q=username">Forgot username?</a>
 			
 			<label class="login-flow__label" for="login-password">Password</label>
 			<input
@@ -109,11 +110,12 @@
 				class="login-flow__input"
 				type="password"
 				name="password"
+				maxlength="72"
 				spellcheck="false"
 				autocomplete="password"
 				required>
 				
-			<a class="login-flow__subtext" href="/forgot?q=password" class="forgot-login">Forgot password?</a>
+			<a class="login-flow__subtext" href="/login?action=forgot&q=password" class="forgot-login">Forgot password?</a>
 			
 			<input type="submit" name="commit" value="Sign In" class="login-flow__button button button--medium">
 		</form>
@@ -131,7 +133,7 @@
 	
 	<a class="login-flow__only-button button button--large" href="?action=login">Login</a>
 	
-	<a class="login-flow__only-button button button--large" href="?action=register">Signup</a>
+	<a class="login-flow__only-button button button--large" href="?action=register">Register</a>
 	
 	<?php endif ?>
 </div>

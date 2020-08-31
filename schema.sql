@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 28, 2020 at 03:46 AM
+-- Generation Time: Aug 31, 2020 at 05:44 AM
 -- Server version: 10.3.16-MariaDB
 -- PHP Version: 7.3.6
 
@@ -45,7 +45,9 @@ CREATE TABLE `collections` (
   `id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   `name` varchar(50) NOT NULL,
-  `type` varchar(50) NOT NULL
+  `type` varchar(50) NOT NULL,
+  `private` tinyint(1) NOT NULL,
+  `deleted` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -58,12 +60,14 @@ CREATE TABLE `media` (
   `id` int(15) NOT NULL,
   `user_id` int(11) NOT NULL,
   `collection_id` int(11) NOT NULL,
+  `status` tinytext NOT NULL DEFAULT 'planned',
   `name` tinytext NOT NULL,
-  `score` int(3) DEFAULT NULL,
-  `episodes` smallint(6) DEFAULT NULL,
+  `score` int(3) DEFAULT 0,
+  `episodes` smallint(6) DEFAULT 0,
+  `progress` smallint(6) NOT NULL,
   `user_started_at` timestamp NULL DEFAULT NULL,
   `user_finished_at` timestamp NULL DEFAULT NULL,
-  `release_date` timestamp NULL DEFAULT NULL,
+  `release_date` date DEFAULT NULL,
   `started_at` date DEFAULT NULL,
   `finished_at` date DEFAULT NULL,
   `comments` text NOT NULL,
@@ -139,8 +143,8 @@ CREATE TABLE `thread_replies` (
 CREATE TABLE `users` (
   `id` int(11) NOT NULL,
   `username` varchar(50) NOT NULL,
-  `nickname` varchar(50) DEFAULT NULL,
-  `email` varchar(255) DEFAULT NULL,
+  `nickname` varchar(50) DEFAULT '',
+  `email` varchar(255) DEFAULT '',
   `password` varchar(255) NOT NULL,
   `permission_level` int(2) NOT NULL DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
@@ -173,13 +177,15 @@ ALTER TABLE `boards`
 -- Indexes for table `collections`
 --
 ALTER TABLE `collections`
-  ADD UNIQUE KEY `id` (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `media`
 --
 ALTER TABLE `media`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `collection_id` (`collection_id`);
 
 --
 -- Indexes for table `permission_levels`

@@ -211,15 +211,15 @@ body {
 .wrapper--site-nav.js-fixed {
 	height: 52px;
 }
+.wrapper--site-nav + .wrapper {
+	margin-top: 70px;
+}
 .wrapper--content {
 	min-height:
 		calc(100vh - 70px - 40px - 40px)
 		/* calc(page height minus header minus footer allowance minus margins)
 		Should approximate the correct height */;
-	margin: 20px 0;
-}
-.wrapper--site-nav + .wrapper--content {
-	margin-top: 90px;
+	padding: 20px 0;
 }
 .wrapper--footer {
 	background: var(--backing-footer);
@@ -470,7 +470,6 @@ body {
 }
 
 .page-actions__pagination {
-	display: inline-block;
 	padding: 4px 8px;
 	background: var(--backing-content);
 	border-radius: var(--rounding);
@@ -933,6 +932,4 @@ input[type="password"]:focus ~ .reqs--password {
 .collection__header-column--name,
 .media__column--name {
 	width: 50%;
-}
-
 }

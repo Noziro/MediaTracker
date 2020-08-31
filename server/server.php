@@ -68,7 +68,7 @@ class Authentication {
 	}
 	
 	// Function called by user attempting register. Returns BOOL for success/fail.
-	public function register(string $user, string $email, string $pass) {
+	public function register(string $user, string $pass, string $email = '') {
 		// Check for existing user
 		$stmt = $this->db->prepare("SELECT id FROM users WHERE username=?");
 		$normalized_user = strtolower($user);
@@ -653,7 +653,7 @@ $valid_timezones = [
 
 // Get user timezone
 function utc_date_to_user($utc) {
-	$prefs = $GLOBALS['prefs'];
+	global $prefs;
 	$timezone_utc = new DateTimeZone('UTC');
 	$timezone = new DateTimeZone($prefs['timezone']);
 	$date = new DateTime($utc, $timezone_utc);
@@ -702,7 +702,7 @@ function readable_date($date, $suffix = true, $verbose = false) {
 
 // Passes database an SQL statement and returns result.
 function sqli_result(string $sql) {
-	$db = $GLOBALS['db'];
+	global $db;
 	
 	$q = $db->prepare($sql);
 	$q->execute();
@@ -713,7 +713,7 @@ function sqli_result(string $sql) {
 
 // Passes database an SQL statement with sanitized variable and returns result.
 function sqli_result_bindvar(string $sql, string $insert_type, string $insert_variable) {
-	$db = $GLOBALS['db'];
+	global $db;
 	
 	$q = $db->prepare($sql);
 	$q->bind_param($insert_type, $insert_variable);
@@ -725,8 +725,8 @@ function sqli_result_bindvar(string $sql, string $insert_type, string $insert_va
 
 // Executes an SQL statement. Returns TRUE for success and STRING for error.
 function sqli_execute(string $sql, string $insert_type, string $insert_variable) {
-	$db = $GLOBALS['db'];
-	
+	global $db;
+
 	$q = $db->prepare($sql);
 	$q->bind_param($insert_type, $insert_variable);
 	$q->execute();
@@ -740,9 +740,9 @@ function sqli_execute(string $sql, string $insert_type, string $insert_variable)
 
 // For use on user POST pages. Closes relevant pieces and redirects user to a page.
 function finalize(string $return_to = '/') {
-	$db = $GLOBALS['db'];
-	
+	global $db;
 	$db->close();
+
 	header('Location: '.$return_to);
 	exit();
 }

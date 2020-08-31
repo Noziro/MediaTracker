@@ -30,7 +30,7 @@
 
 
 
-	<?php if($user['id'] === $page_user['id']) : ?>
+	<?php if($has_session && $user['id'] === $page_user['id']) : ?>
 	<div class="page-actions">
 		<div class="page-actions__button-list">
 			<button id="collection-edit" class="page-actions__action button button--disabled" type="button" disabled>
@@ -43,7 +43,6 @@
 		</div>
 	</div>
 	<?php endif ?>
-
 
 
 	<div class="collection">
@@ -106,6 +105,7 @@
 
 
 	<!-- TODO: class names & id's & label "for"s -->
+	<?php if($has_session && $user['id'] === $page_user['id']) : ?>
 	<div id="js-hidetoggle" class="collection-form">
 		<form action="/interface" method="POST">
 			<input type="hidden" name="action" value="collection-item-create">
@@ -148,6 +148,7 @@
 			<input class="button" type="submit" value="Create">
 		</form>
 	</div>
+	<?php endif; ?>
 
 
 

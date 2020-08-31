@@ -19,6 +19,12 @@ if(isset($_POST['return_to'])) {
 }
 
 if($action === "login") {
+	if(	   !array_key_exists('username', $_POST)
+		|| !array_key_exists('password', $_POST)
+	) {
+		finalize('/login?action=register&error=required-field');
+	}
+
 	$login = $auth->login($_POST['username'], $_POST['password']);
 	
 	if ($login) {
@@ -30,8 +36,7 @@ if($action === "login") {
 
 elseif($action === "register") {
 	function valid_name(string $str) {
-		$okay = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_";
-		$okay = str_split($okay);
+		$okay = str_split("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_");
 		
 		foreach(str_split($str) as $c) {
 			if(!in_array($c, $okay)) {
@@ -41,17 +46,40 @@ elseif($action === "register") {
 		
 		return true;
 	}
+
+	// Set email if not already set
+	if(!array_key_exists('email', $_POST)) {
+		$_POST['email'] = '';
+	}
+
+	// Check all required fields filled
+	if(	   !array_key_exists('username', $_POST)
+		|| !array_key_exists('password', $_POST)
+		|| !array_key_exists('password-confirm', $_POST)
+		|| strlen($_POST['username']) == 0
+		|| strlen($_POST['password']) == 0
+		|| strlen($_POST['password-confirm']) == 0
+	) {
+		finalize('/login?action=login&error=required-field');
+	}
 	
-	if(strlen($_POST['username']) == 0 || strlen($_POST['password']) == 0 || strlen($_POST['password-confirm']) == 0) {
-		finalize('/login?action=register&error=required-field');
-	} elseif($_POST['password'] != $_POST['password-confirm']) {
+	// Confirm user password
+	elseif(strlen($_POST['password']) < 6 || strlen($_POST['password']) > 72) {
+		finalize('/login?action=register&error=register-invalid-pass');
+	}
+
+	elseif($_POST['password'] != $_POST['password-confirm']) {
 		finalize('/login?action=register&error=register-match');
-	} elseif(!valid_name($_POST["username"])) {
-		// Validate username
+	}
+
+	// Validate username
+	elseif(!valid_name($_POST["username"])) {
 		finalize('/login?action=register&error=register-invalid-name');
-	} else {
-		// Carry on if all fields good
-		$register = $auth->register($_POST['username'], $_POST['email'], $_POST['password']);
+	}
+
+	// Carry on if all fields good
+	else {
+		$register = $auth->register($_POST['username'], $_POST['password'], $_POST['email']);
 		
 		if (!$register) {
 			finalize('/login?action=register&error=register-exists');
