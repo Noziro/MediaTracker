@@ -162,27 +162,78 @@ foreach($permission_levels_temp as $perm_pair) {
 		</nav>
 		<?php endif; ?>
 		
-		<?php if(isset($_GET['notice'])) : ?>
+		<?php
+		if(isset($_SESSION['notice'])) :
+		$msg = $_SESSION['notice'];
+		//foreach($_SESSION['notice'] as $msg) :
+		?>
 		
-		<div class="wrapper wrapper--notice">
+		<div class="wrapper <?php
+			if($msg['type'] === 'error') {
+				echo "wrapper--notice-error";
+			} else {
+				echo "wrapper--notice";
+			}
+		?>">
 			<div class="wrapper__inner notice">
 				<?php
-				switch($_GET['notice']) {
-					case 'login-success':
+				switch($msg['case']) {
+					// Notices
+					case 'login_success':
 						echo "Successfully logged into your account. Welcome back!";
 						break;
-					case 'register-success':
+					case 'register_success':
 						echo "Successfully created your account. Have fun!";
 						break;
-					case 'logout-success':
+					case 'logout_success':
 						echo "Successfully logged out of your account. Thanks for visiting.";
 						break;
 					case 'success':
 						echo "Action performed successfully.";
 						break;
-					case 'no-change-detected':
+					case 'no_change_detected':
 						echo "No changes were applied, as none were detected.";
 						break;
+					
+					// Errors
+					case 'required_field':
+						echo "Please fill out the required fields.";
+						break;
+					case 'login_bad':
+						echo "Incorrect login credentials. Please try again.";
+						break;
+					case 'register_exists':
+						echo "User already exists.";
+						break;
+					case 'register_match':
+						echo "Passwords do not match.";
+						break;
+					case 'register_invalid_name':
+						echo "Username contains invalid characters.";
+						break;
+					case 'register_invalid_pass':
+						echo "Password does not meet requirements.";
+						break;
+					case 'logout_failure':
+						echo "Failed to log you out. Please try again or report the error to the admins.";
+						break;
+					case 'require_sign_in':
+						echo "Please sign in before attempting this action.";
+						break;
+					case 'database_failure':
+						echo "An error occured in the server database while performing your request.";
+						break;
+					case 'disallowed_action':
+						echo "Attempted to perform an invalid or unrecognized action.";
+						break;
+					case 'unauthorized':
+						echo "Attempted operation outside of user authority.";
+						break;
+					case 'invalid_value':
+						echo "A value you entered was invalid or out of expected bounds. Please try again.";
+						break;
+
+					// Default
 					default:
 						echo "This was meant to say something, but it doesn't!";
 						break;
@@ -191,60 +242,10 @@ foreach($permission_levels_temp as $perm_pair) {
 			</div>
 		</div>
 		
-		<?php endif ?>
-		
-		<?php if(isset($_GET['error'])) : ?>
-		
-		<div class="wrapper wrapper--notice-error">
-			<div class="wrapper__inner notice">
-				
-				<?php
-				switch($_GET['error']) {
-					case 'required-field':
-						echo "Please fill out the required fields.";
-						break;
-					case 'login-bad':
-						echo "Incorrect login credentials. Please try again.";
-						break;
-					case 'register-exists':
-						echo "User already exists.";
-						break;
-					case 'register-match':
-						echo "Passwords do not match.";
-						break;
-					case 'register-invalid-name':
-						echo "Username contains invalid characters.";
-						break;
-					case 'register-invalid-pass':
-						echo "Password does not meet requirements.";
-						break;
-					case 'logout-failure':
-						echo "Failed to log you out. Please try again or report the error to the admins.";
-						break;
-					case 'require-sign-in':
-						echo "Please sign in before attempting this action.";
-						break;
-					case 'database-failure':
-						echo "An error occured in the server database while performing your request.";
-						break;
-					case 'disallowed-action':
-						echo "Attempted to perform an invalid or unrecognized action.";
-						break;
-					case 'unauthorized':
-						echo "Attempted operation outside of user authority.";
-						break;
-					case 'invalid-value':
-						echo "A value you entered was invalid or out of expected bounds. Please try again.";
-						break;
-					default:
-						echo "Encountered an unknown error.";
-						break;
-				}
-				?>
-			</div>
-		</div>
-		
-		<?php endif ?>
+		<?php
+		//endforeach;
+		endif;
+		?>
 		
 		<main id="content" class="wrapper wrapper--content">
 			<?php 
@@ -306,6 +307,10 @@ foreach($permission_levels_temp as $perm_pair) {
 
 <?php
 
+// Clear any temporary messages
+$_SESSION['notice'] = null;
+
+// Close DB
 $db->close();
 
 ?>

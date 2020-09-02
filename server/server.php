@@ -10,6 +10,8 @@ include("keyring.php");
 
 $db = new mysqli(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB, MYSQL_PORT);
 
+session_start();
+
 
 
 // GENERIC FUNCTIONS
@@ -745,22 +747,18 @@ function sqli_execute(string $sql, string $insert_type, string $insert_variable)
 }
 
 // For use on user POST pages. Closes relevant pieces and redirects user to a page.
-function finalize(string $page = '/', array $params = []) {
+function finalize(string $page = '/', string $notice_case = null, string $notice_type = 'generic') {
 	global $db;
 	$db->close();
 
-	if(count($params) > 0) {
-		if(strpos($page, '?') === True) {
-			$params_str = '&';
-		} else {
-			$params_str = '?';
-		}
-		$params_str .= implode('&', $params);
-	} else {
-		$params_str = '';
+	if(isset($notice_case)) {
+		$_SESSION['notice'] = [
+			'type' => $notice_type,
+			'case' => $notice_case
+		];
 	}
-
-	header('Location: '.$page.$params_str);
+	
+	header('Location: '.$page);
 	exit();
 }
 
