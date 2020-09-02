@@ -40,3 +40,31 @@ var gdpr = document.getElementById('gdpr-accept')
 if (gdpr) {
 	gdpr.onclick = acceptGDPR;
 }
+
+// Toggle Modals
+// Activated via buttons using onclick=""
+
+function toggleModal(id, mode = null) {
+	var modal = document.getElementById(id);
+
+	if(mode === null) {
+		modal.classList.toggle('modal--hidden');
+	} else if(mode === true) {
+		modal.classList.remove('modal--hidden');
+	} else if(mode === false) {
+		modal.classList.add('modal--hidden');
+	}
+}
+
+// Autofill Forms
+
+var fills = document.getElementsByClassName('js-autofill');
+
+for(var i = 0; i < fills.length; i++) {
+	var fillEle = fills.item(i),
+		fillValue = fillEle.getAttribute('data-autofill');
+
+	if(fillValue !== null) {
+		fillEle.value = fillValue;
+	}
+}

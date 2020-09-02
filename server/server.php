@@ -1,5 +1,7 @@
 <?php
 
+$pl_timer_start = hrtime(True);
+
 // GLOBAL VARIABLES
 
 date_default_timezone_set('UTC');
@@ -191,7 +193,7 @@ class Authentication {
 $auth = new Authentication();
 $has_session = $auth->isLoggedIn();
 
-if ($has_session) {
+if($has_session) {
 	$user = $auth->getCurrentUser();
 	$prefs = $auth->getCurrentUserPrefs();
 	$permission_level = $user['permission_level'];
@@ -200,6 +202,19 @@ if ($has_session) {
 	$prefs = [
 		'timezone' => 'UTC'
 	];
+}
+
+// ACCESS LEVEL
+
+$permission_levels_temp = sqli_result('SELECT title, permission_level FROM permission_levels ORDER BY permission_level ASC');
+$permission_levels_temp = $permission_levels_temp->fetch_all(MYSQLI_ASSOC);
+$permission_levels = [];
+
+foreach($permission_levels_temp as $perm_pair) {
+	$title = $perm_pair['title'];
+	$level = $perm_pair['permission_level'];
+	
+	$permission_levels[$title] = $level;
 }
 
 
@@ -747,14 +762,15 @@ function sqli_execute(string $sql, string $insert_type, string $insert_variable)
 }
 
 // For use on user POST pages. Closes relevant pieces and redirects user to a page.
-function finalize(string $page = '/', string $notice_case = null, string $notice_type = 'generic') {
+function finalize(string $page = '/', string $notice_case = null, string $notice_type = 'generic', string $details = '') {
 	global $db;
 	$db->close();
 
 	if(isset($notice_case)) {
 		$_SESSION['notice'] = [
 			'type' => $notice_type,
-			'case' => $notice_case
+			'case' => $notice_case,
+			'details' => $details
 		];
 	}
 	

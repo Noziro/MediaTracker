@@ -51,7 +51,7 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 	
 	<?php if($has_session) : ?>
 	<div class="page-actions">
-		<button id="js-newreply" class="page-actions__action button" type="button">
+		<button class="page-actions__action button" type="button" onclick="toggleModal('modal--reply-create', true)">
 			New Reply
 		</button>
 		
@@ -90,8 +90,6 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 		<?php endif; endif ?>
 	</div>
 	<?php endif ?>
-	
-	
 	
 	
 	
@@ -196,9 +194,7 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 	</div>
 	
 	
-	
 	<?php else : ?>
-	
 	
 	
 	<div id="reply-<?=$reply['id']?>" class="thread-reply thread-reply--deleted">
@@ -230,16 +226,27 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 	</div>
 	
 	<?php endif; endforeach ?>
+
+
 	
-	<div id="js-hidetoggle" class="forum-submit">
-		<form action="/interface" method="POST">
-			<input type="hidden" name="action" value="forum-thread-reply">
-			<input type="hidden" name="thread-id" value="<?=$thread['id']?>">
-			
-			<label class="forum-submit__label" for="reply-body">Body</label>
-			<textarea id="reply-body" class="forum-submit__body-text" name="body" required></textarea>
-			
-			<input class="forum-submit__button button" type="submit" value="Reply">
-		</form>
+	<?php if($has_session) : ?>
+	<div id="modal--reply-create" class="modal modal--hidden" role="dialog" aria-modal="true">
+		<button class="modal__background" onclick="toggleModal('modal--reply-create', false)"></button>
+		<div class="modal__inner">
+			<a class="modal__close" onclick="toggleModal('modal--reply-create', false)">Close</a>
+			<h3 class="modal__header">
+				New Reply
+			</h3>
+			<form action="/interface" method="POST">
+				<input type="hidden" name="action" value="forum-thread-reply">
+				<input type="hidden" name="thread-id" value="<?=$thread['id']?>">
+				
+				<label class="label">Body</label>
+				<textarea class="text-input text-input--resizable-v" name="body" required></textarea>
+				
+				<input class="button button--spaced" type="submit" value="Reply">
+			</form>
+		</div>
 	</div>
+	<?php endif; ?>
 </div>

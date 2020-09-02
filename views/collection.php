@@ -2,10 +2,13 @@
 	<?php
 	if(isset($_GET['id'])) :
 		$collection__id = $_GET['id'];
-		$collection = sqli_result_bindvar('SELECT id, user_id, name, type FROM collections WHERE id=?', 's', $collection__id);
+		$collection = sqli_result_bindvar('SELECT id, user_id, name, type, display_score, display_progress, display_user_started, display_user_finished, display_days, private FROM collections WHERE id=?', 's', $collection__id);
+		if($collection->num_rows < 1) {
+			finalize('/404');
+		}
 		$collection = $collection->fetch_assoc();
 
-		$items = sqli_result_bindvar('SELECT id, status, name, score, episodes, user_started_at, user_finished_at, release_date, started_at, finished_at, comments FROM media WHERE collection_id=? ORDER BY name ASC', 's', $collection['id']);
+		$items = sqli_result_bindvar('SELECT id, status, name, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments FROM media WHERE collection_id=? AND deleted=0 ORDER BY name ASC', 's', $collection['id']);
 		$items_count = $items->num_rows;
 		$items = $items->fetch_all(MYSQLI_ASSOC);
 
@@ -14,6 +17,14 @@
 		
 		$page_user_prefs = sqli_result_bindvar('SELECT rating_system FROM user_preferences WHERE user_id=?', 's', $page_user['id']);
 		$page_user_prefs = $page_user_prefs->fetch_assoc();
+
+		$columns = [
+			'display_score' => 'Score',
+			'display_progress' => 'Progress',
+			'display_user_started' => 'Started',
+			'display_user_finished' => 'Finished',
+			'display_days' => 'Days'
+		];
 	?>
 
 
@@ -33,128 +44,251 @@
 	<?php if($has_session && $user['id'] === $page_user['id']) : ?>
 	<div class="page-actions">
 		<div class="page-actions__button-list">
-			<button id="collection-edit" class="page-actions__action button button--disabled" type="button" disabled>
+			<button class="page-actions__action button" type="button" onclick="toggleModal('modal--collection-edit', true)">
 				Edit Collection Details
 			</button>
 			
-			<button id="collection-item-add" class="page-actions__action button button" type="button">
-				Add New Items
+			<button class="page-actions__action button" type="button" onclick="toggleModal('modal--item-add', true)">
+				Add New Item
 			</button>
 		</div>
 	</div>
 	<?php endif ?>
 
 
-	<div class="collection">
-		<div class="collection__header">
-			<div class="collection__header-column collection__header-column--name">
-				Name
-			</div>
+
+	<?php
+	if($items_count < 1) :
+	?>
+
+	<div class="dialog-box dialog-box--fullsize">No items yet. Add one?</div>
+
+	<?php
+	else :
+	?>
+
+	<table class="table">
+		<thead>
+			<tr class="table__row">
+				<th class="table__heading table__heading--extra-wide">Name</th>
+				<?php if($collection['display_score'] === 1) : ?>
+				<th class="table__heading">Score<br /><span class="table__subheading">of <?=$page_user_prefs['rating_system']?></span></th>
+				<?php endif; if($collection['display_progress'] === 1) : ?>
+				<th class="table__heading">Progress</th>
+				<?php endif; if($collection['display_user_started'] === 1) : ?>
+				<th class="table__heading">Started</th>
+				<?php endif; if($collection['display_user_finished'] === 1) : ?>
+				<th class="table__heading">Finished</th>
+				<?php endif; if($collection['display_days'] === 1) : ?>
+				<th class="table__heading">Days</th>
+				<?php endif; ?>
+				<th class="table__heading">Status</th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php foreach($items as $item) : ?>
+
+			<tr id="item-<?=$item['id']?>" class="table__row">
+				<td class="table__cell">
+					<a class="js-item-edit" href="item/edit?id=<?=$item['id']?>&frame=1" onclick="editItem(<?=$item['id']?>)">
+						<?=$item['name']?>
+					</a>
+				</td>
+
+				<?php if($collection['display_score'] === 1) : ?>
+
+				<td class="table__cell">
+					<?=score_extrapolate($item['score'], $page_user_prefs['rating_system'])?>
+				</td>
+				
+				<?php endif; if($collection['display_progress'] === 1) : ?>
+
+				<td class="table__cell">
+					<?php
+					$w = $item['progress'];
+					$t = $item['episodes'];
+					$r = $item['rewatched'];
+
+					if($w === $t) {
+						echo $t;
+					} else {
+						echo $w.' / '.$t;
+					}
+
+					if($r > 0) {
+						echo '<br />Rewatched: '.$r / $t.'x ('.$r.'eps)';
+					}
+					?>
+				</td>
+
+				<?php endif; if($collection['display_user_started'] === 1) : ?>
+				
+				<td class="table__cell">
+					<?=$item['user_started_at']?>
+				</td>
+
+				<?php endif; if($collection['display_user_finished'] === 1) : ?>
+				
+				<td class="table__cell">
+					<?=$item['user_finished_at']?>
+				</td>
+
+				<?php endif; if($collection['display_days'] === 1) : ?>
+				
+				<td class="table__cell">
+					<?php
+					$s = $item['user_started_at'];
+					$e = $item['user_finished_at'];
+
+					if(isset($s) && isset($e)) {
+						echo date_diff(date_create($s),date_create($e))->format('%a');
+					}
+					?>
+				</td>
+
+				<?php endif; ?>
+
+				<td class="table__cell">
+					<?=$item['status']?>
+				</td>
+			</tr>
+
+			<!--<?php if(isset($item['comments'])) : ?>
 			
-			<div class="collection__header-column">
-				Score / <?=$page_user_prefs['rating_system']?>
-			</div>
-			
-			<div class="collection__header-column">
-				Episodes
-			</div>
-			
-			<div class="collection__header-column">
-				Status
-			</div>
-			
-			<div class="collection__header-column collection__header-column--comments">
-				Comments
+			<tr class="table__row">
+				<td class="table__cell" colspan="7">
+					<?=format_user_text($item['comments'])?>
+				</td>
+			</tr>
+
+			<?php endif; ?>-->
+
+			<?php endforeach; ?>
+		</tbody>
+	</table>
+
+	<?php endif; ?>
+
+
+
+	<?php if($has_session && $user['id'] === $page_user['id']) : ?>
+	<div id="modal--collection-edit" class="modal modal--hidden" role="dialog" aria-modal="true">
+		<button class="modal__background" onclick="toggleModal('modal--collection-edit', false)"></button>
+		<div class="modal__inner">
+			<a class="modal__close" onclick="toggleModal('modal--collection-edit', false)">Close</a>
+			<h3 class="modal__header">
+				Edit Collection
+			</h3>
+			<form action="/interface" method="POST">
+				<input type="hidden" name="action" value="collection-edit">
+				<input type="hidden" name="collection_id" value="<?=$collection['id']?>">
+				
+				<label class="label">Name</label>
+				<input class="input js-autofill" type="text" name="name" data-autofill="<?=$collection['name']?>" required>
+				
+				<label class="label">Type</label>
+				<select class="select" name="type">
+					<?php foreach($valid_coll_types as $type) : ?>
+					<option <?php if($type === $collection['type']) { echo "selected"; } ?>><?=$type?></option>
+					<?php endforeach; ?>
+				</select>
+
+				<label class="label">Privacy</label>
+				<select class="select" name="private">
+					<option value="0" <?php if($collection['private'] === 0) { echo "selected"; } ?>>Public</option>
+					<option value="9" <?php if($collection['private'] === 9) { echo "selected"; } ?>>Only Me</option>
+				</select>
+
+				<label class="label">Display Columns</label>
+				<div class="checkbox-group">
+					<?php
+					foreach($columns as $col => $label) :
+					?>
+					<label class="checkbox-group__item">
+						<input type="hidden" name="<?=$col?>" value="0">
+						<input class="checkbox" type="checkbox" name="<?=$col?>" value="1" <?php if($collection[$col] === 1) { echo "checked"; } ?>>
+						<?=$label?>
+					</label>
+					<?php endforeach; ?>
+				</div>
+
+				<input class="button button--spaced" type="submit" value="Edit">
+			</form>
+		</div>
+	</div>
+
+
+	
+	<div id="modal--item-add" class="modal modal--hidden" role="dialog" aria-modal="true">
+		<button class="modal__background" onclick="toggleModal('modal--item-add', false)"></button>
+		<div class="modal__inner">
+			<a class="modal__close" onclick="toggleModal('modal--item-add', false)">Close</a>
+			<h3 class="modal__header">
+				Add Item
+			</h3>
+			<form action="/interface" method="POST">
+				<input type="hidden" name="action" value="collection-item-create">
+				<input type="hidden" name="collection" value="<?=$collection['id']?>">
+				
+				<label class="label">Name <span class="label__desc">(required)</span></label>
+				<input class="input input--wide" type="text" name="name" required>
+				
+				<label class="label">Status</label>
+				<select class="select" type="text" name="status" required>
+					<?php foreach($valid_status as $status) : ?>
+					<option <?php if($status === 'planned') { echo "selected"; }?>><?=$status?></option>
+					<?php endforeach; ?>
+				</select>
+
+				<label class="label">Rating <span class="label__desc">(out of <?=$prefs['rating_system']?>)</span></label>
+				<input class="input input--thin" name="score" type="number" min="0" max="<?=$prefs['rating_system']?>">
+
+				<label class="label">Completed Episodes</label>
+				<input class="input input--thin" name="progress" type="number" min="0">
+
+				<label class="label">Total Episodes</label>
+				<input class="input input--thin" name="episodes" type="number" min="0">
+
+				<label class="label">Rewatched Episodes <span class="label__desc">(if you rewatched a 25 episode show, input 25)</span></label>
+				<input class="input input--thin" name="rewatched" type="number" min="0">
+
+				<label class="label">User Started At</label>
+				<input class="input input--auto" name="user_started_at" type="date">
+
+				<label class="label">User Finished At</label>
+				<input class="input input--auto" name="user_finished_at" type="date">
+
+				<!-- <label class="label">Media Release Date</label>
+				<input class="input input--auto" name="release_date" type="date"> -->
+
+				<label class="label">Media Started At</label>
+				<input class="input input--auto" name="started_at" type="date">
+
+				<label class="label">Media Finished At</label>
+				<input class="input input--auto" name="finished_at" type="date">
+
+				<label class="label">Comments</label>
+				<textarea class="text-input" name="comments"></textarea>
+
+				<input class="button button--spaced" type="submit" value="Add">
+			</form>
+
+			<div>
+				Not implemented yet - search for other users' items to add
 			</div>
 		</div>
-		
-		<?php
-		if($items_count < 1) :
-		?>
-
-		<div>No items yet. Add one?</div>
-
-		<?php
-		else :
-			foreach($items as $item) :
-		?>
-
-		<div class="collection__item media">
-			<div class="media__column media__column--name">
-				<!-- TODO: have this toggle an overlay modal -->
-				<a href="item?id=<?=$item['id']?>&frame=1">
-					<?=$item['name']?>
-				</a>
-			</div>
-
-			<div class="media__column">
-				<?=score_extrapolate($item['score'], $page_user_prefs['rating_system'])?>
-			</div>
-
-			<div class="media__column">
-				<?=$item['episodes']?>
-			</div>
-
-			<div class="media__column">
-				<?=$item['status']?>
-			</div>
-
-			<div class="media__column media__column--comments">
-				<?=format_user_text($item['comments'])?>
-			</div>
-		</div>
-
-		<?php
-			endforeach;
-		endif;
-		?>
 	</div>
 
 
 
-	<!-- TODO: class names & id's & label "for"s -->
-	<?php if($has_session && $user['id'] === $page_user['id']) : ?>
-	<div id="js-hidetoggle" class="collection-form">
-		<form action="/interface" method="POST">
-			<input type="hidden" name="action" value="collection-item-create">
-			<input type="hidden" name="collection" value="<?=$collection['id']?>">
-			
-			<label class="label">Name <small>required</small></label>
-			<input type="text" name="name" required>
-			
-			<label class="label">Status</label>
-			<select type="text" name="status" required>
-				<?php foreach($valid_status as $status) : ?>
-				<option <?php if($status === 'planned') { echo "selected"; }?>><?=$status?></option>
-				<?php endforeach; ?>
-			</select>
-
-			<label class="label">Rating (#/<?=$prefs['rating_system']?>)</label>
-			<input name="score" type="number" min="0" max="<?=$prefs['rating_system']?>">
-
-			<label class="label">Episodes</label>
-			<input name="episodes" type="number" min="0">
-
-			<label class="label">User Started At</label>
-			<input name="user_started_at" type="date">
-
-			<label class="label">User Finished At</label>
-			<input name="user_finished_at" type="date">
-
-			<label class="label">Media Release Date</label>
-			<input name="release_date" type="date">
-
-			<label class="label">Media Started At</label>
-			<input name="started_at" type="date">
-
-			<label class="label">Media Finished At</label>
-			<input name="finished_at" type="date">
-
-			<label class="label">Comments</label>
-			<textarea name="comments"></textarea>
-
-			<input class="button" type="submit" value="Create">
-		</form>
+	<div id="modal--item-edit" class="modal modal--hidden" role="dialog" aria-modal="true">
+		<button class="modal__background" onclick="toggleModal('modal--item-edit', false)"></button>
+		<div class="modal__inner modal__inner--wide">
+			<a class="modal__close" onclick="toggleModal('modal--item-edit', false)">Close</a>
+			<h3 class="modal__header">
+				Edit Item
+			</h3>
+		</div>
 	</div>
 	<?php endif; ?>
 
@@ -187,7 +321,7 @@
 			<span>Collection</span>
 		</div>
 		
-		<h2 class="content-header__title"><?=$user['nickname']?>'s Collection</h2>
+		<h2 class="content-header__title"><?=$page_user['nickname']?>'s Collection</h2>
 	</div>
 
 
@@ -197,13 +331,17 @@
 		<div class="page-actions__button-list">
 			<?php if($user['id'] === $page_user['id']) : ?>
 
-			<button id="collection-create" class="page-actions__action button" type="button">
+			<button class="page-actions__action button" type="button" onclick="toggleModal('modal--collection-create', true)">
 				New Collection
+			</button>
+
+			<button class="page-actions__action button button--disabled" type="button" disabled>
+				Delete Collections
 			</button>
 
 			<?php else : ?>
 
-			<button id="" class="page-actions__action button button--disabled" type="button" disabled>
+			<button class="page-actions__action button button--disabled" type="button" disabled>
 				Compare Collections
 			</button>
 
@@ -214,64 +352,88 @@
 
 
 
-	<div class="collection-group">
-		<?php
-		if($collections_count < 1) :
-		?>
+	<?php
+	if($collections_count < 1) :
+	?>
 
-		<div>No collections yet. Create one?</div>
+	<div class="dialog-box dialog-box--fullsize">No collections yet. Create one?</div>
 
-		<?php
-		else :
-			foreach($collections as $collection) :
-		?>
+	<?php
+	else :
+	?>
 
-		<div class="collection-group__row">
-			<a class="collection-group__name" href="?id=<?=$collection['id']?>">
-				<?=$collection['name']?>
-			</a>
-			<span class="collection-group__type">
-				<?=$collection['type']?>
-			</span>
-			<?php if($collection['private'] === 9) : ?>
-			<b>
-				Private
-			</b>
-			<?php endif; ?>
+	<table class="table">
+		<thead>
+			<tr class="table__row">
+				<th class="table__heading">Name</th>
+				<th class="table__heading">Type</th>
+				<th class="table__heading">Privacy</th>
+			</tr>
+		</thead>
+		<tbody>
+			<?php foreach($collections as $collection) : ?>
+
+			<tr class="table__row">
+				<td class="table__cell">
+					<a class="collection-group__name" href="?id=<?=$collection['id']?>">
+						<?=$collection['name']?>
+					</a>
+				</td>
+				<td class="table__cell">
+					<?=$collection['type']?>
+				</td>
+				<td class="table__cell">
+					<?php if($collection['private'] === 9) : ?>
+					Private
+					<?php else : ?>
+					Public
+					<?php endif; ?>
+				</td>
+			</tr>
+
+			<?php endforeach; ?>
+		</tbody>
+	</table>
+
+	<?php endif; ?>
+
+
+
+	<?php if($has_session && $user['id'] === $page_user['id']) : ?>
+
+	<div id="modal--collection-create" class="modal modal--hidden" role="dialog" aria-modal="true">
+		<button class="modal__background" onclick="toggleModal('modal--collection-create', false)"></button>
+		<div class="modal__inner">
+			<a class="modal__close" onclick="toggleModal('modal--collection-create', false)">Close</a>
+			<h3 class="modal__header">
+				Create Collection
+			</h3>
+
+			<form action="/interface" method="POST">
+				<input type="hidden" name="action" value="collection-create">
+				
+				<label class="label" for="collection-name">Name</label>
+				<input id="collection-name" class="input" type="text" name="name" required>
+				
+				<label class="label" for="collection-type">Type</label>
+				<select id="collection-type" class="select" name="type">
+					<?php foreach($valid_coll_types as $type) : ?>
+					<option><?=$type?></option>
+					<?php endforeach; ?>
+				</select>
+
+				<label class="label" for="collection-privacy">Privacy</label>
+				<select id="collection-privacy" class="select" name="private">
+					<option value="0">Public</option>
+					<option value="9">Only Me</option>
+				</select>
+
+				<input class="button button--spaced" type="submit" value="Create">
+			</form>
 		</div>
-
-		<?php
-			endforeach;
-		endif;
-		?>
 	</div>
 
-
-
-	<!-- TODO: class names -->
-	<div id="js-hidetoggle" class="forum-submit">
-		<form action="/interface" method="POST">
-			<input type="hidden" name="action" value="collection-create">
-			
-			<label class="label" for="collection-name">Name</label>
-			<input id="collection-name" class="forum-submit__title" type="text" name="name" required>
-			
-			<label class="label" for="collection-type">Type</label>
-			<select id="collection-type" name="type">
-				<?php foreach($valid_coll_types as $type) : ?>
-				<option><?=$type?></option>
-				<?php endforeach; ?>
-			</select>
-
-			<label class="label" for="collection-privacy">Privacy</label>
-			<select id="collection-privacy" name="private">
-				<option value="0">Public</option>
-				<option value="9">Only Me</option>
-			</select>
-
-			<input class="forum-submit__button button" type="submit" value="Create">
-		</form>
-	</div>
+	<?php endif; ?>
 
 
 

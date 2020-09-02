@@ -336,14 +336,19 @@ elseif($action === "collection-create") {
 
 
 
-elseif($action === "collection-item-create") {
-	$collection__id = $_POST['collection'];
+elseif($action === "collection-edit") {
+	$rpage = '/collection';
+	
+	if(!isset($_POST['collection_id']) || !isset($_POST['name']) || !isset($_POST['type'])) {
+		finalize($rpage, 'required_field', 'error');
+	}
+	
+	$collection__id = $_POST['collection_id'];
 	$rpage = '/collection?id='.$collection__id;
-
-	// Check user authority - TEST THIS WORKS - NOT CURRENTLY TESTED - TODO
-
+	
+	// Check user authority
 	$stmt = $db->prepare('SELECT id, user_id FROM collections WHERE id=?');
-	$stmt->bind_param('i', $collection__id);
+	$stmt->bind_param('s', $collection__id);
 	$stmt->execute();
 	$error = $stmt->error;
 	if($error !== "") {
@@ -356,6 +361,122 @@ elseif($action === "collection-item-create") {
 	if($user['id'] !== $collection['user_id']) {
 		finalize($rpage, 'unauthorized', 'error');
 	}
+
+	// Define other variables
+	$name = trim($_POST['name']);
+
+	$type = trim($_POST['type']);
+	if(!in_array((string)$type, $valid_coll_types, True)) {
+		finalize($rpage, 'invalid_value', 'error');
+	}
+
+	if(!isset($_POST['private']) || !in_array((int)$_POST['private'], [0,9], True)) {
+		$private = 0;
+	} else {
+		$private = $_POST['private'];
+	}
+
+	$columns = [
+		'display_score' => 1,
+		'display_progress' => 1,
+		'display_user_started' => 1,
+		'display_user_finished' => 1,
+		'display_days' => 1
+	];
+
+	foreach($columns as $col => $val) {
+		if(!isset($_POST[$col])) {
+			finalize($rpage, 'invalid_value', 'error');
+		} else {
+			$columns[$col] = $_POST[$col];
+		}
+	}
+
+	// Add collection to DB
+	$stmt = $db->prepare('UPDATE collections SET
+		name=?,
+		type=?,
+		display_score=?,
+		display_progress=?,
+		display_user_started=?,
+		display_user_finished=?,
+		display_days=?,
+		private=?
+		WHERE id=?
+	');
+	$stmt->bind_param(
+		'ssssssssi',
+		$name,
+		$type,
+		$columns['display_score'],
+		$columns['display_progress'],
+		$columns['display_user_started'],
+		$columns['display_user_finished'],
+		$columns['display_days'],
+		$private,
+		$collection['id']
+	);
+	$stmt->execute();
+	$error = $stmt->error;
+	if($error !== "") {
+		finalize($rpage, 'database_failure', 'error');
+	}
+	$stmt->close();
+
+	finalize($rpage, 'success');
+}
+
+
+
+
+
+elseif($action === "collection-item-create" || $action === "collection-item-edit") {
+	$rpage = '/collection';
+	if($action === "collection-item-create") {
+		if(!isset($_POST['collection'])) {
+			finalize($rpage, 'disallowed-action', 'error');
+		}
+		$collection__id = $_POST['collection'];
+		$rpage = '/collection?id='.$collection__id;
+
+		// Check user authority - TEST THIS WORKS - NOT CURRENTLY TESTED - TODO
+		$stmt = $db->prepare('SELECT id, user_id FROM collections WHERE id=?');
+		$stmt->bind_param('i', $collection__id);
+		$stmt->execute();
+		$error = $stmt->error;
+		if($error !== "") {
+			finalize($rpage, 'database_failure', 'error');
+		}
+		$collection = $stmt->get_result();
+		$stmt->free_result();
+		$collection = $collection->fetch_assoc();
+
+		$correct_user_id = $collection['user_id'];
+	} elseif($action === "collection-item-edit") {
+		if(!isset($_POST['item'])) {
+			finalize($rpage, 'disallowed-action', 'error');
+		}
+		$item__id = $_POST['item'];
+
+		// Check user authority - TEST THIS WORKS - NOT CURRENTLY TESTED - TODO
+		$stmt = $db->prepare('SELECT id, user_id, collection_id FROM media WHERE id=?');
+		$stmt->bind_param('i', $item__id);
+		$stmt->execute();
+		$error = $stmt->error;
+		if($error !== "") {
+			finalize($rpage, 'database_failure', 'error');
+		}
+		$item = $stmt->get_result();
+		$stmt->free_result();
+		$item = $item->fetch_assoc();
+
+		$rpage = '/collection?id='.$item['collection_id'].'#item-'.$item['id'];
+		$correct_user_id = $item['user_id'];
+	}
+
+	if($user['id'] !== $correct_user_id) {
+		finalize($rpage, 'unauthorized', 'error');
+	}
 	
 	if(!isset($_POST['name']) || !isset($_POST['status'])) {
 		finalize($rpage, 'required_field', 'error');
@@ -366,8 +487,10 @@ elseif($action === "collection-item-create") {
 	$name = trim($_POST['name']);
 	$score = 0;
 	$episodes = 0;
-	$user_started = null;
-	$user_finished = null;
+	$progress = 0;
+	$rewatched = 0;
+	$user_started_at = null;
+	$user_finished_at = null;
 	$release_date = null;
 	$started_at = null;
 	$finished_at = null;
@@ -397,11 +520,34 @@ elseif($action === "collection-item-create") {
 
 
 	// Validate Episodes
+	if(array_key_exists('progress', $_POST)) {
+		$progress= (int)$_POST['progress'];
+		if($progress < 0) {
+			finalize($rpage, 'invalid_value', 'error');
+		}
+	}
+
 	if(array_key_exists('episodes', $_POST)) {
 		$episodes = (int)$_POST['episodes'];
 		if($episodes < 0) {
 			finalize($rpage, 'invalid_value', 'error');
 		}
+		// Increase total episodes to match watched episodes if needed
+		if($episodes < $progress) {
+			$episodes = $progress;
+		}
+	}
+
+	if(array_key_exists('rewatched', $_POST)) {
+		$rewatched = (int)$_POST['rewatched'];
+		if($rewatched < 0) {
+			finalize($rpage, 'invalid_value', 'error');
+		}
+	}
+
+	// Modify episodes to make sense if item completed.
+	if($status === 'completed' && $episodes >= $progress) {
+		$progress = $episodes;
 	}
 
 
@@ -467,39 +613,81 @@ elseif($action === "collection-item-create") {
 	}
 
 
-	// Add item to DB
-	$stmt = $db->prepare('
-		INSERT INTO media (
-			user_id,
-			collection_id,
-			status,
-			name,
-			score,
-			episodes,
-			user_started_at,
-			user_finished_at,
-			release_date,
-			started_at,
-			finished_at,
-			comments
-		)
-		VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-	');
-	$stmt->bind_param(
-		'ssssssssssss',
-		$user['id'],
-		$collection__id,
-		$status,
-		$name,
-		$score,
-		$episodes,
-		$user_started,
-		$user_finished,
-		$release_date,
-		$started,
-		$finished,
-		$comments
-	);
+	// Apply to DB
+	if($action === "collection-item-create") {
+		$stmt = $db->prepare('
+			INSERT INTO media (
+				user_id,
+				collection_id,
+				status,
+				name,
+				score,
+				episodes,
+				progress,
+				rewatched,
+				user_started_at,
+				user_finished_at,
+				release_date,
+				started_at,
+				finished_at,
+				comments
+			)
+			VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+		');
+
+		$stmt->bind_param(
+			'iissiiiissssss',
+			$user['id'],
+			$collection['id'],
+			$status,
+			$name,
+			$score,
+			$episodes,
+			$progress,
+			$rewatched,
+			$user_started_at,
+			$user_finished_at,
+			$release_date,
+			$started_at,
+			$finished_at,
+			$comments
+		);
+	} elseif($action === "collection-item-edit") {
+		$stmt = $db->prepare('
+			UPDATE media SET
+				status=?,
+				name=?,
+				score=?,
+				episodes=?,
+				progress=?,
+				rewatched=?,
+				user_started_at=?,
+				user_finished_at=?,
+				release_date=?,
+				started_at=?,
+				finished_at=?,
+				comments=?
+			WHERE id=?
+		');
+
+		$stmt->bind_param(
+			'ssiiiissssssi',
+			$status,
+			$name,
+			$score,
+			$episodes,
+			$progress,
+			$rewatched,
+			$user_started_at,
+			$user_finished_at,
+			$release_date,
+			$started_at,
+			$finished_at,
+			$comments,
+			$item['id']
+		);
+	}
+	
 	$stmt->execute();
 	$error = $stmt->error;
 	if($error !== "") {
@@ -507,6 +695,53 @@ elseif($action === "collection-item-create") {
 	}
 	
 	$stmt->close();
+	finalize($rpage, 'success');
+}
+
+
+
+
+
+// WHY DOES NONE OF THIS WORK
+if($action === "collection-item-delete") {
+	$rpage = '/collection';
+
+	if(!isset($_POST['item'])) {
+		finalize($rpage, 'disallowed_action', 'error');
+	}
+
+	// Check user authority
+
+	$item__id = $_POST['item'];
+
+	// Check user authority - TEST THIS WORKS - NOT CURRENTLY TESTED - TODO
+	$stmt = $db->prepare('SELECT id, user_id, collection_id FROM media WHERE id=?');
+	$stmt->bind_param('i', $item__id);
+	$stmt->execute();
+	$error = $stmt->error;
+	if($error !== "") {
+		finalize($rpage, 'database_failure', 'error');
+	}
+	$item = $stmt->get_result();
+	$stmt->free_result();
+	$item = $item->fetch_assoc();
+
+	$rpage = '/collection?id='.$item['collection_id'];
+
+	if($user['id'] !== $item['user_id']) {
+		finalize($rpage, 'unauthorized', 'error');
+	}
+
+	// Delete from DB
+	
+	$stmt = $db->prepare('UPDATE media SET deleted=1 WHERE id=?');
+	$stmt->bind_param('s', $item['id']);
+	$stmt->execute();
+	$error = $stmt->error;
+	if($error !== "") {
+		finalize($rpage, 'database_failure', 'error');
+	}
+
 	finalize($rpage, 'success');
 }
 

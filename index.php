@@ -21,38 +21,26 @@ include(PATH . "server/server.php");
 $url = strtok($_SERVER["REQUEST_URI"], '?');
 
 # Check for various conditions related to the URL and make usable later in code
+
 if($url == '/') {
-	#index
 	$url = 'index';
-} elseif(mysqli_connect_errno()) {
-	#500
-	http_response_code(500);
-	$url = '500';
-} /*elseif(file_exists("views/$url.php") != 1) {
-	#404
-	header('Location: /404');
-}*/ else {
+} elseif(file_exists("views/$url.php") != 1) {
+	// header('Location: /404');
+} else {
 	#generic pages - strips the / off the beginning
 	$url = substr($url, 1);
 }
 
+# Check for SQL connection
+if(mysqli_connect_errno()) {
+	#500
+	http_response_code(500);
+	$url = '500';
+}
+
+
 $url_split = explode('/', $url);
 $url_readable = end($url_split);
-
-
-
-# ACCESS LEVEL
-
-$permission_levels_temp = sqli_result('SELECT title, permission_level FROM permission_levels ORDER BY permission_level ASC');
-$permission_levels_temp = $permission_levels_temp->fetch_all(MYSQLI_ASSOC);
-$permission_levels = [];
-
-foreach($permission_levels_temp as $perm_pair) {
-	$title = $perm_pair['title'];
-	$level = $perm_pair['permission_level'];
-	
-	$permission_levels[$title] = $level;
-}
 
 ?>
 
@@ -99,6 +87,10 @@ foreach($permission_levels_temp as $perm_pair) {
 		echo "error";
 	} else {
 		echo implode(" page--", $url_split);
+	}
+
+	if(isset($_GET['frame'])) {
+		echo " page--frame";
 	}
 	?>">
 		<?php if(!isset($_GET['frame'])) : ?> 
@@ -233,6 +225,10 @@ foreach($permission_levels_temp as $perm_pair) {
 						echo "A value you entered was invalid or out of expected bounds. Please try again.";
 						break;
 
+					case 'generic':
+						echo $msg['details'];
+						break;
+
 					// Default
 					default:
 						echo "This was meant to say something, but it doesn't!";
@@ -261,10 +257,11 @@ foreach($permission_levels_temp as $perm_pair) {
 					<!-- <span class="footer__item">A project by Noziro Red</span> -->
 					<a class="footer__item" href="<?=FILEPATH?>about">About</a>
 					<a class="footer__item" href="mailto:nozirored@gmail.com?subject=Contacting%20about%20Collections.com">Contact</a>
+					<a class="footer__item" href="https://github.com/Noziro/MediaTracker">Source</a>
 				</div>
 				
 				<div class="footer__section">
-					<span class="footer__section-head"> Themes</span>
+					<span class="footer__section-head">Themes</span>
 					
 					<div class="footer__themes">
 						<?php $themes = [
@@ -286,6 +283,17 @@ foreach($permission_levels_temp as $perm_pair) {
 						
 						<?php endforeach; ?>
 					</div>
+				</div>
+
+				<div class="footer__section">
+					<span class="footer__subtext">
+						Page generated in 
+						<?php
+						$pl_timer_end = hrtime(True);
+						$pl_timer = $pl_timer_end - $pl_timer_start;
+						echo $pl_timer/1e+6." milliseconds.";
+						?>
+					</span>
 				</div>
 			</div>
 		</footer>

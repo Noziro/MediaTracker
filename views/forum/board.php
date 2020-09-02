@@ -55,12 +55,14 @@ $threads = $threads->fetch_all(MYSQLI_ASSOC);
 		
 		<h6 class="content-header__subtitle"><?=$board['description']?></h2>
 	</div>
+
+	
 	
 	<?php if($has_session || $total_threads > $pagination_offset) : ?>
 	<div class="page-actions">
 		<?php if($has_session) : ?>
 		<div class="page-actions__button-list">
-			<button id="js-newthread" class="page-actions__action button" type="button">
+			<button class="page-actions__action button" type="button" onclick="toggleModal('modal--thread-create', true)">
 				New Thread
 			</button>
 		</div>
@@ -107,6 +109,8 @@ $threads = $threads->fetch_all(MYSQLI_ASSOC);
 	</div>
 	<?php endif ?>
 	
+
+
 	<div class="forum-threads">
 		<div class="forum-threads__thread-header">
 			<div class="forum-threads__thread-description-header">
@@ -176,18 +180,29 @@ $threads = $threads->fetch_all(MYSQLI_ASSOC);
 		<?php endforeach ?>
 	</div>
 	
-	<div id="js-hidetoggle" class="forum-submit">
-		<form action="/interface" method="POST">
-			<input type="hidden" name="action" value="forum-thread-create">
-			<input type="hidden" name="board-id" value="<?=$board['id']?>">
-			
-			<label class="forum-submit__label" for="thread-title">Title</label>
-			<input id="thread-title" class="forum-submit__title" type="text" name="title" required>
-			
-			<label class="forum-submit__label" for="thread-body">Body</label>
-			<textarea id="thread-body" class="forum-submit__body-text" name="body" required></textarea>
-			
-			<input class="forum-submit__button button" type="submit" value="Create">
-		</form>
+
+
+	<?php if($has_session) : ?>
+	<div id="modal--thread-create" class="modal modal--hidden" role="dialog" aria-modal="true">
+		<button class="modal__background" onclick="toggleModal('modal--thread-create', false)"></button>
+		<div class="modal__inner">
+			<a class="modal__close" onclick="toggleModal('modal--thread-create', false)">Close</a>
+			<h3 class="modal__header">
+				New Thread
+			</h3>
+			<form action="/interface" method="POST">
+				<input type="hidden" name="action" value="forum-thread-create">
+				<input type="hidden" name="board-id" value="<?=$board['id']?>">
+				
+				<label class="label">Title</label>
+				<input class="input input--wide" type="text" name="title" required>
+				
+				<label class="label">Body</label>
+				<textarea class="text-input text-input--resizable-v" name="body" required></textarea>
+				
+				<input class="button button--spaced" type="submit" value="Create">
+			</form>
+		</div>
 	</div>
+	<?php endif; ?>
 </div>

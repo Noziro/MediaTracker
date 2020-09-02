@@ -8,6 +8,25 @@ $boards = $boards->fetch_all(MYSQLI_ASSOC);
 	<div class="content-header">
 		<h2 class="content-header__title">Forum</h2>
 	</div>
+
+	<?php if($permission_level >= $permission_levels['Admin']) : ?>
+	<div class="page-actions">
+		<div class="page-actions__button-list">
+			<button class="page-actions__action button button--disabled" type="button" disabled>
+				New Board <!-- not sure if this will be implemented or not -->
+			</button>
+			<button class="page-actions__action button button--disabled" type="button" disabled>
+				Edit Board
+			</button>
+			<button class="page-actions__action button button--disabled" type="button" disabled>
+				Rearrange Boards
+			</button>
+			<button class="page-actions__action button button--disabled" type="button" disabled>
+				Delete Board <!-- not sure if this will be implemented or not -->
+			</button>
+		</div>
+	</div>
+	<?php endif; ?>
 	
 	<div class="forum-boards">
 		<?php foreach($boards as $board): ?>
@@ -66,4 +85,21 @@ $boards = $boards->fetch_all(MYSQLI_ASSOC);
 		</div>
 		<?php endforeach ?>
 	</div>
+
+	<div>
+		<?php
+		$threads = sqli_result('SELECT COUNT(*) FROM threads WHERE deleted=0');
+		$threads = $threads->fetch_row()[0];
+		$replies = sqli_result('SELECT COUNT(*) FROM thread_replies WHERE deleted=0');
+		$replies = $replies->fetch_row()[0];
+		?>
+
+		Total Threads: <?=$threads?> - Total Replies: <?=$replies?>
+	</div>
+
+	<?php if($permission_level >= $permission_levels['Admin']) : ?>
+	<div class="">
+		<!-- TODO MODAL/FORMS -->
+	</div>
+	<?php endif; ?>
 </div>

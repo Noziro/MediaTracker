@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 31, 2020 at 11:15 AM
+-- Generation Time: Sep 02, 2020 at 12:13 PM
 -- Server version: 10.3.16-MariaDB
 -- PHP Version: 7.3.6
 
@@ -64,15 +64,18 @@ CREATE TABLE `media` (
   `name` tinytext NOT NULL,
   `score` int(3) DEFAULT 0,
   `episodes` smallint(6) DEFAULT 0,
-  `progress` smallint(6) NOT NULL,
-  `user_started_at` timestamp NULL DEFAULT NULL,
-  `user_finished_at` timestamp NULL DEFAULT NULL,
+  `progress` smallint(6) NOT NULL DEFAULT 0,
+  `rewatched` smallint(6) NOT NULL DEFAULT 0,
+  `user_started_at` date DEFAULT NULL,
+  `user_finished_at` date DEFAULT NULL,
   `release_date` date DEFAULT NULL,
   `started_at` date DEFAULT NULL,
   `finished_at` date DEFAULT NULL,
   `comments` text NOT NULL,
   `companies` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `storage` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL
+  `storage` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `private` tinyint(1) NOT NULL,
+  `deleted` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -160,7 +163,12 @@ CREATE TABLE `users` (
 CREATE TABLE `user_preferences` (
   `user_id` int(11) NOT NULL,
   `timezone` tinytext NOT NULL DEFAULT 'UTC',
-  `rating_system` int(3) NOT NULL DEFAULT 10
+  `rating_system` int(3) NOT NULL DEFAULT 10,
+  `display_score` tinyint(4) NOT NULL DEFAULT 1,
+  `display_progress` tinyint(4) NOT NULL DEFAULT 1,
+  `display_started` tinyint(4) NOT NULL DEFAULT 1,
+  `display_finished` tinyint(4) NOT NULL DEFAULT 1,
+  `display_days` tinyint(4) NOT NULL DEFAULT 1
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -204,13 +212,15 @@ ALTER TABLE `sessions`
 -- Indexes for table `threads`
 --
 ALTER TABLE `threads`
-  ADD UNIQUE KEY `id` (`id`);
+  ADD UNIQUE KEY `id` (`id`),
+  ADD KEY `deleted` (`deleted`);
 
 --
 -- Indexes for table `thread_replies`
 --
 ALTER TABLE `thread_replies`
-  ADD UNIQUE KEY `id` (`id`);
+  ADD UNIQUE KEY `id` (`id`),
+  ADD KEY `deleted` (`deleted`);
 
 --
 -- Indexes for table `users`

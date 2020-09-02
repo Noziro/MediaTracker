@@ -107,8 +107,8 @@ if(!$has_session) {
 		
 		<h3 class="settings__header">User Experience</h3>
 		
-		<label for="change-timezone" class="settings__label">Change timezone</label>
-		<select id="change-timezone" form="form-settings" name="change-timezone">
+		<label class="label">Change timezone</label>
+		<select class="select" form="form-settings" name="change-timezone">
 			<?php foreach($valid_timezones as $zone_group_label => $zone_group) : ?>
 			<optgroup label="<?=$zone_group_label?>">
 				<?php foreach($zone_group as $zone) : ?>
@@ -122,8 +122,8 @@ if(!$has_session) {
 		
 		<h3 class="settings__header">Collections</h3>
 		
-		<label for="change-rating-system" class="settings__label">Change rating system</label>
-		<select id="change-rating-system" form="form-settings" name="change-rating-system">
+		<label class="label">Change rating system</label>
+		<select class="select" form="form-settings" name="change-rating-system">
 			<?php
 			$rating_systems = [
 				3 => '3 Star',
@@ -146,7 +146,7 @@ if(!$has_session) {
 		</select>
 		
 		<div class="settings__button button-list">
-			<button form="form-settings" class="settings__button button" type="submit">
+			<button form="form-settings" class="settings__button button button--spaced" type="submit">
 				Apply
 			</button>
 			

@@ -138,6 +138,7 @@ small {
 	text-decoration: underline;
 }
 
+
 .button {
 	display: inline-block;
 	background: var(--backing-button);
@@ -178,6 +179,101 @@ small {
 	/*overriding browser styles*/
 	color: var(--text-regular); 
 }
+.button--spaced {
+	margin: 16px 0 4px;
+}
+
+
+
+/* FORMS */
+
+.label {
+	display: block;
+	margin: 5px 0;
+	color: var(--text-medium);
+	font-size: 14px;
+	font-weight: 600;
+}
+.label ~ .label {
+	margin-top: 16px;
+}
+
+.label__desc {
+	font-size: 12px;
+}
+
+.text-input {
+	display: block;
+	width: 100%;
+	min-height: 4em;
+	padding: 5px;
+	background-color: var(--backing-subcontent);
+	border: 1px solid var(--border-light);
+	border-radius: var(--rounding);
+	resize: none;
+}
+.text-input--resizable {
+	resize: both;
+}
+.text-input--resizable-h {
+	resize: horizontal;
+}
+.text-input--resizable-v {
+	resize: vertical;
+}
+.text-input:focus {
+	border-color: var(--border-active);
+	outline: none;
+}
+
+.select {
+	display: block;
+	min-width: 100px;
+	max-width: 100%;
+	height: 24px;
+	background-color: var(--backing-subcontent);
+	border: 1px solid var(--border-light);
+	border-radius: var(--rounding);
+	margin: 5px 0;
+	color: var(--text);
+}
+.select:focus {
+	border-color: var(--border-active);
+	outline: none;
+}
+
+.input {
+	display: block;
+	width: 250px;
+	max-width: 100%;
+	height: 24px;
+	padding: 5px;
+	background-color: var(--backing-subcontent);
+	border: 1px solid var(--border-light);
+	border-radius: var(--rounding);
+	margin: 5px 0;
+	color: var(--text);
+}
+.input--thin {
+	width: 100px;
+}
+.input--auto {
+	width: auto;
+}
+.input--wide {
+	width: 400px;
+}
+.input:focus {
+	border-color: var(--border-active);
+	outline: none;
+}
+
+.checkbox-group {
+}
+
+.checkbox-group__item {
+	display: block;
+}
 
 /* Containers */
 
@@ -188,11 +284,14 @@ html {
 	font: 14px/1 Montserrat, Arial, sans-serif;
 }
 
-body {
+.page {
 	min-width: 600px;
 	background: var(--backing-page);
 	padding: 0;
 	margin: 0;
+}
+.page--frame {
+	background: none;
 }
 
 .wrapper {
@@ -327,6 +426,11 @@ body {
 	padding-top: 6px;
 }
 
+.footer__subtext {
+	font-size: 9px;
+	color: var(--text-medium);
+}
+
 /* Theme Selector */
 
 .footer__themes {
@@ -363,6 +467,85 @@ body {
 	font-weight: bold;
 }
 
+/* MODALS */
+
+.modal {
+	position: fixed;
+	top: 0;
+	left: 0;
+	z-index: 150;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	min-width: 850px;
+	height: 100%;
+}
+.modal--hidden {
+	visibility: hidden;
+}
+
+.modal__background {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	background: rgba(0,0,0,0.5);
+}
+
+.modal__inner {
+	position: relative;
+	width: 600px;
+	padding: 20px;
+	background: var(--backing-content);
+	margin: 0 auto;
+	max-height: calc(100vh - 40px);
+	overflow-y: auto;
+}
+.modal__inner--wide {
+	width: 90%;
+	min-width: 850px;
+	max-width: 1440px;
+}
+
+.modal__header {
+	padding-bottom: 5px;
+	border-bottom: 2px solid var(--text-medium);
+	margin: 0 0 20px;
+	font-size: 16px;
+	font-weight: 600;
+}
+
+.modal__close {
+	float: right;
+	font-size: 12px;
+}
+
+.modal__frame {
+	width: 100%;
+	height: 500px;
+	min-height: 80vh;
+	max-height: calc(100vh - 100px);
+	border: none;
+}
+
+/* DIALOG BOX */
+
+.dialog-box {
+	width: 450px;
+	max-width: 100%;
+	padding: 10px;
+	background: var(--backing-content);
+	border-radius: var(--rounding);
+	margin: 10px 0;
+}
+.dialog-box--subcontent {
+	background: var(--backing-subcontent);
+}
+.dialog-box--fullsize {
+	width: 100%;
+	text-align: center;
+}
+
 /* Search Bar */
 
 .search-bar {
@@ -378,6 +561,48 @@ body {
 } .search-bar:focus {
 	border-color: var(--border-active);
 }
+
+
+
+/* TABLES */
+
+.table {
+	width: 100%;
+	text-align: left;
+	border-collapse: collapse;
+}
+
+.table__row:not(:first-of-type) {
+	border-top: 4px solid var(--backing-page);
+}
+
+.table__heading {
+	padding: 8px 12px;
+	font-size: 14px;
+	font-weight: 600;
+}
+.table__heading--extra-wide {
+	width: 45%;
+}
+.table__heading--spacious {
+	padding: 8px 16px;
+	font-size: 16px;
+}
+
+.table__subheading {
+	font-size: 12px;
+	font-weight: 400;
+}
+
+.table__cell {
+	padding: 8px 12px;
+	background: var(--backing-content);
+}
+.table__cell--spacious {
+	padding: 16px;
+}
+
+
 
 /* Dropdowns */
 
@@ -662,34 +887,6 @@ body {
 	margin-left: 8px;
 }
 
-
-.forum-submit {
-	width: 80%;
-	margin: 20px auto 0;
-}
-
-.forum-submit__label {
-	display: block;
-	margin: 16px 0 4px;
-	color: var(--text-medium);
-	font-size: 14px;
-	font-weight: 600;
-}
-
-.forum-submit__title {
-	width: 40%;
-}
-
-.forum-submit__body-text {
-	width: 100%;
-	min-height: 4em;
-	resize: vertical;
-}
-
-.forum-submit__button {
-	display: block;
-}
-
 /* Login - still needs work to make this less jank */
 
 .login-flow__form {
@@ -894,51 +1091,4 @@ input[type="password"]:focus ~ .reqs--password {
 .active-sessions__cell--content {
 	font-size: 12px;
 	font-family: 'Roboto Mono', monospace;
-}
-
-/* COLLECTIONS - this CSS is awful please make it better - TODO */
-
-.collection__header {
-	display: flex;
-	padding: 0 8px;
-}
-
-.media {
-	display: flex;
-	padding: 0 8px;
-	background: var(--backing-content);
-}
-
-.collection__header-column {
-	display: flex;
-	width: 90px;
-	min-height: 32px;
-	padding: 8px;
-	border-bottom: 2px solid var(--border-light);
-	flex: 1 1 auto;
-	justify-content: space-between;
-	font-size: 14px;
-	font-weight: 600;
-}
-.media__column {
-	width: 90px;
-	padding: 8px;
-	flex: 1 1 auto;
-}
-.collection__item + .collection__item {
-	border-top: 2px solid var(--border-light);
-}
-
-.collection__header-column--name,
-.media__column--name {
-	width: 50%;
-}
-.collection__header-column--comments,
-.media__column--comments {
-	width: 300px;
-	max-height: 150px;
-	overflow: hidden;
-}
-.media__column--comments:hover {
-	max-height: initial;
 }
