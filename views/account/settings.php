@@ -120,31 +120,6 @@ if(!$has_session) {
 			<?php endforeach; ?>
 		</select>
 		
-		<h3 class="settings__header">Collections</h3>
-		
-		<label class="label">Change rating system</label>
-		<select class="select" form="form-settings" name="change-rating-system">
-			<?php
-			$rating_systems = [
-				3 => '3 Star',
-				5 => '5 Star',
-				10 => '10 Point',
-				20 => '20 Point',
-				100 => '100 Point'
-			];
-
-			foreach($rating_systems as $value => $label) {
-				echo '<option value="'.$value.'"';
-				
-				if($value === $prefs['rating_system']) {
-					echo 'selected';
-				}
-
-				echo '>'.$label.'</option>';
-			}
-			?>
-		</select>
-		
 		<div class="settings__button button-list">
 			<button form="form-settings" class="settings__button button button--spaced" type="submit">
 				Apply

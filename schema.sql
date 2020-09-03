@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 02, 2020 at 12:13 PM
+-- Generation Time: Sep 03, 2020 at 07:04 AM
 -- Server version: 10.3.16-MariaDB
 -- PHP Version: 7.3.6
 
@@ -46,6 +46,12 @@ CREATE TABLE `collections` (
   `user_id` int(11) NOT NULL,
   `name` varchar(50) NOT NULL,
   `type` varchar(50) NOT NULL,
+  `display_score` tinyint(1) NOT NULL DEFAULT 1,
+  `display_progress` tinyint(1) NOT NULL DEFAULT 1,
+  `display_user_started` tinyint(1) NOT NULL DEFAULT 1,
+  `display_user_finished` tinyint(1) NOT NULL DEFAULT 1,
+  `display_days` tinyint(1) NOT NULL DEFAULT 1,
+  `rating_system` tinyint(3) NOT NULL DEFAULT 10,
   `private` tinyint(1) NOT NULL,
   `deleted` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -74,6 +80,7 @@ CREATE TABLE `media` (
   `comments` text NOT NULL,
   `companies` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `storage` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `adult` tinyint(1) NOT NULL DEFAULT 0,
   `private` tinyint(1) NOT NULL,
   `deleted` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -162,13 +169,7 @@ CREATE TABLE `users` (
 
 CREATE TABLE `user_preferences` (
   `user_id` int(11) NOT NULL,
-  `timezone` tinytext NOT NULL DEFAULT 'UTC',
-  `rating_system` int(3) NOT NULL DEFAULT 10,
-  `display_score` tinyint(4) NOT NULL DEFAULT 1,
-  `display_progress` tinyint(4) NOT NULL DEFAULT 1,
-  `display_started` tinyint(4) NOT NULL DEFAULT 1,
-  `display_finished` tinyint(4) NOT NULL DEFAULT 1,
-  `display_days` tinyint(4) NOT NULL DEFAULT 1
+  `timezone` tinytext NOT NULL DEFAULT 'UTC'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --

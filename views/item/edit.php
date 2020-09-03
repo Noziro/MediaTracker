@@ -2,9 +2,12 @@
 if(isset($_GET['id'])) {
     $item__id = $_GET['id'];
 
-    $item = sqli_result_bindvar('SELECT id, user_id, status, name, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments FROM media WHERE id=? LIMIT 1', 's', $item__id);
+    $item = sqli_result_bindvar('SELECT id, user_id, collection_id, status, name, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments FROM media WHERE id=? LIMIT 1', 's', $item__id);
 	$item_count = $item->num_rows;
 	$item = $item->fetch_assoc();
+
+	$collection = sqli_result_bindvar('SELECT id, user_id, name, type, display_score, display_progress, display_user_started, display_user_finished, display_days, rating_system, private FROM collections WHERE id=?', 's', $item['collection_id']);
+	$collection = $collection->fetch_assoc();
 
 	// Item exists
 	if($item_count < 1) {
@@ -40,8 +43,8 @@ if(isset($_GET['id'])) {
 			<?php endforeach; ?>
 		</select>
 
-		<label class="label">Rating <span class="label__desc">(out of <?=$prefs['rating_system']?>)</span></label>
-		<input class="input input--thin js-autofill" name="score" type="number" min="0" max="<?=$prefs['rating_system']?>" <?php if(isset($item['score'])) { echo 'data-autofill="'.score_extrapolate($item['score'], $prefs['rating_system']).'"'; } ?>>
+		<label class="label">Rating <span class="label__desc">(out of <?=$collection['rating_system']?>)</span></label>
+		<input class="input input--thin js-autofill" name="score" type="number" min="0" max="<?=$collection['rating_system']?>" <?php if(isset($item['score'])) { echo 'data-autofill="'.score_extrapolate($item['score'], $collection['rating_system']).'"'; } ?>>
 
 		<label class="label">Completed Episodes</label>
 		<input class="input input--thin js-autofill" name="progress" type="number" min="0" <?php if(isset($item['progress'])) { echo 'data-autofill="'.$item['progress'].'"'; } ?>>

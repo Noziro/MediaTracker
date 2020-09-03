@@ -2,7 +2,7 @@
 	<?php
 	if(isset($_GET['id'])) :
 		$collection__id = $_GET['id'];
-		$collection = sqli_result_bindvar('SELECT id, user_id, name, type, display_score, display_progress, display_user_started, display_user_finished, display_days, private FROM collections WHERE id=?', 's', $collection__id);
+		$collection = sqli_result_bindvar('SELECT id, user_id, name, type, display_score, display_progress, display_user_started, display_user_finished, display_days, rating_system, private FROM collections WHERE id=?', 's', $collection__id);
 		if($collection->num_rows < 1) {
 			finalize('/404');
 		}
@@ -15,8 +15,8 @@
 		$page_user = sqli_result_bindvar('SELECT id, nickname FROM users WHERE id=?', 's', $collection['user_id']);
 		$page_user = $page_user->fetch_assoc();
 		
-		$page_user_prefs = sqli_result_bindvar('SELECT rating_system FROM user_preferences WHERE user_id=?', 's', $page_user['id']);
-		$page_user_prefs = $page_user_prefs->fetch_assoc();
+		// $page_user_prefs = sqli_result_bindvar('SELECT rating_system FROM user_preferences WHERE user_id=?', 's', $page_user['id']);
+		// $page_user_prefs = $page_user_prefs->fetch_assoc();
 
 		$columns = [
 			'display_score' => 'Score',
@@ -72,7 +72,7 @@
 			<tr class="table__row">
 				<th class="table__heading table__heading--extra-wide">Name</th>
 				<?php if($collection['display_score'] === 1) : ?>
-				<th class="table__heading">Score<br /><span class="table__subheading">of <?=$page_user_prefs['rating_system']?></span></th>
+				<th class="table__heading">Score<br /><span class="table__subheading">of <?=$collection['rating_system']?></span></th>
 				<?php endif; if($collection['display_progress'] === 1) : ?>
 				<th class="table__heading">Progress</th>
 				<?php endif; if($collection['display_user_started'] === 1) : ?>
@@ -98,7 +98,7 @@
 				<?php if($collection['display_score'] === 1) : ?>
 
 				<td class="table__cell">
-					<?=score_extrapolate($item['score'], $page_user_prefs['rating_system'])?>
+					<?=score_extrapolate($item['score'], $collection['rating_system'])?>
 				</td>
 				
 				<?php endif; if($collection['display_progress'] === 1) : ?>
@@ -212,6 +212,29 @@
 					<?php endforeach; ?>
 				</div>
 
+				<label class="label">Rating System</label>
+				<select class="select" name="rating_system">
+					<?php
+					$rating_systems = [
+						3 => '3 Star',
+						5 => '5 Star',
+						10 => '10 Point',
+						20 => '20 Point',
+						100 => '100 Point'
+					];
+
+					foreach($rating_systems as $value => $label) {
+						echo '<option value="'.$value.'"';
+						
+						if($value === $collection['rating_system']) {
+							echo 'selected';
+						}
+
+						echo '>'.$label.'</option>';
+					}
+					?>
+				</select>
+
 				<input class="button button--spaced" type="submit" value="Edit">
 			</form>
 		</div>
@@ -240,8 +263,8 @@
 					<?php endforeach; ?>
 				</select>
 
-				<label class="label">Rating <span class="label__desc">(out of <?=$prefs['rating_system']?>)</span></label>
-				<input class="input input--thin" name="score" type="number" min="0" max="<?=$prefs['rating_system']?>">
+				<label class="label">Rating <span class="label__desc">(out of <?=$collection['rating_system']?>)</span></label>
+				<input class="input input--thin" name="score" type="number" min="0" max="<?=$collection['rating_system']?>">
 
 				<label class="label">Completed Episodes</label>
 				<input class="input input--thin" name="progress" type="number" min="0">

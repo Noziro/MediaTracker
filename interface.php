@@ -347,7 +347,7 @@ elseif($action === "collection-edit") {
 	$rpage = '/collection?id='.$collection__id;
 	
 	// Check user authority
-	$stmt = $db->prepare('SELECT id, user_id FROM collections WHERE id=?');
+	$stmt = $db->prepare('SELECT id, user_id, rating_system FROM collections WHERE id=?');
 	$stmt->bind_param('s', $collection__id);
 	$stmt->execute();
 	$error = $stmt->error;
@@ -362,19 +362,23 @@ elseif($action === "collection-edit") {
 		finalize($rpage, 'unauthorized', 'error');
 	}
 
+
 	// Define other variables
 	$name = trim($_POST['name']);
+
 
 	$type = trim($_POST['type']);
 	if(!in_array((string)$type, $valid_coll_types, True)) {
 		finalize($rpage, 'invalid_value', 'error');
 	}
 
+
 	if(!isset($_POST['private']) || !in_array((int)$_POST['private'], [0,9], True)) {
 		$private = 0;
 	} else {
 		$private = $_POST['private'];
 	}
+
 
 	$columns = [
 		'display_score' => 1,
@@ -392,6 +396,18 @@ elseif($action === "collection-edit") {
 		}
 	}
 
+
+	if(isset($_POST['rating_system'])) {
+		$rating_system = $_POST['rating_system'];
+
+		// If not valid input
+		if(!in_array((int)$rating_system, [3,5,10,20,100], True)) {
+			finalize($rpage, 'invalid_value', 'error');
+		}
+	} else {
+		$rating_system = $collection['rating_system'];
+	}
+
 	// Add collection to DB
 	$stmt = $db->prepare('UPDATE collections SET
 		name=?,
@@ -401,11 +417,12 @@ elseif($action === "collection-edit") {
 		display_user_started=?,
 		display_user_finished=?,
 		display_days=?,
+		rating_system=?,
 		private=?
 		WHERE id=?
 	');
 	$stmt->bind_param(
-		'ssssssssi',
+		'sssssssisi',
 		$name,
 		$type,
 		$columns['display_score'],
@@ -413,6 +430,7 @@ elseif($action === "collection-edit") {
 		$columns['display_user_started'],
 		$columns['display_user_finished'],
 		$columns['display_days'],
+		$rating_system,
 		$private,
 		$collection['id']
 	);
@@ -470,6 +488,18 @@ elseif($action === "collection-item-create" || $action === "collection-item-edit
 		$stmt->free_result();
 		$item = $item->fetch_assoc();
 
+		// Get collection
+		$stmt = $db->prepare('SELECT id, rating_system FROM collections WHERE id=?');
+		$stmt->bind_param('i', $item['collection_id']);
+		$stmt->execute();
+		$error = $stmt->error;
+		if($error !== "") {
+			finalize($rpage, 'database_failure', 'error');
+		}
+		$collection = $stmt->get_result();
+		$stmt->free_result();
+		$collection = $collection->fetch_assoc();
+
 		$rpage = '/collection?id='.$item['collection_id'].'#item-'.$item['id'];
 		$correct_user_id = $item['user_id'];
 	}
@@ -511,11 +541,11 @@ elseif($action === "collection-item-create" || $action === "collection-item-edit
 	if(array_key_exists('score', $_POST)) {
 		$score = (int)$_POST['score'];
 
-		if($score < 0 || $score > $prefs['rating_system']) {
+		if($score < 0 || $score > $collection['rating_system']) {
 			finalize($rpage, 'invalid_value', 'error');
 		}
 
-		$score = score_normalize($score, $prefs['rating_system']);
+		$score = score_normalize($score, $collection['rating_system']);
 	}
 
 
@@ -791,33 +821,6 @@ elseif($action === "change-settings") {
 		$changed = True;
 	}
 	skip_timezone:
-
-
-	// RATING SYSTEM
-	if(isset($_POST['change-rating-system'])) {
-		$ratsys = $_POST['change-rating-system'];
-
-		// If value the same as before
-		if($ratsys === $prefs['rating_system']) {
-			goto skip_rating_system;
-		}
-
-		// If not valid input
-		if(!in_array((int)$ratsys, [3,5,10,20,100], True)) {
-			finalize($rpage, 'invalid_value', 'error');
-		}
-
-		// If valid, continue
-		$stmt = $db->prepare('UPDATE user_preferences SET rating_system=? WHERE user_id=?');
-		$stmt->bind_param('ss', $ratsys, $user['id']);
-		$stmt->execute();
-		$error = $stmt->error;
-		if($error !== '') {
-			finalize($rpage, 'database_failure', 'error');
-		}
-		$changed = True;
-	}
-	skip_rating_system:
 
 
 	// FINALIZE - should only reach this point after clearing all conditions
