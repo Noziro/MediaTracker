@@ -1,4 +1,6 @@
-<div class="wrapper__inner">
-	TODO
-	<?php header("Location: /404"); exit(); ?>
-</div>
+<main id="content" class="wrapper wrapper--content">
+	<div class="wrapper__inner">
+		TODO
+		<?php header("Location: /404"); exit(); ?>
+	</div>
+</main>

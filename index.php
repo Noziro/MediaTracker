@@ -243,11 +243,9 @@ $url_readable = end($url_split);
 		endif;
 		?>
 		
-		<main id="content" class="wrapper wrapper--content">
-			<?php 
-			include(PATH . "views/$url.php");
-			?>
-		</main>
+		<?php 
+		include(PATH . "views/$url.php");
+		?>
 		
 		<?php if(!isset($_GET['frame'])) : ?> 
 		<footer id="footer" class="wrapper wrapper--footer">

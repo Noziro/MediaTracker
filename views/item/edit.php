@@ -23,61 +23,63 @@ if(isset($_GET['id'])) {
 }
 ?>
 
-<div class="wrapper__inner">
-	<form id="collection-item-delete" action="/interface" method="POST" style="display:none">
-		<input type="hidden" name="action" value="collection-item-delete">
-		<input type="hidden" name="item" value="<?=$item['id']?>">
-	</form>
+<main id="content" class="wrapper wrapper--content">
+	<div class="wrapper__inner">
+		<form id="collection-item-delete" action="/interface" method="POST" style="display:none">
+			<input type="hidden" name="action" value="collection-item-delete">
+			<input type="hidden" name="item" value="<?=$item['id']?>">
+		</form>
 
-	<form id="collection-item-edit" action="/interface" method="POST">
-		<input type="hidden" name="action" value="collection-item-edit">
-		<input type="hidden" name="item" value="<?=$item['id']?>">
-		
-		<label class="label">Name <span class="label__desc">(required)</span></label>
-		<input class="input input--wide js-autofill" type="text" name="name" data-autofill="<?=$item['name']?>" required>
-		
-		<label class="label">Status</label>
-		<select class="select" type="text" name="status" required>
-			<?php foreach($valid_status as $status) : ?>
-			<option <?php if($status === $item['status']) { echo "selected"; }?>><?=$status?></option>
-			<?php endforeach; ?>
-		</select>
+		<form id="collection-item-edit" action="/interface" method="POST">
+			<input type="hidden" name="action" value="collection-item-edit">
+			<input type="hidden" name="item" value="<?=$item['id']?>">
+			
+			<label class="label">Name <span class="label__desc">(required)</span></label>
+			<input class="input input--wide js-autofill" type="text" name="name" data-autofill="<?=$item['name']?>" required>
+			
+			<label class="label">Status</label>
+			<select class="select" type="text" name="status" required>
+				<?php foreach($valid_status as $status) : ?>
+				<option <?php if($status === $item['status']) { echo "selected"; }?>><?=$status?></option>
+				<?php endforeach; ?>
+			</select>
 
-		<label class="label">Rating <span class="label__desc">(out of <?=$collection['rating_system']?>)</span></label>
-		<input class="input input--thin js-autofill" name="score" type="number" min="0" max="<?=$collection['rating_system']?>" <?php if(isset($item['score'])) { echo 'data-autofill="'.score_extrapolate($item['score'], $collection['rating_system']).'"'; } ?>>
+			<label class="label">Rating <span class="label__desc">(out of <?=$collection['rating_system']?>)</span></label>
+			<input class="input input--thin js-autofill" name="score" type="number" min="0" max="<?=$collection['rating_system']?>" <?php if(isset($item['score'])) { echo 'data-autofill="'.score_extrapolate($item['score'], $collection['rating_system']).'"'; } ?>>
 
-		<label class="label">Completed Episodes</label>
-		<input class="input input--thin js-autofill" name="progress" type="number" min="0" <?php if(isset($item['progress'])) { echo 'data-autofill="'.$item['progress'].'"'; } ?>>
+			<label class="label">Completed Episodes</label>
+			<input class="input input--thin js-autofill" name="progress" type="number" min="0" <?php if(isset($item['progress'])) { echo 'data-autofill="'.$item['progress'].'"'; } ?>>
 
-		<label class="label">Total Episodes</label>
-		<input class="input input--thin js-autofill" name="episodes" type="number" min="0" <?php if(isset($item['episodes'])) { echo 'data-autofill="'.$item['episodes'].'"'; } ?>>
+			<label class="label">Total Episodes</label>
+			<input class="input input--thin js-autofill" name="episodes" type="number" min="0" <?php if(isset($item['episodes'])) { echo 'data-autofill="'.$item['episodes'].'"'; } ?>>
 
-		<label class="label">Rewatched Episodes <span class="label__desc">(if you rewatched a 25 episode show, input 25)</span></label>
-		<input class="input input--thin js-autofill" name="rewatched" type="number" min="0" <?php if(isset($item['rewatched'])) { echo 'data-autofill="'.$item['rewatched'].'"'; } ?>>
+			<label class="label">Rewatched Episodes <span class="label__desc">(if you rewatched a 25 episode show, input 25)</span></label>
+			<input class="input input--thin js-autofill" name="rewatched" type="number" min="0" <?php if(isset($item['rewatched'])) { echo 'data-autofill="'.$item['rewatched'].'"'; } ?>>
 
-		<label class="label">User Started At</label>
-		<input class="input input--auto js-autofill" name="user_started_at" type="date" max="" <?php if(isset($item['user_started_at'])) { echo 'data-autofill="'.$item['user_started_at'].'"'; } ?>>
+			<label class="label">User Started At</label>
+			<input class="input input--auto js-autofill" name="user_started_at" type="date" max="" <?php if(isset($item['user_started_at'])) { echo 'data-autofill="'.$item['user_started_at'].'"'; } ?>>
 
-		<label class="label">User Finished At</label>
-		<input class="input input--auto js-autofill" name="user_finished_at" type="date" <?php if(isset($item['user_finished_at'])) { echo 'data-autofill="'.$item['user_finished_at'].'"'; } ?>>
+			<label class="label">User Finished At</label>
+			<input class="input input--auto js-autofill" name="user_finished_at" type="date" <?php if(isset($item['user_finished_at'])) { echo 'data-autofill="'.$item['user_finished_at'].'"'; } ?>>
 
-		<!-- <label class="label">Media Release Date</label>
-		<input class="input input--auto" name="release_date" type="date"> -->
+			<!-- <label class="label">Media Release Date</label>
+			<input class="input input--auto" name="release_date" type="date"> -->
 
-		<label class="label">Media Started At</label>
-		<input class="input input--auto js-autofill" name="started_at" type="date" <?php if(isset($item['started_at'])) { echo 'data-autofill="'.$item['started_at'].'"'; } ?>>
+			<label class="label">Media Started At</label>
+			<input class="input input--auto js-autofill" name="started_at" type="date" <?php if(isset($item['started_at'])) { echo 'data-autofill="'.$item['started_at'].'"'; } ?>>
 
-		<label class="label">Media Finished At</label>
-		<input class="input input--auto js-autofill" name="finished_at" type="date" <?php if(isset($item['finished_at'])) { echo 'data-autofill="'.$item['finished_at'].'"'; } ?>>
+			<label class="label">Media Finished At</label>
+			<input class="input input--auto js-autofill" name="finished_at" type="date" <?php if(isset($item['finished_at'])) { echo 'data-autofill="'.$item['finished_at'].'"'; } ?>>
 
-		<label class="label">Comments</label>
-		<textarea class="text-input js-autofill" name="comments" <?php if(isset($item['comments'])) { echo 'data-autofill="'.$item['comments'].'"'; } ?>></textarea>
-	</form>
+			<label class="label">Comments</label>
+			<textarea class="text-input js-autofill" name="comments" <?php if(isset($item['comments'])) { echo 'data-autofill="'.$item['comments'].'"'; } ?>></textarea>
+		</form>
 
-	<input form="collection-item-edit" class="button button--spaced" type="submit" value="Edit">
-	<input form="collection-item-delete" class="button button--spaced" type="submit" value="Delete">
+		<input form="collection-item-edit" class="button button--spaced" type="submit" value="Edit">
+		<input form="collection-item-delete" class="button button--spaced" type="submit" value="Delete">
 
-	<div>
-		Not implemented yet - search for other users' items to add
+		<div>
+			Not implemented yet - search for other users' items to add
+		</div>
 	</div>
-</div>
+</main>
