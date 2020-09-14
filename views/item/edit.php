@@ -25,11 +25,6 @@ if(isset($_GET['id'])) {
 
 <main id="content" class="wrapper wrapper--content">
 	<div class="wrapper__inner">
-		<form id="collection-item-delete" action="/interface" method="POST" style="display:none">
-			<input type="hidden" name="action" value="collection_item_delete">
-			<input type="hidden" name="item" value="<?=$item['id']?>">
-		</form>
-
 		<form id="collection-item-edit" action="/interface" method="POST">
 			<input type="hidden" name="action" value="collection_item_edit">
 			<input type="hidden" name="item" value="<?=$item['id']?>">
@@ -75,11 +70,31 @@ if(isset($_GET['id'])) {
 			<textarea class="text-input js-autofill" name="comments" <?php if(isset($item['comments'])) { echo 'data-autofill="'.$item['comments'].'"'; } ?>></textarea>
 		</form>
 
-		<input form="collection-item-edit" class="button button--spaced" type="submit" value="Edit">
-		<input form="collection-item-delete" class="button button--spaced" type="submit" value="Delete">
+		<div class="button-list">
+			<button form="collection-item-edit" class="button-list__button button button--spaced" type="submit">Edit</button>
+			<button class="button-list__button button button--spaced" onclick="modalConfirmation('Are you sure you wish to delete this item?', 'collection_item_delete', 'item', <?=$item['id']?>)">Delete</button>
+		</div>
 
 		<div class="dialog-box dialog-box--subcontent">
 			Not implemented yet - search for other users' items to add
+		</div>
+	</div>
+
+
+
+	<div id="modal--confirmation" class="modal modal--hidden" role="dialog" aria-modal="true">
+		<button class="modal__background" onclick="toggleModal('modal--confirmation', false)"></button>
+		<div class="modal__inner">
+			<h3 id="js-confirmation-msg" class="modal__header"></h3>
+			<div class="js-confirmation-preview"><!-- TODO - unused atm - plan to put post content here to display what user is deleting --></div>
+			<form id="form-confirmation" action="/interface" method="POST" style="display:none">
+				<input id="js-confirmation-action" type="hidden" name="action">
+				<input id="js-confirmation-data" type="hidden">
+			</form>
+			<div class="button-list">
+				<button form="form-confirmation" class="button-list__button button button--medium button--negative" type="submit">Confirm</a>
+				<button class="button-list__button button button--medium" onclick="toggleModal('modal--confirmation', false)">Cancel</a>
+			</div>
 		</div>
 	</div>
 </main>

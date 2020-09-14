@@ -52,6 +52,10 @@
 				<button class="page-actions__action button" type="button" onclick="toggleModal('modal--item-add', true)">
 					Add New Item
 				</button>
+				
+				<button class="page-actions__action button button--disabled" type="button" disabled>
+					Mass Edit <!-- TODO - will activate a multi-selection mode with checkboxes for each item in which you can edit attributes or delete -->
+				</button>
 			</div>
 		</div>
 		<?php endif ?>
@@ -364,9 +368,9 @@
 				<button class="page-actions__action button" type="button" onclick="toggleModal('modal--collection-create', true)">
 					New Collection
 				</button>
-
+				
 				<button class="page-actions__action button button--disabled" type="button" disabled>
-					Delete Collections
+					Mass Edit <!-- TODO - will activate a multi-selection mode with checkboxes for each item in which you can edit attributes or delete -->
 				</button>
 
 				<?php else : ?>
@@ -396,8 +400,9 @@
 			<thead>
 				<tr class="table__row">
 					<th class="table__heading">Name</th>
-					<th class="table__heading">Type</th>
-					<th class="table__heading">Privacy</th>
+					<th class="table__heading table__heading--extra-thin">Items</th>
+					<th class="table__heading table__heading--small">Type</th>
+					<th class="table__heading table__heading--small">Privacy</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -405,9 +410,15 @@
 
 				<tr class="table__row">
 					<td class="table__cell">
-						<a class="collection-group__name" href="?id=<?=$collection['id']?>">
+						<a class="table__row-title" href="?id=<?=$collection['id']?>">
 							<?=$collection['name']?>
 						</a>
+					</td>
+					<td class="table__cell">
+						<?php
+						$items = sqli_result_bindvar('SELECT COUNT(id) FROM media WHERE collection_id=?', 'i', $collection['id']);
+						echo $items->fetch_row()[0];
+						?>
 					</td>
 					<td class="table__cell">
 						<?=$collection['type']?>

@@ -36,6 +36,7 @@
 	--backing-content: hsl(0, 0%, 100%);
 	--backing-subcontent: hsl(0, 0%, 88%);
 	--backing-button: hsl(0, 0%, 88%);
+	--backing-negative: hsl(0, 92%, 60%);
 	--backing-3: #aaa;
 	--backing-input: hsl(0, 30%, 97%);
 	--border-light: hsl(0, 0%, 90%);
@@ -139,6 +140,15 @@ small {
 }
 
 
+.button-list {
+	display: flex;
+	flex-flow: row wrap;
+}
+.button-list__button + .button-list__button {
+	margin-left: 5px;
+}
+
+
 .button {
 	display: block;
 	background: var(--backing-button);
@@ -171,6 +181,9 @@ small {
 .button--calltoaction {
 	background: var(--accent-1);
 	color: var(--backing-content);
+}
+.button--negative {
+	background: var(--backing-negative);
 }
 .button--disabled {
 	opacity: 0.5;
@@ -577,11 +590,16 @@ html {
 
 .table__heading {
 	padding: 8px 12px;
-	font-size: 14px;
 	font-weight: 600;
 }
 .table__heading--extra-wide {
 	width: 45%;
+}
+.table__heading--small {
+	width: 150px;
+}
+.table__heading--extra-thin {
+	width: 35px;
 }
 .table__heading--spacious {
 	padding: 8px 16px;
@@ -599,6 +617,10 @@ html {
 }
 .table__cell--spacious {
 	padding: 16px;
+}
+
+.table__row-title {
+
 }
 
 

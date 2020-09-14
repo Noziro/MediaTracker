@@ -87,23 +87,13 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 				
 				<?php if($thread['deleted'] === 1) : ?>
 				
-				<form id="form-undelete-thread" style="display:none" action="/interface" method="POST">
-					<input type="hidden" name="action" value="forum_thread_undelete">
-					<input type="hidden" name="thread_id" value="<?=$thread['id']?>">
-				</form>
-				
-				<button form="form-undelete-thread" class="page-actions__action button" type="submit">
+				<button class="page-actions__action button" onclick="modalConfirmation('Are you sure you wish to <u>un</u>delete this thread?', 'forum_thread_undelete', 'thread_id', <?=$thread['id']?>)">
 					Undelete Thread
 				</button>
 				
 				<?php else : ?>
 				
-				<form id="form-delete-thread" style="display:none" action="/interface" method="POST">
-					<input type="hidden" name="action" value="forum_thread_delete">
-					<input type="hidden" name="thread_id" value="<?=$thread['id']?>">
-				</form>
-				
-				<button form="form-delete-thread" class="page-actions__action button" type="submit">
+				<button class="page-actions__action button" onclick="modalConfirmation('Are you sure you wish to delete this thread?', 'forum_thread_delete', 'thread_id', <?=$thread['id']?>)">
 					Delete Thread
 				</button>
 				
@@ -259,12 +249,7 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 					<?php endif ?>
 					
 					<?php if($permission_level >= $permission_levels['Moderator'] || $reply['user_id'] === $user['id']) : ?>
-					<form id="form-delete-reply-<?=$reply['id']?>" style="display:none" action="/interface" method="POST">
-						<input type="hidden" name="action" value="forum_reply_delete">
-						<input type="hidden" name="reply_id" value="<?=$reply['id']?>">
-					</form>
-					
-					<button form="form-delete-reply-<?=$reply['id']?>" class="thread-reply__action button button--small" type="submit">
+					<button class="thread-reply__action button button--small" onclick="modalConfirmation('Are you sure you wish to delete this post?', 'forum_reply_delete', 'reply_id', <?=$reply['id']?>)">
 						Delete
 					</button>
 					<?php endif ?>
@@ -293,12 +278,7 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 				<?php if($permission_level >= $permission_levels['Moderator'] || $has_session && $reply['user_id'] === $user['id']) : ?>
 				
 				<div class="thread-reply__actions">
-					<form id="form-undelete-reply-<?=$reply['id']?>" style="display:none" action="/interface" method="POST">
-						<input type="hidden" name="action" value="forum_reply_undelete">
-						<input type="hidden" name="reply_id" value="<?=$reply['id']?>">
-					</form>
-					
-					<button form="form-undelete-reply-<?=$reply['id']?>" class="thread-reply__action button button--small" type="submit">
+					<button class="thread-reply__action button button--small" onclick="modalConfirmation('Are you sure you wish to <u>un</u>delete this post?', 'forum_reply_undelete', 'reply_id', <?=$reply['id']?>)">
 						Undelete
 					</button>
 				</div>
@@ -316,6 +296,7 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 
 		
 		<?php if($has_session) : ?>
+
 		<div id="modal--reply-create" class="modal modal--hidden" role="dialog" aria-modal="true">
 			<button class="modal__background" onclick="toggleModal('modal--reply-create', false)"></button>
 			<div class="modal__inner">
@@ -334,6 +315,25 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 				</form>
 			</div>
 		</div>
+
+
+
+		<div id="modal--confirmation" class="modal modal--hidden" role="dialog" aria-modal="true">
+			<button class="modal__background" onclick="toggleModal('modal--confirmation', false)"></button>
+			<div class="modal__inner">
+				<h3 id="js-confirmation-msg" class="modal__header"></h3>
+				<div class="js-confirmation-preview"><!-- TODO - unused atm - plan to put post content here to display what user is deleting --></div>
+				<form id="form-confirmation" action="/interface" method="POST" style="display:none">
+					<input id="js-confirmation-action" type="hidden" name="action">
+					<input id="js-confirmation-data" type="hidden">
+				</form>
+				<div class="button-list">
+					<button form="form-confirmation" class="button-list__button button button--medium button--negative" type="submit">Confirm</a>
+					<button class="button-list__button button button--medium" onclick="toggleModal('modal--confirmation', false)">Cancel</a>
+				</div>
+			</div>
+		</div>
+
 		<?php endif; ?>
 	</div>
 </main>
