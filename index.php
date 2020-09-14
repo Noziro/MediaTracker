@@ -25,7 +25,7 @@ $url = strtok($_SERVER["REQUEST_URI"], '?');
 if($url == '/') {
 	$url = 'index';
 } elseif(file_exists("views/$url.php") != 1) {
-	// header('Location: /404');
+	header('Location: /404');
 } else {
 	#generic pages - strips the / off the beginning
 	$url = substr($url, 1);

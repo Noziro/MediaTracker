@@ -2,10 +2,17 @@
 
 RewriteEngine on
 
-# Provides access to static folder
+# Provides access to files in static folder (but not directories)
+## Only matches if NOT directory
+RewriteCond %{REQUEST_FILENAME} !-d
+## Only matches if valid file
+RewriteCond %{REQUEST_FILENAME} -f
+## Allows access
 RewriteRule ^static - [L,NC]
-RewriteRule ^session session.php [L]
-RewriteRule ^interface interface.php [L]
 
-# Redirects all to
+# Provides access to session and interface php files
+RewriteRule ^session(|\.php)$ session.php [L,NC]
+RewriteRule ^interface(|\.php)$ interface.php [L,NC]
+
+# Redirects everything else to index
 RewriteRule . index.php [L]
