@@ -89,13 +89,12 @@ elseif($action === "forum_thread_reply") {
 	if(!isset($_POST['thread_id'])) {
 		finalize('/forum', 'disallowed_action', 'error');
 	}
-
 	$thread__id = $_POST['thread_id'];
 	$rpage = '/forum/thread?id='.$thread__id;
 
 	// Validate thread exists
 
-	$stmt = $db->prepare('SELECT id, board_id FROM threads WHERE id=?');
+	$stmt = $db->prepare('SELECT id, board_id, locked FROM threads WHERE id=?');
 	$stmt->bind_param('i', $thread__id);
 	$stmt->execute();
 	$thread = $stmt->get_result();
@@ -109,6 +108,10 @@ elseif($action === "forum_thread_reply") {
 	$thread = $thread->fetch_assoc();
 
 	// Check user authority
+
+	if($thread['locked'] === 1 && $permission_level < $permission_levels['Moderator']) {
+		finalize($rpage, 'unauthorized', 'error');
+	}
 
 	$stmt = $db->prepare('SELECT id, permission_level FROM boards WHERE id=?');
 	$stmt->bind_param('i', $thread['board_id']);
@@ -147,6 +150,92 @@ elseif($action === "forum_thread_reply") {
 	}
 	
 	finalize($rpage);
+}
+
+
+
+
+
+elseif($action === "forum_thread_lock") {
+	$rpage = '/forum';
+	if(!isset($_POST['thread_id'])) {
+		finalize($rpage, 'disallowed_action', 'error');
+	}
+	$thread__id = $_POST['thread_id'];
+
+	// Check user authority
+	if($permission_level < $permission_levels['Moderator']) {
+		finalize($rpage, 'unauthorized', 'error');
+	}
+
+	// Check thread exists
+	$stmt = $db->prepare('SELECT id FROM threads WHERE id=?');
+	$stmt->bind_param('i', $thread__id);
+	$stmt->execute();
+	$thread = $stmt->get_result();
+	if($thread->num_rows < 1) {
+		finalize($rpage, 'disallowed_action', 'error');
+	}
+	if($stmt->affected_rows === -1) {
+		finalize($rpage, 'database_failure', 'error');
+	}
+	$stmt->free_result();
+	$thread = $thread->fetch_assoc();
+
+	$rpage = '/forum/thread?id='.$thread['id'];
+
+	// Execute DB
+	$stmt = $db->prepare('UPDATE threads SET locked=1 WHERE id=?');
+	$stmt->bind_param('i', $thread['id']);
+	$stmt->execute();
+	if($stmt->affected_rows < 1) {
+		finalize($rpage, 'database_failure', 'error');
+	}
+
+	finalize($rpage, 'success');
+}
+
+
+
+
+
+elseif($action === "forum_thread_unlock") {
+	$rpage = '/forum';
+	if(!isset($_POST['thread_id'])) {
+		finalize($rpage, 'disallowed_action', 'error');
+	}
+	$thread__id = $_POST['thread_id'];
+
+	// Check user authority
+	if($permission_level < $permission_levels['Moderator']) {
+		finalize($rpage, 'unauthorized', 'error');
+	}
+
+	// Check thread exists
+	$stmt = $db->prepare('SELECT id FROM threads WHERE id=?');
+	$stmt->bind_param('i', $thread__id);
+	$stmt->execute();
+	$thread = $stmt->get_result();
+	if($thread->num_rows < 1) {
+		finalize($rpage, 'disallowed_action', 'error');
+	}
+	if($stmt->affected_rows === -1) {
+		finalize($rpage, 'database_failure', 'error');
+	}
+	$stmt->free_result();
+	$thread = $thread->fetch_assoc();
+
+	$rpage = '/forum/thread?id='.$thread['id'];
+
+	// Execute DB
+	$stmt = $db->prepare('UPDATE threads SET locked=0 WHERE id=?');
+	$stmt->bind_param('i', $thread['id']);
+	$stmt->execute();
+	if($stmt->affected_rows < 1) {
+		finalize($rpage, 'database_failure', 'error');
+	}
+
+	finalize($rpage, 'success');
 }
 
 
@@ -202,7 +291,7 @@ elseif($action === "forum_thread_delete") {
 	
 	$rpage = '/forum/board?id='.$thread['board_id'];
 	
-	$stmt = $db->prepare('UPDATE threads SET deleted=TRUE WHERE id=?');
+	$stmt = $db->prepare('UPDATE threads SET deleted=1 WHERE id=?');
 	$stmt->bind_param('s', $thread['id']);
 	$stmt->execute();
 	if($stmt->affected_rows < 1) {
@@ -254,7 +343,7 @@ elseif($action === "forum_thread_undelete") {
 
 	// Execute DB
 	
-	$stmt = $db->prepare('UPDATE threads SET deleted=FALSE WHERE id=?');
+	$stmt = $db->prepare('UPDATE threads SET deleted=0 WHERE id=?');
 	$stmt->bind_param('s', $thread['id']);
 	$stmt->execute();
 	if($stmt->affected_rows < 1) {
@@ -408,7 +497,7 @@ elseif($action === "forum_reply_undelete") {
 
 	// Execute DB
 	
-	$stmt = $db->prepare('UPDATE replies SET deleted=FALSE WHERE id=?');
+	$stmt = $db->prepare('UPDATE replies SET deleted=0 WHERE id=?');
 	$stmt->bind_param('s', $reply['id']);
 	$stmt->execute();
 	if($stmt->affected_rows < 1) {
@@ -428,7 +517,7 @@ elseif($action === "forum_reply_undelete") {
 	$stmt->free_result();
 
 	if($first_reply_id === $reply['id']) {
-		$stmt = $db->prepare('UPDATE threads SET anonymous=FALSE WHERE id=?');
+		$stmt = $db->prepare('UPDATE threads SET anonymous=0 WHERE id=?');
 		$stmt->bind_param('s', $reply['thread_id']);
 		$stmt->execute();
 		if($stmt->affected_rows < 1) {

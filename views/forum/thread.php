@@ -1,6 +1,6 @@
 <?php
 if(isset($_GET["id"])) {
-	$thread = sqli_result_bindvar("SELECT id, board_id, title, deleted FROM threads WHERE id=?", "s", $_GET["id"]);
+	$thread = sqli_result_bindvar("SELECT id, board_id, title, locked, deleted FROM threads WHERE id=?", "s", $_GET["id"]);
 	
 	if($thread->num_rows < 1) {
 		header('Location: /404');
@@ -68,9 +68,14 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 		
 		
 		
-		<?php if($has_session) : ?>
+		<?php if($has_session && $permission_level >= $permission_levels['Moderator'] || $thread['locked'] === 0 || $total_replies > $pagination_offset) : ?>
 		<div class="page-actions">
+			<?php if($permission_levels['Moderator'] || $thread['locked'] === 0) : ?>
 			<div class="page-actions__button-list">
+				<?php
+				if($thread['locked'] === 0) :
+				?>
+
 				<button class="page-actions__action button" type="button" onclick="toggleModal('modal--reply-create', true)">
 					New Reply
 				</button>
@@ -79,26 +84,48 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 					Watch Thread
 				</button>
 				
-				<?php if($permission_level >= $permission_levels['Moderator']) : ?>
+				<?php
+				endif;
+
+				if($permission_level >= $permission_levels['Moderator']) :
+					if($thread['locked'] === 1) :
+				?>
+
+				<button class="page-actions__action button" type="button" onclick="modalConfirmation('Are you sure you wish to lock this thread?', 'forum_thread_unlock', 'thread_id', <?=$thread['id']?>)">
+					Unlock Thread
+				</button>
+
+				<?php
+					else :
+				?>
 				
-				<button id="js-lockthread" class="page-actions__action button button--disabled" type="button" disabled>
+				<button class="page-actions__action button" type="button" onclick="modalConfirmation('Are you sure you wish to lock this thread?', 'forum_thread_lock', 'thread_id', <?=$thread['id']?>)">
 					Lock Thread
 				</button>
 				
-				<?php if($thread['deleted'] === 1) : ?>
+				<?php
+					endif;
+					if($thread['deleted'] === 1) :
+				?>
 				
 				<button class="page-actions__action button" onclick="modalConfirmation('Are you sure you wish to <u>un</u>delete this thread?', 'forum_thread_undelete', 'thread_id', <?=$thread['id']?>)">
 					Undelete Thread
 				</button>
 				
-				<?php else : ?>
+				<?php
+					else :
+				?>
 				
 				<button class="page-actions__action button" onclick="modalConfirmation('Are you sure you wish to delete this thread?', 'forum_thread_delete', 'thread_id', <?=$thread['id']?>)">
 					Delete Thread
 				</button>
 				
-				<?php endif; endif ?>
+				<?php
+					endif;
+				endif;
+				?>
 			</div>
+			<?php endif; ?>
 
 			<?php if($total_replies > $pagination_offset) : ?>
 			<div class="page-actions__pagination">
@@ -143,6 +170,14 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 		
 		
 
+
+
+		<?php if($thread['locked'] === 1) : ?>
+
+		<div class="dialog-box">This thread is locked and may no longer be replied to.</div>
+
+		<?php endif; ?>
+		
 
 
 		<?php if($thread['deleted'] === 1) : ?>
@@ -234,7 +269,7 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 				
 				<?php endif ?>
 				
-				<?php if($has_session) : ?>
+				<?php if($has_session && $thread['locked'] === 0 || $permission_level >= $permission_levels['Moderator']) : ?>
 				<div class="thread-reply__actions">
 					<button id="js-reply-<?=$reply['id']?>" class="thread-reply__action button button--small button--disabled" type="button" disabled>
 						Reply
