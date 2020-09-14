@@ -1,14 +1,6 @@
 <?php
 $boards = sqli_result_bindvar('SELECT id, name, description FROM boards WHERE permission_level <= ? ORDER BY display_order ASC', 's', $permission_level);
 $boards = $boards->fetch_all(MYSQLI_ASSOC);
-
-
-$t = 100;
-$stmt = $db->prepare('SELECT id, thread_id, user_id FROM replies');
-$stmt->execute();
-$res = $stmt->get_result();
-echo $stmt->affected_rows;
-
 ?>
 
 <main id="content" class="wrapper wrapper--content">
