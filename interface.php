@@ -33,10 +33,10 @@ if($action === "forum_thread_create") {
 	$stmt = $db->prepare('SELECT id, permission_level FROM boards WHERE id=?');
 	$stmt->bind_param('i', $board__id);
 	$stmt->execute();
+	$board = $stmt->get_result();
 	if($stmt->affected_rows === -1) {
 		finalize('/forum', 'database_failure', 'error');
 	}
-	$board = $stmt->get_result();
 	if($board->num_rows < 1) {
 		finalize('/forum', 'disallowed_action', 'error');
 	}
@@ -71,7 +71,7 @@ if($action === "forum_thread_create") {
 	$new_thread_id = $new_thread_id->fetch_assoc()['id'];
 	
 	// Add thread reply to DB
-	$stmt = $db->prepare('INSERT INTO thread_replies (user_id, thread_id, body) VALUES (?, ?, ?)');
+	$stmt = $db->prepare('INSERT INTO replies (user_id, thread_id, body) VALUES (?, ?, ?)');
 	$stmt->bind_param('iis', $user['id'], $new_thread_id, $body);
 	$stmt->execute();
 	if($stmt->affected_rows < 1) {
@@ -98,10 +98,10 @@ elseif($action === "forum_thread_reply") {
 	$stmt = $db->prepare('SELECT id, board_id FROM threads WHERE id=?');
 	$stmt->bind_param('i', $thread__id);
 	$stmt->execute();
+	$thread = $stmt->get_result();
 	if($stmt->affected_rows === -1) {
 		finalize($rpage, 'database_failure', 'error');
 	}
-	$thread = $stmt->get_result();
 	if($thread->num_rows < 1) {
 		finalize($rpage, 'disallowed_action', 'error');
 	}
@@ -113,10 +113,10 @@ elseif($action === "forum_thread_reply") {
 	$stmt = $db->prepare('SELECT id, permission_level FROM boards WHERE id=?');
 	$stmt->bind_param('i', $thread['board_id']);
 	$stmt->execute();
+	$board = $stmt->get_result();
 	if($stmt->affected_rows === -1) {
 		finalize('/forum', 'database_failure', 'error');
 	}
-	$board = $stmt->get_result();
 	$stmt->free_result();
 	$board = $board->fetch_assoc();
 	
@@ -131,7 +131,7 @@ elseif($action === "forum_thread_reply") {
 	}
 
 	// Add post to DB
-	$stmt = $db->prepare('INSERT INTO thread_replies (user_id, thread_id, body) VALUES (?, ?, ?)');
+	$stmt = $db->prepare('INSERT INTO replies (user_id, thread_id, body) VALUES (?, ?, ?)');
 	$stmt->bind_param('sss', $user['id'], $thread__id, $_POST['body']);
 	$stmt->execute();
 	if($stmt->affected_rows < 1) {
@@ -165,10 +165,10 @@ elseif($action === "forum_thread_delete") {
 	$stmt = $db->prepare('SELECT id, board_id, user_id FROM threads WHERE id=?');
 	$stmt->bind_param('i', $thread__id);
 	$stmt->execute();
+	$thread = $stmt->get_result();
 	if($stmt->affected_rows === -1) {
 		finalize($rpage, 'database_failure', 'error');
 	}
-	$thread = $stmt->get_result();
 	if($thread->num_rows < 1) {
 		finalize($rpage, 'disallowed_action', 'error');
 	}
@@ -180,10 +180,10 @@ elseif($action === "forum_thread_delete") {
 	$stmt = $db->prepare('SELECT id, permission_level FROM boards WHERE id=?');
 	$stmt->bind_param('i', $thread['board_id']);
 	$stmt->execute();
+	$board = $stmt->get_result();
 	if($stmt->affected_rows === -1) {
 		finalize('/forum', 'database_failure', 'error');
 	}
-	$board = $stmt->get_result();
 	$stmt->free_result();
 	$board = $board->fetch_assoc();
 	
@@ -226,10 +226,10 @@ elseif($action === "forum_thread_undelete") {
 	$stmt = $db->prepare('SELECT id, board_id, user_id FROM threads WHERE id=?');
 	$stmt->bind_param('i', $thread__id);
 	$stmt->execute();
+	$thread = $stmt->get_result();
 	if($stmt->affected_rows === -1) {
 		finalize($rpage, 'database_failure', 'error');
 	}
-	$thread = $stmt->get_result();
 	if($thread->num_rows < 1) {
 		finalize($rpage, 'disallowed_action', 'error');
 	}
@@ -241,10 +241,10 @@ elseif($action === "forum_thread_undelete") {
 	$stmt = $db->prepare('SELECT id, permission_level FROM boards WHERE id=?');
 	$stmt->bind_param('i', $thread['board_id']);
 	$stmt->execute();
+	$board = $stmt->get_result();
 	if($stmt->affected_rows === -1) {
 		finalize('/forum', 'database_failure', 'error');
 	}
-	$board = $stmt->get_result();
 	$stmt->free_result();
 	$board = $board->fetch_assoc();
 	
@@ -274,7 +274,7 @@ elseif($action === "forum_reply_edit") {
 
 	// Check existence
 
-	$stmt = $db->prepare('SELECT id, thread_id, user_id FROM thread_replies WHERE id=?');
+	$stmt = $db->prepare('SELECT id, thread_id, user_id FROM replies WHERE id=?');
 	$stmt->bind_param('s', $_POST['reply_id']);
 	$stmt->execute();
 	$reply = $stmt->get_result();
@@ -298,7 +298,7 @@ elseif($action === "forum_reply_edit") {
 		finalize($rpage, 'required_field', 'error');
 	}
 	
-	$stmt = $db->prepare('UPDATE thread_replies SET body=?, updated_at=CURRENT_TIMESTAMP WHERE id=?');
+	$stmt = $db->prepare('UPDATE replies SET body=?, updated_at=CURRENT_TIMESTAMP WHERE id=?');
 	$stmt->bind_param('ss', $_POST['body'], $reply['id']);
 	$stmt->execute();
 	if($stmt->affected_rows < 1) {
@@ -319,13 +319,13 @@ elseif($action === "forum_reply_delete") {
 	
 	// Check existence
 
-	$stmt = $db->prepare('SELECT id, thread_id, user_id FROM thread_replies WHERE id=?');
+	$stmt = $db->prepare('SELECT id, thread_id, user_id FROM replies WHERE id=?');
 	$stmt->bind_param('i', $reply__id);
 	$stmt->execute();
+	$reply = $stmt->get_result();
 	if($stmt->affected_rows === -1) {
 		finalize($rpage, 'database_failure', 'error');
 	}
-	$reply = $stmt->get_result();
 	if($reply->num_rows < 1) {
 		finalize($rpage, 'disallowed_action', 'error');
 	}
@@ -342,7 +342,7 @@ elseif($action === "forum_reply_delete") {
 
 	// Execute DB
 	
-	$stmt = $db->prepare('UPDATE thread_replies SET deleted=1 WHERE id=?');
+	$stmt = $db->prepare('UPDATE replies SET deleted=1 WHERE id=?');
 	$stmt->bind_param('s', $reply['id']);
 	$stmt->execute();
 	if($stmt->affected_rows < 1) {
@@ -351,19 +351,19 @@ elseif($action === "forum_reply_delete") {
 	
 	// Set thread anonymous if deleting first post.
 
-	$stmt = $db->prepare("SELECT id FROM thread_replies WHERE thread_id=? ORDER BY created_at ASC LIMIT 1");
+	$stmt = $db->prepare("SELECT id FROM replies WHERE thread_id=? ORDER BY created_at ASC LIMIT 1");
 	$stmt->bind_param("s", $reply['thread_id']);
 	$stmt->execute();
+	$res = $stmt->get_result();
 	if($stmt->affected_rows === -1) {
 		finalize($rpage, 'database_failure', 'error');
 	}
-	$res = $stmt->get_result();
 	$res = $res->fetch_assoc();
 	$first_reply_id = $res['id'];
 	$stmt->free_result();
 
 	if($first_reply_id === $reply['id']) {
-		$stmt = $db->prepare('UPDATE threads SET anonymous=TRUE WHERE id=?');
+		$stmt = $db->prepare('UPDATE threads SET anonymous=1 WHERE id=?');
 		$stmt->bind_param('s', $reply['thread_id']);
 		$stmt->execute();
 		if($stmt->affected_rows < 1) {
@@ -385,13 +385,13 @@ elseif($action === "forum_reply_undelete") {
 	
 	// Check existence
 
-	$stmt = $db->prepare('SELECT id, thread_id, user_id FROM thread_replies WHERE id=?');
+	$stmt = $db->prepare('SELECT id, thread_id, user_id FROM replies WHERE id=?');
 	$stmt->bind_param('i', $reply__id);
 	$stmt->execute();
+	$reply = $stmt->get_result();
 	if($stmt->affected_rows === -1) {
 		finalize($rpage, 'database_failure', 'error');
 	}
-	$reply = $stmt->get_result();
 	if($reply->num_rows < 1) {
 		finalize($rpage, 'disallowed_action', 'error');
 	}
@@ -408,7 +408,7 @@ elseif($action === "forum_reply_undelete") {
 
 	// Execute DB
 	
-	$stmt = $db->prepare('UPDATE thread_replies SET deleted=FALSE WHERE id=?');
+	$stmt = $db->prepare('UPDATE replies SET deleted=FALSE WHERE id=?');
 	$stmt->bind_param('s', $reply['id']);
 	$stmt->execute();
 	if($stmt->affected_rows < 1) {
@@ -416,13 +416,13 @@ elseif($action === "forum_reply_undelete") {
 	}
 	
 	// Set thread un-anonymous if un-deleting first post.
-	$stmt = $db->prepare("SELECT id FROM thread_replies WHERE thread_id=? ORDER BY created_at ASC LIMIT 1");
+	$stmt = $db->prepare("SELECT id FROM replies WHERE thread_id=? ORDER BY created_at ASC LIMIT 1");
 	$stmt->bind_param("s", $reply['thread_id']);
 	$stmt->execute();
+	$res = $stmt->get_result();
 	if($stmt->affected_rows === -1) {
 		finalize($rpage, 'database_failure', 'error');
 	}
-	$res = $stmt->get_result();
 	$res = $res->fetch_assoc();
 	$first_reply_id = $res['id'];
 	$stmt->free_result();
@@ -494,10 +494,10 @@ elseif($action === "collection_edit") {
 	$stmt = $db->prepare('SELECT id, user_id, rating_system FROM collections WHERE id=?');
 	$stmt->bind_param('s', $collection__id);
 	$stmt->execute();
+	$collection = $stmt->get_result();
 	if($stmt->affected_rows === -1) {
 		finalize($rpage, 'database_failure', 'error');
 	}
-	$collection = $stmt->get_result();
 	$stmt->free_result();
 	$collection = $collection->fetch_assoc();
 
@@ -602,10 +602,10 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 		$stmt = $db->prepare('SELECT id, user_id, rating_system FROM collections WHERE id=?');
 		$stmt->bind_param('i', $collection__id);
 		$stmt->execute();
+		$collection = $stmt->get_result();
 		if($stmt->affected_rows === -1) {
 			finalize($rpage, 'database_failure', 'error');
 		}
-		$collection = $stmt->get_result();
 		$stmt->free_result();
 		$collection = $collection->fetch_assoc();
 
@@ -620,10 +620,10 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 		$stmt = $db->prepare('SELECT id, user_id, collection_id FROM media WHERE id=?');
 		$stmt->bind_param('i', $item__id);
 		$stmt->execute();
+		$item = $stmt->get_result();
 		if($stmt->affected_rows === -1) {
 			finalize($rpage, 'database_failure', 'error');
 		}
-		$item = $stmt->get_result();
 		$stmt->free_result();
 		$item = $item->fetch_assoc();
 
@@ -631,10 +631,10 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 		$stmt = $db->prepare('SELECT id, rating_system FROM collections WHERE id=?');
 		$stmt->bind_param('i', $item['collection_id']);
 		$stmt->execute();
+		$collection = $stmt->get_result();
 		if($stmt->affected_rows === -1) {
 			finalize($rpage, 'database_failure', 'error');
 		}
-		$collection = $stmt->get_result();
 		$stmt->free_result();
 		$collection = $collection->fetch_assoc();
 
@@ -883,10 +883,10 @@ if($action === "collection_item_delete") {
 	$stmt = $db->prepare('SELECT id, user_id, collection_id FROM media WHERE id=?');
 	$stmt->bind_param('i', $item__id);
 	$stmt->execute();
+	$item = $stmt->get_result();
 	if($stmt->affected_rows === -1) {
 		finalize($rpage, 'database_failure', 'error');
 	}
-	$item = $stmt->get_result();
 	if($stmt->num_rows < 1) {
 		finalize($rpage, 'disallowed_action', 'error');
 	}

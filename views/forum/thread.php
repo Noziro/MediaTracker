@@ -23,7 +23,7 @@ if(isset($_GET["id"])) {
 	exit();
 }
 
-$stmt = $db->prepare('SELECT COUNT(id) FROM thread_replies WHERE thread_id=? AND deleted=0');
+$stmt = $db->prepare('SELECT COUNT(id) FROM replies WHERE thread_id=? AND deleted=0');
 $stmt->bind_param('i', $thread['id']);
 $stmt->execute();
 $total_replies = $stmt->get_result();
@@ -35,10 +35,10 @@ $pagination_offset = 20;
 if(isset($_GET["page"])) {
 	$pagination_offset_current = ($_GET['page'] - 1) * $pagination_offset;
 	
-	$stmt = $db->prepare("SELECT id, user_id, body, created_at, updated_at, deleted FROM thread_replies WHERE thread_id=? ORDER BY created_at ASC LIMIT ?, ?");
+	$stmt = $db->prepare("SELECT id, user_id, body, created_at, updated_at, deleted FROM replies WHERE thread_id=? ORDER BY created_at ASC LIMIT ?, ?");
 	$stmt->bind_param("sii", $thread['id'], $pagination_offset_current, $pagination_offset);
 } else {
-	$stmt = $db->prepare("SELECT id, user_id, body, created_at, updated_at, deleted FROM thread_replies WHERE thread_id=? ORDER BY created_at ASC LIMIT 20");
+	$stmt = $db->prepare("SELECT id, user_id, body, created_at, updated_at, deleted FROM replies WHERE thread_id=? ORDER BY created_at ASC LIMIT 20");
 	$stmt->bind_param("s", $thread['id']);
 }
 

@@ -171,7 +171,7 @@ $threads = $threads->fetch_all(MYSQLI_ASSOC);
 				</div>
 				<div class="forum-threads__recent-replies">
 					<?php 				
-					$replies = sqli_result_bindvar("SELECT id, user_id, updated_at FROM thread_replies WHERE thread_id=? ORDER BY created_at DESC LIMIT 1", "i", $thread['id']);
+					$replies = sqli_result_bindvar("SELECT id, user_id, updated_at FROM replies WHERE thread_id=? ORDER BY created_at DESC LIMIT 1", "i", $thread['id']);
 					
 					if($replies->num_rows > 0) :
 					
@@ -192,7 +192,7 @@ $threads = $threads->fetch_all(MYSQLI_ASSOC);
 							>>
 						</a>
 						<div><?php
-							$reply__count = sqli_result_bindvar("SELECT COUNT(id) FROM thread_replies WHERE thread_id=?", "i", $thread['id']);
+							$reply__count = sqli_result_bindvar("SELECT COUNT(id) FROM replies WHERE thread_id=?", "i", $thread['id']);
 							$reply__count = $reply__count->fetch_row()[0] - 1;
 							if($reply__count == 0) {
 								echo 'No replies';

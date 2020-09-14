@@ -254,7 +254,7 @@ $url_readable = end($url_split);
 					<span class="footer__section-head"><?=$website.$domain?></span>
 					<!-- <span class="footer__item">A project by Noziro Red</span> -->
 					<a class="footer__item" href="<?=FILEPATH?>about">About</a>
-					<a class="footer__item" href="mailto:nozirored@gmail.com?subject=Contacting%20about%20Collections.com">Contact</a>
+					<a class="footer__item" href="mailto:nozirored@gmail.com?subject=<?=urlencode('Contacting about '.$website.$domain)?>">Contact</a>
 					<a class="footer__item" href="https://github.com/Noziro/MediaTracker">Source</a>
 				</div>
 				

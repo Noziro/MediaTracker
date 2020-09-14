@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 03, 2020 at 07:04 AM
+-- Generation Time: Sep 14, 2020 at 05:12 AM
 -- Server version: 10.3.16-MariaDB
 -- PHP Version: 7.3.6
 
@@ -100,6 +100,22 @@ CREATE TABLE `permission_levels` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `replies`
+--
+
+CREATE TABLE `replies` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `thread_id` int(11) NOT NULL,
+  `body` text NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `deleted` tinyint(1) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `sessions`
 --
 
@@ -126,22 +142,6 @@ CREATE TABLE `threads` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `deleted` tinyint(1) NOT NULL DEFAULT 0,
   `anonymous` tinyint(1) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `thread_replies`
---
-
-CREATE TABLE `thread_replies` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `thread_id` int(11) NOT NULL,
-  `body` text NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `deleted` tinyint(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -204,6 +204,13 @@ ALTER TABLE `permission_levels`
   ADD UNIQUE KEY `permission_level` (`permission_level`);
 
 --
+-- Indexes for table `replies`
+--
+ALTER TABLE `replies`
+  ADD UNIQUE KEY `id` (`id`),
+  ADD KEY `deleted` (`deleted`);
+
+--
 -- Indexes for table `sessions`
 --
 ALTER TABLE `sessions`
@@ -213,13 +220,6 @@ ALTER TABLE `sessions`
 -- Indexes for table `threads`
 --
 ALTER TABLE `threads`
-  ADD UNIQUE KEY `id` (`id`),
-  ADD KEY `deleted` (`deleted`);
-
---
--- Indexes for table `thread_replies`
---
-ALTER TABLE `thread_replies`
   ADD UNIQUE KEY `id` (`id`),
   ADD KEY `deleted` (`deleted`);
 
@@ -259,15 +259,15 @@ ALTER TABLE `media`
   MODIFY `id` int(15) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `threads`
+-- AUTO_INCREMENT for table `replies`
 --
-ALTER TABLE `threads`
+ALTER TABLE `replies`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT for table `thread_replies`
+-- AUTO_INCREMENT for table `threads`
 --
-ALTER TABLE `thread_replies`
+ALTER TABLE `threads`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --

@@ -2,6 +2,13 @@
 $boards = sqli_result_bindvar('SELECT id, name, description FROM boards WHERE permission_level <= ? ORDER BY display_order ASC', 's', $permission_level);
 $boards = $boards->fetch_all(MYSQLI_ASSOC);
 
+
+$t = 100;
+$stmt = $db->prepare('SELECT id, thread_id, user_id FROM replies');
+$stmt->execute();
+$res = $stmt->get_result();
+echo $stmt->affected_rows;
+
 ?>
 
 <main id="content" class="wrapper wrapper--content">
@@ -91,7 +98,7 @@ $boards = $boards->fetch_all(MYSQLI_ASSOC);
 			<?php
 			$threads = sqli_result('SELECT COUNT(*) FROM threads WHERE deleted=0');
 			$threads = $threads->fetch_row()[0];
-			$replies = sqli_result('SELECT COUNT(*) FROM thread_replies WHERE deleted=0');
+			$replies = sqli_result('SELECT COUNT(*) FROM replies WHERE deleted=0');
 			$replies = $replies->fetch_row()[0];
 			?>
 
