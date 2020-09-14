@@ -187,7 +187,7 @@
 					Edit Collection
 				</h3>
 				<form action="/interface" method="POST">
-					<input type="hidden" name="action" value="collection-edit">
+					<input type="hidden" name="action" value="collection_edit">
 					<input type="hidden" name="collection_id" value="<?=$collection['id']?>">
 					
 					<label class="label">Name</label>
@@ -257,7 +257,7 @@
 					Add Item
 				</h3>
 				<form action="/interface" method="POST">
-					<input type="hidden" name="action" value="collection-item-create">
+					<input type="hidden" name="action" value="collection_item_create">
 					<input type="hidden" name="collection" value="<?=$collection['id']?>">
 					
 					<label class="label">Name <span class="label__desc">(required)</span></label>
@@ -440,7 +440,7 @@
 				</h3>
 
 				<form action="/interface" method="POST">
-					<input type="hidden" name="action" value="collection-create">
+					<input type="hidden" name="action" value="collection_create">
 					
 					<label class="label" for="collection-name">Name</label>
 					<input id="collection-name" class="input" type="text" name="name" required>

@@ -88,8 +88,8 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 				<?php if($thread['deleted'] === 1) : ?>
 				
 				<form id="form-undelete-thread" style="display:none" action="/interface" method="POST">
-					<input type="hidden" name="action" value="forum-thread-undelete">
-					<input type="hidden" name="thread-id" value="<?=$thread['id']?>">
+					<input type="hidden" name="action" value="forum_thread_undelete">
+					<input type="hidden" name="thread_id" value="<?=$thread['id']?>">
 				</form>
 				
 				<button form="form-undelete-thread" class="page-actions__action button" type="submit">
@@ -99,8 +99,8 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 				<?php else : ?>
 				
 				<form id="form-delete-thread" style="display:none" action="/interface" method="POST">
-					<input type="hidden" name="action" value="forum-thread-delete">
-					<input type="hidden" name="thread-id" value="<?=$thread['id']?>">
+					<input type="hidden" name="action" value="forum_thread_delete">
+					<input type="hidden" name="thread_id" value="<?=$thread['id']?>">
 				</form>
 				
 				<button form="form-delete-thread" class="page-actions__action button" type="submit">
@@ -152,6 +152,18 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 		<?php endif ?>
 		
 		
+
+
+
+		<?php if($thread['deleted'] === 1) : ?>
+
+		<div class="dialog-box">This thread is deleted and only visible to moderators.</div>
+
+		<?php endif; ?>
+
+
+
+
 
 		<?php
 		if($replies__count < 1) :
@@ -213,18 +225,18 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 				
 				<div id="js-reply-edit-<?=$reply['id']?>" class="thread-reply__edit js-reply-edit" style="display:none">
 					<form id="form-edit-reply-<?=$reply['id']?>" style="display:none" action="/interface" method="POST">
-						<input type="hidden" name="action" value="forum-reply-edit">
-						<input type="hidden" name="reply-id" value="<?=$reply['id']?>">
+						<input type="hidden" name="action" value="forum_reply_edit">
+						<input type="hidden" name="reply_id" value="<?=$reply['id']?>">
 					</form>
 					
-					<textarea form="form-edit-reply-<?=$reply['id']?>" class="thread-reply__edit-body" name="body"></textarea>
+					<textarea form="form-edit-reply-<?=$reply['id']?>" class="thread-reply__edit-body js-autofill" name="body" data-autofill="<?=$reply['body']?>"></textarea>
 					
 					<div class="thread-reply__actions">
 						<button form="form-edit-reply-<?=$reply['id']?>" class="thread-reply__action button button--small" type="submit">
 							Submit Edit
 						</button>
 						
-						<button id="js-edit-cancel-<?=$reply['id']?>" class="thread-reply__action button button--small js-edit-cancel" type="button">
+						<button id="js-edit-cancel-<?=$reply['id']?>" class="thread-reply__action button button--small js-edit-cancel" type="button" onclick="toggleEdit(<?=$reply['id']?>, false)">
 							Cancel
 						</button>
 					</div>
@@ -240,7 +252,7 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 					
 					<?php if($reply['user_id'] === $user['id']) : ?>
 					
-					<button id="js-edit-reply-<?=$reply['id']?>" class="thread-reply__action button button--small js-edit-reply" type="button" data-value="<?=$reply['id']?>">
+					<button id="js-edit-reply-<?=$reply['id']?>" class="thread-reply__action button button--small js-edit-reply" type="button" onclick="toggleEdit(<?=$reply['id']?>, true)">
 						Edit
 					</button>
 					
@@ -248,8 +260,8 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 					
 					<?php if($permission_level >= $permission_levels['Moderator'] || $reply['user_id'] === $user['id']) : ?>
 					<form id="form-delete-reply-<?=$reply['id']?>" style="display:none" action="/interface" method="POST">
-						<input type="hidden" name="action" value="forum-reply-delete">
-						<input type="hidden" name="reply-id" value="<?=$reply['id']?>">
+						<input type="hidden" name="action" value="forum_reply_delete">
+						<input type="hidden" name="reply_id" value="<?=$reply['id']?>">
 					</form>
 					
 					<button form="form-delete-reply-<?=$reply['id']?>" class="thread-reply__action button button--small" type="submit">
@@ -282,8 +294,8 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 				
 				<div class="thread-reply__actions">
 					<form id="form-undelete-reply-<?=$reply['id']?>" style="display:none" action="/interface" method="POST">
-						<input type="hidden" name="action" value="forum-reply-undelete">
-						<input type="hidden" name="reply-id" value="<?=$reply['id']?>">
+						<input type="hidden" name="action" value="forum_reply_undelete">
+						<input type="hidden" name="reply_id" value="<?=$reply['id']?>">
 					</form>
 					
 					<button form="form-undelete-reply-<?=$reply['id']?>" class="thread-reply__action button button--small" type="submit">
@@ -312,8 +324,8 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 					New Reply
 				</h3>
 				<form action="/interface" method="POST">
-					<input type="hidden" name="action" value="forum-thread-reply">
-					<input type="hidden" name="thread-id" value="<?=$thread['id']?>">
+					<input type="hidden" name="action" value="forum_thread_reply">
+					<input type="hidden" name="thread_id" value="<?=$thread['id']?>">
 					
 					<label class="label">Body</label>
 					<textarea class="text-input text-input--resizable-v" name="body" required></textarea>

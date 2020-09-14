@@ -26,12 +26,12 @@ if(isset($_GET['id'])) {
 <main id="content" class="wrapper wrapper--content">
 	<div class="wrapper__inner">
 		<form id="collection-item-delete" action="/interface" method="POST" style="display:none">
-			<input type="hidden" name="action" value="collection-item-delete">
+			<input type="hidden" name="action" value="collection_item_delete">
 			<input type="hidden" name="item" value="<?=$item['id']?>">
 		</form>
 
 		<form id="collection-item-edit" action="/interface" method="POST">
-			<input type="hidden" name="action" value="collection-item-edit">
+			<input type="hidden" name="action" value="collection_item_edit">
 			<input type="hidden" name="item" value="<?=$item['id']?>">
 			
 			<label class="label">Name <span class="label__desc">(required)</span></label>
@@ -78,7 +78,7 @@ if(isset($_GET['id'])) {
 		<input form="collection-item-edit" class="button button--spaced" type="submit" value="Edit">
 		<input form="collection-item-delete" class="button button--spaced" type="submit" value="Delete">
 
-		<div>
+		<div class="dialog-box dialog-box--subcontent">
 			Not implemented yet - search for other users' items to add
 		</div>
 	</div>

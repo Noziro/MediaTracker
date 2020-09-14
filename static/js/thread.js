@@ -1,35 +1,20 @@
-// Add Edit Post Show/Hide Functionality
+// Edit Post Show/Hide Functionality
+function toggleEdit($reply_id, $mode) {
+	var $edit_btn = document.getElementById(`js-edit-reply-${$reply_id}`),
+		$body_div = document.getElementById(`js-reply-body-${$reply_id}`),
+		$edit_div = document.getElementById(`js-reply-edit-${$reply_id}`);
 
-var $editBtns = document.getElementsByClassName('js-edit-reply');
-
-for ($btn of $editBtns) {
-	var $replyId = $btn.getAttribute('data-value'),
-		$editBtn = document.getElementById('js-edit-reply-'+$replyId),
-		$cancelBtn = document.getElementById('js-edit-cancel-'+$replyId);
-	
-	// Show edit
-	$editBtn.onclick = function() {
-		var $bodyDiv = document.getElementById('js-reply-body-'+$replyId),
-			$editDiv = document.getElementById('js-reply-edit-'+$replyId);
+	if($mode === true) {
+		$body_div.style.display = 'none';
+		$edit_div.style.display = 'block';
 		
-		$bodyDiv.style.display = 'none';
-		$editDiv.style.display = 'block';
+		$edit_btn.setAttribute('disabled', '');
+		$edit_btn.classList.add('button--disabled');
+	} else if($mode === false) {
+		$body_div.style.display = 'block';
+		$edit_div.style.display = 'none';
 		
-		$editBtn.setAttribute('disabled', '');
-		$editBtn.classList.add('button--disabled');
-	};
-	
-	// Hide edit
-	$cancelBtn.onclick = function() {
-		var $bodyDiv = document.getElementById('js-reply-body-'+$replyId),
-			$editDiv = document.getElementById('js-reply-edit-'+$replyId);
-		
-		$bodyDiv.style.display = 'block';
-		$editDiv.style.display = 'none';
-		
-		$editBtn.removeAttribute('disabled');
-		$editBtn.classList.remove('button--disabled');
-	};
+		$edit_btn.removeAttribute('disabled', '');
+		$edit_btn.classList.remove('button--disabled');
+	}
 }
-
-

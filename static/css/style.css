@@ -328,7 +328,6 @@ html {
 .wrapper__inner {
 	width: 90%;
 	max-width: 1440px;
-	min-height: inherit;
 	margin: 0 auto;
 }
 

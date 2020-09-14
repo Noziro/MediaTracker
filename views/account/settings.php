@@ -20,7 +20,7 @@ if(!$has_session) {
 		
 		<div class="split__section split__section--primary">
 			<form id="form-settings" style="display:none" action="/interface" method="POST">
-				<input type="hidden" name="action" value="change-settings">
+				<input type="hidden" name="action" value="change_settings">
 			</form>
 			
 			<?php if(!isset($_GET['section']) || $_GET['section'] === 'profile') : ?>

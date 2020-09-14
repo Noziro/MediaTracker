@@ -1,6 +1,6 @@
 <?php
 if(isset($_GET["id"])) {
-	$board = sqli_result_bindvar("SELECT id, name, description, permission_level FROM boards WHERE id=?", "s", $_GET["id"]);
+	$board = sqli_result_bindvar("SELECT id, name, description, permission_level FROM boards WHERE id=?", "i", $_GET["id"]);
 	
 	if($board->num_rows < 1) {
 		header('Location: /404');
@@ -171,7 +171,7 @@ $threads = $threads->fetch_all(MYSQLI_ASSOC);
 				</div>
 				<div class="forum-threads__recent-replies">
 					<?php 				
-					$replies = sqli_result_bindvar("SELECT id, user_id, updated_at FROM thread_replies WHERE thread_id=? ORDER BY created_at DESC LIMIT 1", "s", $thread['id']);
+					$replies = sqli_result_bindvar("SELECT id, user_id, updated_at FROM thread_replies WHERE thread_id=? ORDER BY created_at DESC LIMIT 1", "i", $thread['id']);
 					
 					if($replies->num_rows > 0) :
 					
@@ -191,6 +191,17 @@ $threads = $threads->fetch_all(MYSQLI_ASSOC);
 						<a class="goto-reply" href="<?=FILEPATH."forum/thread?id=".$thread['id']."#reply-".$reply['id']?>">
 							>>
 						</a>
+						<div><?php
+							$reply__count = sqli_result_bindvar("SELECT COUNT(id) FROM thread_replies WHERE thread_id=?", "i", $thread['id']);
+							$reply__count = $reply__count->fetch_row()[0] - 1;
+							if($reply__count == 0) {
+								echo 'No replies';
+							} elseif($reply__count == 1) {
+								echo $reply__count.' reply';
+							} else {
+								echo $reply__count.' replies';
+							}
+						?></div>
 					</div>
 					<?php endif ?>
 				</div>
@@ -213,8 +224,8 @@ $threads = $threads->fetch_all(MYSQLI_ASSOC);
 					New Thread
 				</h3>
 				<form action="/interface" method="POST">
-					<input type="hidden" name="action" value="forum-thread-create">
-					<input type="hidden" name="board-id" value="<?=$board['id']?>">
+					<input type="hidden" name="action" value="forum_thread_create">
+					<input type="hidden" name="board_id" value="<?=$board['id']?>">
 					
 					<label class="label">Title</label>
 					<input class="input input--wide" type="text" name="title" required>

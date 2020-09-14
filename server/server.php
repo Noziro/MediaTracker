@@ -729,8 +729,11 @@ function sqli_result(string $sql) {
 	
 	$q = $db->prepare($sql);
 	$q->execute();
+	$e = $q->error;
 	$r = $q->get_result();
 	$q->close();
+	
+	if($e !== '') { return False; }
 	return $r;
 }
 
@@ -741,8 +744,11 @@ function sqli_result_bindvar(string $sql, string $insert_type, string $insert_va
 	$q = $db->prepare($sql);
 	$q->bind_param($insert_type, $insert_variable);
 	$q->execute();
+	$e = $q->error;
 	$r = $q->get_result();
 	$q->close();
+
+	if($e !== '') { return False; }
 	return $r;
 }
 
@@ -755,9 +761,8 @@ function sqli_execute(string $sql, string $insert_type, string $insert_variable)
 	$q->execute();
 	$error = $q->error;
 	$q->close();
-	if($error !== "") {
-		return $error;
-	}
+
+	if($error !== "") { return False; }
 	return true;
 }
 
