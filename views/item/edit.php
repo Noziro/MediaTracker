@@ -27,6 +27,7 @@ if(isset($_GET['id'])) {
 	<div class="wrapper__inner">
 		<form id="collection-item-edit" action="/interface" method="POST">
 			<input type="hidden" name="action" value="collection_item_edit">
+			<input type="hidden" name="return_to" value="/collection?id=<?=$item['collection_id'].'#item-'.$item['id']?>">
 			<input type="hidden" name="item" value="<?=$item['id']?>">
 
 			<div class="item-fields">
@@ -174,6 +175,7 @@ if(isset($_GET['id'])) {
 			<div class="js-confirmation-preview"><!-- TODO - unused atm - plan to put post content here to display what user is deleting --></div>
 			<form id="form-confirmation" action="/interface" method="POST" style="display:none">
 				<input id="js-confirmation-action" type="hidden" name="action">
+				<input type="hidden" name="return_to" value="/collection?id=<?=$item['collection_id']?>">
 				<input id="js-confirmation-data" type="hidden">
 			</form>
 			<div class="button-list">

@@ -14,6 +14,13 @@ if(!$has_session)  {
 
 $action = $_POST['action'];
 
+// RETURN TO
+
+if(isset($_POST['return_to'])) {
+	$r2 = $_POST['return_to'];
+} else {
+	$r2 = '/';
+}
 
 
 
@@ -22,11 +29,10 @@ $action = $_POST['action'];
 
 if($action === "forum_thread_create") {
 	if(!isset($_POST['board_id'])) {
-		finalize('/forum', 'disallowed_action', 'error');
+		finalize($r2, 'disallowed_action', 'error');
 	}
 	
 	$board__id = $_POST['board_id'];
-	$rpage = '/forum/board?id='.$board__id;
 
 	// Check user authority
 
@@ -50,7 +56,7 @@ if($action === "forum_thread_create") {
 	// Check required fields
 
 	if(!isset($_POST['title']) || !isset($_POST['body']) || trim($_POST['body']) === '') {
-		finalize($rpage, 'required_field', 'error');
+		finalize($r2, 'required_field', 'error');
 	}
 
 	$title = $_POST['title'];
@@ -61,7 +67,7 @@ if($action === "forum_thread_create") {
 	$stmt->bind_param('iis', $user['id'], $board__id, $title);
 	$stmt->execute();
 	if($stmt->affected_rows < 1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 	
 	// Get newly added thread ID
@@ -75,22 +81,21 @@ if($action === "forum_thread_create") {
 	$stmt->bind_param('iis', $user['id'], $new_thread_id, $body);
 	$stmt->execute();
 	if($stmt->affected_rows < 1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 	
-	finalize($rpage);
+	finalize($r2);
 }
 
 
 
 
 
-elseif($action === "forum_thread_reply") {
+elseif($action === "forum_reply_create") {
 	if(!isset($_POST['thread_id'])) {
-		finalize('/forum', 'disallowed_action', 'error');
+		finalize($r2, 'disallowed_action', 'error');
 	}
 	$thread__id = $_POST['thread_id'];
-	$rpage = '/forum/thread?id='.$thread__id;
 
 	// Validate thread exists
 
@@ -99,10 +104,10 @@ elseif($action === "forum_thread_reply") {
 	$stmt->execute();
 	$thread = $stmt->get_result();
 	if($stmt->affected_rows === -1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 	if($thread->num_rows < 1) {
-		finalize($rpage, 'disallowed_action', 'error');
+		finalize($r2, 'disallowed_action', 'error');
 	}
 	$stmt->free_result();
 	$thread = $thread->fetch_assoc();
@@ -110,7 +115,7 @@ elseif($action === "forum_thread_reply") {
 	// Check user authority
 
 	if($thread['locked'] === 1 && $permission_level < $permission_levels['Moderator']) {
-		finalize($rpage, 'unauthorized', 'error');
+		finalize($r2, 'unauthorized', 'error');
 	}
 
 	$stmt = $db->prepare('SELECT id, permission_level FROM boards WHERE id=?');
@@ -118,38 +123,38 @@ elseif($action === "forum_thread_reply") {
 	$stmt->execute();
 	$board = $stmt->get_result();
 	if($stmt->affected_rows === -1) {
-		finalize('/forum', 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 	$stmt->free_result();
 	$board = $board->fetch_assoc();
 	
 	if($permission_level < $board['permission_level']) {
-		finalize('/forum', 'unauthorized', 'error');
+		finalize($r2, 'unauthorized', 'error');
 	}
 
 	// Check required fields
 	
 	if(!isset($_POST['body']) || trim($_POST['body']) === '') {
-		finalize($rpage, 'required_field', 'error');
+		finalize($r2, 'required_field', 'error');
 	}
 
 	// Add post to DB
 	$stmt = $db->prepare('INSERT INTO replies (user_id, thread_id, body) VALUES (?, ?, ?)');
-	$stmt->bind_param('sss', $user['id'], $thread__id, $_POST['body']);
+	$stmt->bind_param('iis', $user['id'], $thread__id, $_POST['body']);
 	$stmt->execute();
 	if($stmt->affected_rows < 1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 	
 	// Set thread updated_at date for sorting purposes
 	$stmt = $db->prepare('UPDATE threads SET updated_at=CURRENT_TIMESTAMP WHERE id=?');
-	$stmt->bind_param('s', $thread__id);
+	$stmt->bind_param('i', $thread__id);
 	$stmt->execute();
 	if($stmt->affected_rows < 1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 	
-	finalize($rpage);
+	finalize($r2, 'success');
 }
 
 
@@ -157,15 +162,14 @@ elseif($action === "forum_thread_reply") {
 
 
 elseif($action === "forum_thread_lock") {
-	$rpage = '/forum';
 	if(!isset($_POST['thread_id'])) {
-		finalize($rpage, 'disallowed_action', 'error');
+		finalize($r2, 'disallowed_action', 'error');
 	}
 	$thread__id = $_POST['thread_id'];
 
 	// Check user authority
 	if($permission_level < $permission_levels['Moderator']) {
-		finalize($rpage, 'unauthorized', 'error');
+		finalize($r2, 'unauthorized', 'error');
 	}
 
 	// Check thread exists
@@ -174,25 +178,23 @@ elseif($action === "forum_thread_lock") {
 	$stmt->execute();
 	$thread = $stmt->get_result();
 	if($thread->num_rows < 1) {
-		finalize($rpage, 'disallowed_action', 'error');
+		finalize($r2, 'disallowed_action', 'error');
 	}
 	if($stmt->affected_rows === -1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 	$stmt->free_result();
 	$thread = $thread->fetch_assoc();
-
-	$rpage = '/forum/thread?id='.$thread['id'];
 
 	// Execute DB
 	$stmt = $db->prepare('UPDATE threads SET locked=1 WHERE id=?');
 	$stmt->bind_param('i', $thread['id']);
 	$stmt->execute();
 	if($stmt->affected_rows < 1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 
-	finalize($rpage, 'success');
+	finalize($r2, 'success');
 }
 
 
@@ -200,15 +202,14 @@ elseif($action === "forum_thread_lock") {
 
 
 elseif($action === "forum_thread_unlock") {
-	$rpage = '/forum';
 	if(!isset($_POST['thread_id'])) {
-		finalize($rpage, 'disallowed_action', 'error');
+		finalize($r2, 'disallowed_action', 'error');
 	}
 	$thread__id = $_POST['thread_id'];
 
 	// Check user authority
 	if($permission_level < $permission_levels['Moderator']) {
-		finalize($rpage, 'unauthorized', 'error');
+		finalize($r2, 'unauthorized', 'error');
 	}
 
 	// Check thread exists
@@ -217,25 +218,23 @@ elseif($action === "forum_thread_unlock") {
 	$stmt->execute();
 	$thread = $stmt->get_result();
 	if($thread->num_rows < 1) {
-		finalize($rpage, 'disallowed_action', 'error');
+		finalize($r2, 'disallowed_action', 'error');
 	}
 	if($stmt->affected_rows === -1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 	$stmt->free_result();
 	$thread = $thread->fetch_assoc();
-
-	$rpage = '/forum/thread?id='.$thread['id'];
 
 	// Execute DB
 	$stmt = $db->prepare('UPDATE threads SET locked=0 WHERE id=?');
 	$stmt->bind_param('i', $thread['id']);
 	$stmt->execute();
 	if($stmt->affected_rows < 1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 
-	finalize($rpage, 'success');
+	finalize($r2, 'success');
 }
 
 
@@ -243,9 +242,8 @@ elseif($action === "forum_thread_unlock") {
 
 
 elseif($action === "forum_thread_delete") {
-	$rpage = '/forum';
 	if(!isset($_POST['thread_id'])) {
-		finalize($rpage, 'disallowed_action', 'error');
+		finalize($r2, 'disallowed_action', 'error');
 	}
 	$thread__id = $_POST['thread_id'];
 
@@ -256,10 +254,10 @@ elseif($action === "forum_thread_delete") {
 	$stmt->execute();
 	$thread = $stmt->get_result();
 	if($stmt->affected_rows === -1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 	if($thread->num_rows < 1) {
-		finalize($rpage, 'disallowed_action', 'error');
+		finalize($r2, 'disallowed_action', 'error');
 	}
 	$stmt->free_result();
 	$thread = $thread->fetch_assoc();
@@ -289,15 +287,15 @@ elseif($action === "forum_thread_delete") {
 	$stmt->free_result();
 	$thread = $thread->fetch_assoc();
 	
-	$rpage = '/forum/board?id='.$thread['board_id'];
+	$r2 = '/forum/board?id='.$thread['board_id'];
 	
 	$stmt = $db->prepare('UPDATE threads SET deleted=1 WHERE id=?');
 	$stmt->bind_param('s', $thread['id']);
 	$stmt->execute();
 	if($stmt->affected_rows < 1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
-	finalize($rpage, 'success');
+	finalize($r2, 'success');
 }
 
 
@@ -308,7 +306,6 @@ elseif($action === "forum_thread_undelete") {
 		finalize('/forum', 'disallowed_action', 'error');
 	}
 	$thread__id = $_POST['thread_id'];
-	$rpage = '/forum/thread?id='.$thread__id;
 
 	// Check existence
 
@@ -317,10 +314,10 @@ elseif($action === "forum_thread_undelete") {
 	$stmt->execute();
 	$thread = $stmt->get_result();
 	if($stmt->affected_rows === -1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 	if($thread->num_rows < 1) {
-		finalize($rpage, 'disallowed_action', 'error');
+		finalize($r2, 'disallowed_action', 'error');
 	}
 	$stmt->free_result();
 	$thread = $thread->fetch_assoc();
@@ -347,9 +344,9 @@ elseif($action === "forum_thread_undelete") {
 	$stmt->bind_param('s', $thread['id']);
 	$stmt->execute();
 	if($stmt->affected_rows < 1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
-	finalize($rpage, 'success');
+	finalize($r2, 'success');
 }
 
 
@@ -372,37 +369,34 @@ elseif($action === "forum_reply_edit") {
 	}
 	$stmt->free_result();
 	$reply = $reply->fetch_assoc();
-	
-	$rpage = '/forum/thread?id='.$reply['thread_id'].'#reply-'.$reply['id'];
 
 	// Check user authority
 
 	if($user['id'] !== $reply['user_id']) {
-		finalize($rpage, 'unauthorized', 'error');
+		finalize($r2, 'unauthorized', 'error');
 	}
 
 	// Execute DB
 	
 	if(!isset($_POST['body']) || trim($_POST['body']) === '') {
-		finalize($rpage, 'required_field', 'error');
+		finalize($r2, 'required_field', 'error');
 	}
 	
 	$stmt = $db->prepare('UPDATE replies SET body=?, updated_at=CURRENT_TIMESTAMP WHERE id=?');
 	$stmt->bind_param('ss', $_POST['body'], $reply['id']);
 	$stmt->execute();
 	if($stmt->affected_rows < 1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 
-	finalize($rpage, 'success');
+	finalize($r2, 'success');
 }
 
 
 
 elseif($action === "forum_reply_delete") {
-	$rpage = '/forum';
 	if(!isset($_POST['reply_id'])) {
-		finalize($rpage, 'disallowed_action', 'error');
+		finalize($r2, 'disallowed_action', 'error');
 	}
 	$reply__id = $_POST['reply_id'];
 	
@@ -413,20 +407,18 @@ elseif($action === "forum_reply_delete") {
 	$stmt->execute();
 	$reply = $stmt->get_result();
 	if($stmt->affected_rows === -1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 	if($reply->num_rows < 1) {
-		finalize($rpage, 'disallowed_action', 'error');
+		finalize($r2, 'disallowed_action', 'error');
 	}
 	$stmt->free_result();
 	$reply = $reply->fetch_assoc();
-	
-	$rpage = '/forum/thread?id='.$reply['thread_id'];
 
 	// Check user authority
 	
 	if($user['id'] !== $reply['user_id'] && $permission_level < $permission_levels['Moderator']) {
-		finalize($rpage, 'unauthorized', 'error');
+		finalize($r2, 'unauthorized', 'error');
 	}
 
 	// Execute DB
@@ -435,7 +427,7 @@ elseif($action === "forum_reply_delete") {
 	$stmt->bind_param('s', $reply['id']);
 	$stmt->execute();
 	if($stmt->affected_rows < 1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 	
 	// Set thread anonymous if deleting first post.
@@ -445,7 +437,7 @@ elseif($action === "forum_reply_delete") {
 	$stmt->execute();
 	$res = $stmt->get_result();
 	if($stmt->affected_rows === -1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 	$res = $res->fetch_assoc();
 	$first_reply_id = $res['id'];
@@ -456,19 +448,18 @@ elseif($action === "forum_reply_delete") {
 		$stmt->bind_param('s', $reply['thread_id']);
 		$stmt->execute();
 		if($stmt->affected_rows < 1) {
-			finalize($rpage, 'database_failure', 'error');
+			finalize($r2, 'database_failure', 'error');
 		}
 	}
 	
-	finalize($rpage, 'success');
+	finalize($r2, 'success');
 }
 
 
 
 elseif($action === "forum_reply_undelete") {
-	$rpage = '/forum';
 	if(!isset($_POST['reply_id'])) {
-		finalize($rpage, 'disallowed_action', 'error');
+		finalize($r2, 'disallowed_action', 'error');
 	}
 	$reply__id = $_POST['reply_id'];
 	
@@ -479,20 +470,18 @@ elseif($action === "forum_reply_undelete") {
 	$stmt->execute();
 	$reply = $stmt->get_result();
 	if($stmt->affected_rows === -1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 	if($reply->num_rows < 1) {
-		finalize($rpage, 'disallowed_action', 'error');
+		finalize($r2, 'disallowed_action', 'error');
 	}
 	$stmt->free_result();
 	$reply = $reply->fetch_assoc();
 
-	$rpage = '/forum/thread?id='.$reply['thread_id'];
-
 	// Check user authority
 	
 	if($user['id'] !== $reply['user_id'] && $permission_level < $permission_levels['Moderator']) {
-		finalize($rpage, 'unauthorized', 'error');
+		finalize($r2, 'unauthorized', 'error');
 	}
 
 	// Execute DB
@@ -501,7 +490,7 @@ elseif($action === "forum_reply_undelete") {
 	$stmt->bind_param('s', $reply['id']);
 	$stmt->execute();
 	if($stmt->affected_rows < 1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 	
 	// Set thread un-anonymous if un-deleting first post.
@@ -510,7 +499,7 @@ elseif($action === "forum_reply_undelete") {
 	$stmt->execute();
 	$res = $stmt->get_result();
 	if($stmt->affected_rows === -1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 	$res = $res->fetch_assoc();
 	$first_reply_id = $res['id'];
@@ -521,11 +510,11 @@ elseif($action === "forum_reply_undelete") {
 		$stmt->bind_param('s', $reply['thread_id']);
 		$stmt->execute();
 		if($stmt->affected_rows < 1) {
-			finalize($rpage, 'database_failure', 'error');
+			finalize($r2, 'database_failure', 'error');
 		}
 	}
 
-	finalize($rpage, 'success');
+	finalize($r2, 'success');
 }
 
 
@@ -533,11 +522,9 @@ elseif($action === "forum_reply_undelete") {
 
 
 elseif($action === "collection_create") {
-	$rpage = '/collection';
-	
 	// Required fields
 	if(!isset($_POST['name']) || !isset($_POST['type'])) {
-		finalize($rpage, 'required_field', 'error');
+		finalize($r2, 'required_field', 'error');
 	}
 
 	// Define variables
@@ -545,7 +532,7 @@ elseif($action === "collection_create") {
 
 	$type = trim($_POST['type']);
 	if(!in_array((string)$type, $valid_coll_types, True)) {
-		finalize($rpage, 'invalid_value', 'error');
+		finalize($r2, 'invalid_value', 'error');
 	}
 
 	if(!isset($_POST['private']) || !in_array((int)$_POST['private'], [0,9], True)) {
@@ -559,10 +546,10 @@ elseif($action === "collection_create") {
 	$stmt->bind_param('ssss', $user['id'], $name, $type, $private);
 	$stmt->execute();
 	if($stmt->affected_rows < 1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 	
-	finalize($rpage, 'success');
+	finalize($r2, 'success');
 }
 
 
@@ -570,14 +557,11 @@ elseif($action === "collection_create") {
 
 
 elseif($action === "collection_edit") {
-	$rpage = '/collection';
-	
 	if(!isset($_POST['collection_id']) || !isset($_POST['name']) || !isset($_POST['type'])) {
-		finalize($rpage, 'required_field', 'error');
+		finalize($r2, 'required_field', 'error');
 	}
 	
 	$collection__id = $_POST['collection_id'];
-	$rpage = '/collection?id='.$collection__id;
 	
 	// Check user authority
 	$stmt = $db->prepare('SELECT id, user_id, rating_system FROM collections WHERE id=?');
@@ -585,13 +569,13 @@ elseif($action === "collection_edit") {
 	$stmt->execute();
 	$collection = $stmt->get_result();
 	if($stmt->affected_rows === -1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 	$stmt->free_result();
 	$collection = $collection->fetch_assoc();
 
 	if($user['id'] !== $collection['user_id']) {
-		finalize($rpage, 'unauthorized', 'error');
+		finalize($r2, 'unauthorized', 'error');
 	}
 
 
@@ -601,7 +585,7 @@ elseif($action === "collection_edit") {
 
 	$type = trim($_POST['type']);
 	if(!in_array((string)$type, $valid_coll_types, True)) {
-		finalize($rpage, 'invalid_value', 'error');
+		finalize($r2, 'invalid_value', 'error');
 	}
 
 
@@ -622,7 +606,7 @@ elseif($action === "collection_edit") {
 
 	foreach($columns as $col => $val) {
 		if(!isset($_POST[$col])) {
-			finalize($rpage, 'invalid_value', 'error');
+			finalize($r2, 'invalid_value', 'error');
 		} else {
 			$columns[$col] = $_POST[$col];
 		}
@@ -634,7 +618,7 @@ elseif($action === "collection_edit") {
 
 		// If not valid input
 		if(!in_array((int)$rating_system, [3,5,10,20,100], True)) {
-			finalize($rpage, 'invalid_value', 'error');
+			finalize($r2, 'invalid_value', 'error');
 		}
 	} else {
 		$rating_system = $collection['rating_system'];
@@ -668,10 +652,10 @@ elseif($action === "collection_edit") {
 	);
 	$stmt->execute();
 	if($stmt->affected_rows < 1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 
-	finalize($rpage, 'success');
+	finalize($r2, 'success');
 }
 
 
@@ -679,13 +663,11 @@ elseif($action === "collection_edit") {
 
 
 elseif($action === "collection_item_create" || $action === "collection_item_edit") {
-	$rpage = '/collection';
 	if($action === "collection_item_create") {
 		if(!isset($_POST['collection'])) {
-			finalize($rpage, 'disallowed_action', 'error');
+			finalize($r2, 'disallowed_action', 'error');
 		}
 		$collection__id = $_POST['collection'];
-		$rpage = '/collection?id='.$collection__id;
 
 		// Check user authority
 		$stmt = $db->prepare('SELECT id, user_id, rating_system FROM collections WHERE id=?');
@@ -693,7 +675,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 		$stmt->execute();
 		$collection = $stmt->get_result();
 		if($stmt->affected_rows === -1) {
-			finalize($rpage, 'database_failure', 'error');
+			finalize($r2, 'database_failure', 'error');
 		}
 		$stmt->free_result();
 		$collection = $collection->fetch_assoc();
@@ -701,7 +683,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 		$correct_user_id = $collection['user_id'];
 	} elseif($action === "collection_item_edit") {
 		if(!isset($_POST['item'])) {
-			finalize($rpage, 'disallowed_action', 'error');
+			finalize($r2, 'disallowed_action', 'error');
 		}
 		$item__id = $_POST['item'];
 
@@ -711,7 +693,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 		$stmt->execute();
 		$item = $stmt->get_result();
 		if($stmt->affected_rows === -1) {
-			finalize($rpage, 'database_failure', 'error');
+			finalize($r2, 'database_failure', 'error');
 		}
 		$stmt->free_result();
 		$item = $item->fetch_assoc();
@@ -722,12 +704,10 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 		$stmt->execute();
 		$collection = $stmt->get_result();
 		if($stmt->affected_rows === -1) {
-			finalize($rpage, 'database_failure', 'error');
+			finalize($r2, 'database_failure', 'error');
 		}
 		$stmt->free_result();
 		$collection = $collection->fetch_assoc();
-
-		$rpage = '/collection?id='.$item['collection_id'].'#item-'.$item['id'];
 		$correct_user_id = $item['user_id'];
 	}
 
@@ -736,7 +716,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 	}
 	
 	if(!isset($_POST['name']) || !isset($_POST['status'])) {
-		finalize($rpage, 'required_field', 'error');
+		finalize($r2, 'required_field', 'error');
 	}
 
 	// Define base variables
@@ -762,7 +742,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 		$status = (string)$_POST['status'];
 
 		if(!in_array($status, $valid_status, True)) {
-			finalize($rpage, 'invalid_value', 'error');
+			finalize($r2, 'invalid_value', 'error');
 		}
 	}
 
@@ -772,7 +752,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 		$score = (int)$_POST['score'];
 
 		if($score < 0 || $score > $collection['rating_system']) {
-			finalize($rpage, 'invalid_value', 'error');
+			finalize($r2, 'invalid_value', 'error');
 		}
 
 		$score = score_normalize($score, $collection['rating_system']);
@@ -783,14 +763,14 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 	if(array_key_exists('progress', $_POST)) {
 		$progress= (int)$_POST['progress'];
 		if($progress < 0) {
-			finalize($rpage, 'invalid_value', 'error');
+			finalize($r2, 'invalid_value', 'error');
 		}
 	}
 
 	if(array_key_exists('episodes', $_POST)) {
 		$episodes = (int)$_POST['episodes'];
 		if($episodes < 0) {
-			finalize($rpage, 'invalid_value', 'error');
+			finalize($r2, 'invalid_value', 'error');
 		}
 		// Increase total episodes to match watched episodes if needed
 		if($episodes < $progress) {
@@ -801,7 +781,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 	if(array_key_exists('rewatched', $_POST)) {
 		$rewatched = (int)$_POST['rewatched'];
 		if($rewatched < 0) {
-			finalize($rpage, 'invalid_value', 'error');
+			finalize($r2, 'invalid_value', 'error');
 		}
 	}
 
@@ -813,6 +793,8 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 
 	// Validate Dates
 	function validate_date($date) {
+		global $r2;
+
 		// strings should match this format: YYYY-MM-DD
 
 		$split = explode('-', $date);
@@ -835,7 +817,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 			|| (int)$d < 1
 			|| (int)$d > 31 // yes, this will accept invalid day ranges. will fix with a different if statement when/if it becomes a problem (such as SQL refusing the date). This requires some testing.
 			) {
-				finalize($rpage, 'invalid_value', 'error');
+				finalize($r2, 'invalid_value', 'error');
 		}
 
 		// if all check passed, return
@@ -868,7 +850,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 		$comments = $_POST['comments'];
 		$maxlen = pow(2,16) - 1;
 		if(strlen($comments) > $maxlen) {
-			finalize($rpage, 'invalid_value', 'error');
+			finalize($r2, 'invalid_value', 'error');
 		}
 	}
 
@@ -892,14 +874,14 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 	if(array_key_exists('adult', $_POST)) {
 		$adult = $_POST['adult'];
 		if($adult < 0 || $adult > 1) {
-			finalize($rpage, 'invalid_value', 'error');
+			finalize($r2, 'invalid_value', 'error');
 		}
 	}
 
 	if(array_key_exists('favourite', $_POST)) {
 		$favourite = $_POST['favourite'];
 		if($favourite < 0 || $favourite > 1) {
-			finalize($rpage, 'invalid_value', 'error');
+			finalize($r2, 'invalid_value', 'error');
 		}
 	}
 
@@ -993,16 +975,20 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 	
 	$stmt->execute();
 	if($stmt->affected_rows < 1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 
-	// Get newly added thread ID
-	$stmt = $db->prepare('SELECT LAST_INSERT_ID()');
-	$stmt->execute();
-	$new_item_id = $stmt->get_result();
-	$new_item_id = $new_item_id->fetch_row()[0];
+	if($action === 'collection_item_create') {
+		// Get newly added ID
+		$stmt = $db->prepare('SELECT LAST_INSERT_ID()');
+		$stmt->execute();
+		$new_item_id = $stmt->get_result();
+		$new_item_id = $new_item_id->fetch_row()[0];
+
+		$r2 = $r2.'#item-'.$new_item_id;
+	}
 	
-	finalize($rpage.'#item-'.$new_item_id, 'success');
+	finalize($r2, 'success');
 }
 
 
@@ -1010,10 +996,8 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 
 
 if($action === "collection_item_delete") {
-	$rpage = '/collection';
-
 	if(!isset($_POST['item'])) {
-		finalize($rpage, 'disallowed_action', 'error');
+		finalize($r2, 'disallowed_action', 'error');
 	}
 
 	// Check user authority
@@ -1026,19 +1010,17 @@ if($action === "collection_item_delete") {
 	$stmt->execute();
 	$item = $stmt->get_result();
 	if($stmt->affected_rows === -1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 	if($item->num_rows < 1) {
-		finalize($rpage, 'disallowed_action', 'error');
+		finalize($r2, 'disallowed_action', 'error');
 	}
 	$stmt->free_result();
 	$item = $item->fetch_assoc();
 
 	if($user['id'] !== $item['user_id']) {
-		finalize($rpage, 'unauthorized', 'error');
+		finalize($r2, 'unauthorized', 'error');
 	}
-
-	$rpage = '/collection?id='.$item['collection_id'];
 
 	// Delete from DB
 	
@@ -1046,10 +1028,10 @@ if($action === "collection_item_delete") {
 	$stmt->bind_param('s', $item['id']);
 	$stmt->execute();
 	if($stmt->affected_rows < 1) {
-		finalize($rpage, 'database_failure', 'error');
+		finalize($r2, 'database_failure', 'error');
 	}
 
-	finalize($rpage, 'success');
+	finalize($r2, 'success');
 }
 
 
@@ -1057,7 +1039,6 @@ if($action === "collection_item_delete") {
 
 
 elseif($action === "change_settings") {
-	$rpage = '/account/settings';
 	$changed = False;
 
 	// ALL SETTINGS
@@ -1084,7 +1065,7 @@ elseif($action === "change_settings") {
 		}
 
 		if($needle === False) {
-			finalize($rpage, 'invalid_value', 'error');
+			finalize($r2, 'invalid_value', 'error');
 		}
 
 		// If valid, continue
@@ -1092,7 +1073,7 @@ elseif($action === "change_settings") {
 		$stmt->bind_param('ss', $tz, $user['id']);
 		$stmt->execute();
 		if($stmt->affected_rows < 1) {
-			finalize($rpage, 'database_failure', 'error');
+			finalize($r2, 'database_failure', 'error');
 		}
 		$changed = True;
 	}
@@ -1101,9 +1082,9 @@ elseif($action === "change_settings") {
 
 	// FINALIZE - should only reach this point after clearing all conditions
 	if($changed === True) {
-		finalize($rpage, 'success');
+		finalize($r2, 'success');
 	} else {
-		finalize($rpage, 'no_change_detected');
+		finalize($r2, 'no_change_detected');
 	}
 }
 
@@ -1112,12 +1093,11 @@ elseif($action === "change_settings") {
 
 
 elseif($action === 'import-list') {
-	$rpage = '/account/settings?section=data';
 	if(!array_key_exists('file', $_POST)) {
-		finalize($rpage, 'required_field', 'error');
+		finalize($r2, 'required_field', 'error');
 	}
 
-	
+	finalize($r2, 'generic', 'generic', 'feature not implemented yet');
 }
 
 

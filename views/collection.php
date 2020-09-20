@@ -206,6 +206,7 @@
 				</h3>
 				<form action="/interface" method="POST">
 					<input type="hidden" name="action" value="collection_edit">
+					<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 					<input type="hidden" name="collection_id" value="<?=$collection['id']?>">
 					
 					<label class="label">Name</label>
@@ -276,6 +277,7 @@
 				</h3>
 				<form action="/interface" method="POST">
 					<input type="hidden" name="action" value="collection_item_create">
+					<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 					<input type="hidden" name="collection" value="<?=$collection['id']?>">
 
 					<div class="item-fields">
@@ -550,6 +552,7 @@
 
 				<form action="/interface" method="POST">
 					<input type="hidden" name="action" value="collection_create">
+					<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 					
 					<label class="label" for="collection-name">Name</label>
 					<input id="collection-name" class="input" type="text" name="name" required>
