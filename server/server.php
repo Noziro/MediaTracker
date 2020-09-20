@@ -198,6 +198,7 @@ if($has_session) {
 	$prefs = $auth->getCurrentUserPrefs();
 	$permission_level = $user['permission_level'];
 } else {
+	$user = False;
 	$permission_level = 0;
 	$prefs = [
 		'timezone' => 'UTC'

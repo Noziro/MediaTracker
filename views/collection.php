@@ -9,7 +9,7 @@
 			}
 			$collection = $collection->fetch_assoc();
 
-			$items = sqli_result_bindvar('SELECT id, status, name, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments FROM media WHERE collection_id=? AND deleted=0 ORDER BY name ASC', 's', $collection['id']);
+			$items = sqli_result_bindvar('SELECT id, status, name, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments, favourite FROM media WHERE collection_id=? AND deleted=0 ORDER BY status ASC, name ASC', 's', $collection['id']);
 			$items_count = $items->num_rows;
 			$items = $items->fetch_all(MYSQLI_ASSOC);
 
@@ -109,6 +109,10 @@
 						} else {
 							echo "-";
 						}
+
+						if($item['favourite'] === 1) {
+							echo " ♥";
+						}
 						?>
 					</td>
 					
@@ -152,7 +156,17 @@
 						$e = $item['user_finished_at'];
 
 						if(isset($s) && isset($e)) {
-							echo date_diff(date_create($s),date_create($e))->format('%a');
+							$days = date_diff(date_create($s),date_create($e))->format('%a');
+							if($days < 1) {
+								$days = 1;
+							}
+							echo $days;
+						} elseif(isset($s)) {
+							$days = date_diff(date_create($s),date_create())->format('%a');
+							if($days < 1) {
+								$days = 1;
+							}
+							echo '>'.$days;
 						}
 						?>
 					</td>
@@ -255,7 +269,7 @@
 		
 		<div id="modal--item-add" class="modal modal--hidden" role="dialog" aria-modal="true">
 			<button class="modal__background" onclick="toggleModal('modal--item-add', false)"></button>
-			<div class="modal__inner">
+			<div class="modal__inner modal__inner--wide">
 				<a class="modal__close" onclick="toggleModal('modal--item-add', false)">Close</a>
 				<h3 class="modal__header">
 					Add Item
@@ -263,48 +277,130 @@
 				<form action="/interface" method="POST">
 					<input type="hidden" name="action" value="collection_item_create">
 					<input type="hidden" name="collection" value="<?=$collection['id']?>">
-					
-					<label class="label">Name <span class="label__desc">(required)</span></label>
-					<input class="input input--wide" type="text" name="name" required>
-					
-					<label class="label">Status</label>
-					<select class="select" type="text" name="status" required>
-						<?php foreach($valid_status as $status) : ?>
-						<option <?php if($status === 'planned') { echo "selected"; }?>><?=$status?></option>
-						<?php endforeach; ?>
-					</select>
 
-					<label class="label">Rating <span class="label__desc">(out of <?=$collection['rating_system']?>)</span></label>
-					<input class="input input--thin" name="score" type="number" min="0" max="<?=$collection['rating_system']?>">
+					<div class="item-fields">
+						<div class="item-fields__divider">
+							<span class="item-fields__header">Item Information</span>
+						</div>
 
-					<label class="label">Completed Episodes</label>
-					<input class="input input--thin" name="progress" type="number" min="0">
+						<div class="item-fields__field">
+							<label class="label">Name <span class="label__desc">(required)</span></label>
+							<input class="input input--wide" type="text" name="name" required>
+						</div>
 
-					<label class="label">Total Episodes</label>
-					<input class="input input--thin" name="episodes" type="number" min="0">
+						<div class="item-fields__field">
+							<label class="label">Episodes</label>
+							<input class="input input--thin" name="episodes" type="number" min="0">
+						</div>
 
-					<label class="label">Rewatched Episodes <span class="label__desc">(if you rewatched a 25 episode show, input 25)</span></label>
-					<input class="input input--thin" name="rewatched" type="number" min="0">
+						<!--<div class="item-fields__field item-fields__field--date">
+							<label class="label">Media Release Date</label>
+							<input class="input input--auto" name="release_date" type="date">
+						</div>-->
 
-					<label class="label">User Started At</label>
-					<input class="input input--auto" name="user_started_at" type="date">
+						<div class="item-fields__field item-fields__field--date">
+							<label class="label">Media Started At</label>
+							<input id="js-set-today-3" class="input input--auto" name="started_at" type="date">
+							<a class="subtext" onclick="setToday('js-set-today-3')">Today</a>
+						</div>
 
-					<label class="label">User Finished At</label>
-					<input class="input input--auto" name="user_finished_at" type="date">
+						<div class="item-fields__field item-fields__field--date">
+							<label class="label">Media Finished At</label>
+							<input id="js-set-today-4" class="input input--auto" name="finished_at" type="date">
+							<a class="subtext" onclick="setToday('js-set-today-4')">Today</a>
+						</div>
 
-					<!-- <label class="label">Media Release Date</label>
-					<input class="input input--auto" name="release_date" type="date"> -->
+						<!--<div class="item-fields__field">
+							<label class="label">Credits</label>
+							<input class="input" type="text" name="credits" required>
+						</div>-->
 
-					<label class="label">Media Started At</label>
-					<input class="input input--auto" name="started_at" type="date">
+						<!--<div class="item-fields__field">
+							<label class="label">Image</label>
+							<input type="file" name="image">
+						</div>--->
 
-					<label class="label">Media Finished At</label>
-					<input class="input input--auto" name="finished_at" type="date">
+						<div class="item-fields__field">
+							<label class="label">Flags</label>
+							<div class="checkbox-group">
+								<label class="checkbox-group__item">
+									<input type="hidden" name="adult" value="0"> <!-- fallback value -->
+									<input class="checkbox" type="checkbox" name="adult" value="1">
+									Adult
+								</label>
 
-					<label class="label">Comments</label>
-					<textarea class="text-input" name="comments"></textarea>
+								<label class="checkbox-group__item">
+									<input type="hidden" name="favourite" value="0"> <!-- fallback value -->
+									<input class="checkbox" type="checkbox" name="favourite" value="1">
+									Favourite
+								</label>
+							</div>
+						</div>
 
-					<input class="button button--spaced" type="submit" value="Add">
+						<div class="item-fields__field">
+							<label class="label">Links</label>
+							<input class="input" type="text" name="links[]">
+							<input class="input" type="text" name="links[]">
+							<input class="input" type="text" name="links[]">
+						</div>
+
+
+						<div class="item-fields__divider">
+							<span class="item-fields__header">User Data</span>
+						</div>
+
+						<div class="item-fields__field">
+							<label class="label">Status</label>
+							<select class="select" type="text" name="status" required>
+								<?php foreach($valid_status as $status) : ?>
+								<option <?php if($status === 'completed') { echo "selected"; }?>><?=$status?></option>
+								<?php endforeach; ?>
+							</select>
+						</div>
+
+						<div class="item-fields__field">
+							<label class="label">Rating <span class="label__desc">(out of <?=$collection['rating_system']?>)</span></label>
+							<input class="input input--thin" name="score" type="number" min="0" max="<?=$collection['rating_system']?>">
+						</div>
+
+						<div class="item-fields__field">
+							<label class="label">Completed Episodes</label>
+							<input class="input input--thin" name="progress" type="number" min="0">
+						</div>
+
+						<div class="item-fields__field">
+							<label class="label">
+								Rewatched Episodes
+								<div class="label__desc">for a 25 episode show, input 25</div>
+							</label>
+							<input class="input input--thin" name="rewatched" type="number" min="0">
+						</div>
+
+						<div class="item-fields__field item-fields__field--date">
+							<label class="label">User Started At</label>
+							<input id="js-set-today-1" class="input input--auto" name="user_started_at" type="date">
+							<a class="subtext" onclick="setToday('js-set-today-1')">Today</a>
+						</div>
+
+						<div class="item-fields__field item-fields__field--date">
+							<label class="label">User Finished At</label>
+							<input id="js-set-today-2" class="input input--auto" name="user_finished_at" type="date">
+							<a class="subtext" onclick="setToday('js-set-today-2')">Today</a>
+						</div>
+
+						<div class="item-fields__divider"></div>
+
+						<div class="item-fields__field">
+							<label class="label">Comments</label>
+							<textarea class="text-input" name="comments"></textarea>
+						</div>
+
+						<div class="item-fields__divider"></div>
+
+						<div class="item-fields__field">
+							<input class="button button--spaced" type="submit" value="Add">
+						</div>
+					</div>
 				</form>
 
 				<div>
@@ -406,7 +502,9 @@
 				</tr>
 			</thead>
 			<tbody>
-				<?php foreach($collections as $collection) : ?>
+				<?php foreach($collections as $collection) :
+					// TODO - optimize this. Can probably be incorporated into the SQL query.
+					if($user['id'] !== $page_user['id'] && $collection['private'] === 9) { continue; } ?>
 
 				<tr class="table__row">
 					<td class="table__cell">

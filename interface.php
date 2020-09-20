@@ -425,7 +425,7 @@ elseif($action === "forum_reply_delete") {
 
 	// Check user authority
 	
-	if($permission_level < $permission_levels['Moderator'] || $user['id'] !== $reply['user_id']) {
+	if($user['id'] !== $reply['user_id'] && $permission_level < $permission_levels['Moderator']) {
 		finalize($rpage, 'unauthorized', 'error');
 	}
 
@@ -491,7 +491,7 @@ elseif($action === "forum_reply_undelete") {
 
 	// Check user authority
 	
-	if($permission_level < $permission_levels['Moderator'] || $user['id'] !== $reply['user_id']) {
+	if($user['id'] !== $reply['user_id'] && $permission_level < $permission_levels['Moderator']) {
 		finalize($rpage, 'unauthorized', 'error');
 	}
 
@@ -751,7 +751,10 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 	$release_date = null;
 	$started_at = null;
 	$finished_at = null;
-	$comments = null;
+	$comments = '';
+	$links = '';
+	$adult = 0;
+	$favourite = 0;
 
 
 	// Validate status
@@ -870,6 +873,37 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 	}
 
 
+	// Links
+	if(array_key_exists('links', $_POST) && is_array($_POST['links'])) {
+		$validatedLinks = [];
+		foreach($_POST['links'] as $link) {
+			$link = trim($link);
+			if($link !== ""
+			&& filter_var($url, FILTER_VALIDATE_URL) === False
+			&& strpos($link, 'http') === 0) {
+				$validatedLinks[] = $link;
+			}
+		}
+		$links = json_encode($validatedLinks);
+	}
+
+
+	// Flags
+	if(array_key_exists('adult', $_POST)) {
+		$adult = $_POST['adult'];
+		if($adult < 0 || $adult > 1) {
+			finalize($rpage, 'invalid_value', 'error');
+		}
+	}
+
+	if(array_key_exists('favourite', $_POST)) {
+		$favourite = $_POST['favourite'];
+		if($favourite < 0 || $favourite > 1) {
+			finalize($rpage, 'invalid_value', 'error');
+		}
+	}
+
+
 	// Apply to DB
 	if($action === "collection_item_create") {
 		$stmt = $db->prepare('
@@ -887,13 +921,16 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 				release_date,
 				started_at,
 				finished_at,
-				comments
+				comments,
+				links,
+				adult,
+				favourite
 			)
-			VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+			VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 		');
 
 		$stmt->bind_param(
-			'iissiiiissssss',
+			'iissiiiisssssssii',
 			$user['id'],
 			$collection['id'],
 			$status,
@@ -907,7 +944,10 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 			$release_date,
 			$started_at,
 			$finished_at,
-			$comments
+			$comments,
+			$links,
+			$adult,
+			$favourite
 		);
 	} elseif($action === "collection_item_edit") {
 		$stmt = $db->prepare('
@@ -923,12 +963,15 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 				release_date=?,
 				started_at=?,
 				finished_at=?,
-				comments=?
+				comments=?,
+				links=?,
+				adult=?,
+				favourite=?
 			WHERE id=?
 		');
 
 		$stmt->bind_param(
-			'ssiiiissssssi',
+			'ssiiiisssssssiii',
 			$status,
 			$name,
 			$score,
@@ -941,6 +984,9 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 			$started_at,
 			$finished_at,
 			$comments,
+			$links,
+			$adult,
+			$favourite,
 			$item['id']
 		);
 	}
@@ -949,8 +995,14 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 	if($stmt->affected_rows < 1) {
 		finalize($rpage, 'database_failure', 'error');
 	}
+
+	// Get newly added thread ID
+	$stmt = $db->prepare('SELECT LAST_INSERT_ID()');
+	$stmt->execute();
+	$new_item_id = $stmt->get_result();
+	$new_item_id = $new_item_id->fetch_row()[0];
 	
-	finalize($rpage, 'success');
+	finalize($rpage.'#item-'.$new_item_id, 'success');
 }
 
 
@@ -976,7 +1028,7 @@ if($action === "collection_item_delete") {
 	if($stmt->affected_rows === -1) {
 		finalize($rpage, 'database_failure', 'error');
 	}
-	if($stmt->num_rows < 1) {
+	if($item->num_rows < 1) {
 		finalize($rpage, 'disallowed_action', 'error');
 	}
 	$stmt->free_result();
@@ -1053,6 +1105,19 @@ elseif($action === "change_settings") {
 	} else {
 		finalize($rpage, 'no_change_detected');
 	}
+}
+
+
+
+
+
+elseif($action === 'import-list') {
+	$rpage = '/account/settings?section=data';
+	if(!array_key_exists('file', $_POST)) {
+		finalize($rpage, 'required_field', 'error');
+	}
+
+	
 }
 
 

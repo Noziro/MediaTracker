@@ -13,6 +13,7 @@ if(!$has_session) {
 
 				<a class="split__sidebar-item" href="?section=profile">Profile</a>
 				<a class="split__sidebar-item" href="?section=security">Security</a>
+				<a class="split__sidebar-item" href="?section=privacy">Privacy</a>
 				<a class="split__sidebar-item" href="?section=preferences">Preferences</a>
 				<a class="split__sidebar-item" href="?section=data">Data</a>
 			</div>
@@ -114,7 +115,7 @@ if(!$has_session) {
 			<h3 class="settings__header">User Experience</h3>
 			
 			<label class="label">Change timezone</label>
-			<select class="select" form="form-settings" name="change-timezone">
+			<select class="select" form="form-settings" name="change_timezone">
 				<?php foreach($valid_timezones as $zone_group_label => $zone_group) : ?>
 				<optgroup label="<?=$zone_group_label?>">
 					<?php foreach($zone_group as $zone) : ?>
@@ -135,6 +136,22 @@ if(!$has_session) {
 					Discard
 				</button>-->
 			</div>
+
+
+
+
+
+			<?php elseif($_GET['section'] === 'privacy') : ?>
+
+			<h3 class="settings__header">Collection Options</h3>
+
+			<label class="label">Who can view your lists</label>
+			- Anyone - Just friends - Only me
+
+
+			<label class="label">Hide adult entries</label>
+			Yes/no
+
 
 
 
@@ -165,6 +182,20 @@ if(!$has_session) {
 				<label for="parser-imdb" class="checkbox">
 					<input id="parser-imdb" type="radio" name="parser" value="imdb">
 					IMDB
+				</label>
+
+				<label class="label">Which collection should it be imported to?</label>
+					<?php
+					$collections = sqli_result_bindvar('SELECT id, name, type FROM collections WHERE user_id=? AND deleted=FALSE ORDER BY name ASC', 'i', $user['id']);
+					$collections = $collections->fetch_all(MYSQLI_ASSOC);
+					$i = 0;
+					foreach($collections as $collection) :
+					?>
+					<label>
+						<input type="radio" name="collection_id" value="<?=$collection['id']?>" <?php if($i === 0) { echo "checked"; $i = 1; } ?>>
+						<?=$collection['name']?> (<?=$collection['type']?>)
+					</label>
+					<?php endforeach; ?>
 				</label>
 
 				<button form="form-settings" class="button button--spaced" type="submit">

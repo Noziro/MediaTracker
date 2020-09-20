@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 14, 2020 at 09:18 AM
+-- Generation Time: Sep 20, 2020 at 04:32 AM
 -- Server version: 10.3.16-MariaDB
 -- PHP Version: 7.3.6
 
@@ -68,6 +68,7 @@ CREATE TABLE `media` (
   `collection_id` int(11) NOT NULL,
   `status` tinytext NOT NULL DEFAULT 'planned',
   `name` tinytext NOT NULL,
+  `image` varchar(2048) NOT NULL,
   `score` int(3) DEFAULT 0,
   `episodes` smallint(6) DEFAULT 0,
   `progress` smallint(6) NOT NULL DEFAULT 0,
@@ -78,9 +79,11 @@ CREATE TABLE `media` (
   `started_at` date DEFAULT NULL,
   `finished_at` date DEFAULT NULL,
   `comments` text NOT NULL,
-  `companies` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `credits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `storage` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
+  `links` longtext CHARACTER SET armscii8 COLLATE armscii8_bin NOT NULL,
   `adult` tinyint(1) NOT NULL DEFAULT 0,
+  `favourite` tinyint(1) NOT NULL,
   `private` tinyint(1) NOT NULL,
   `deleted` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

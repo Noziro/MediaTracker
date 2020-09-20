@@ -101,19 +101,63 @@ $page_user = $page_user->fetch_assoc();
 			<div class="profile__section">
 				<span class="profile__section-header">Stats</span>
 
-				Avg. Score: 
-				<?php
-				$avg_score = sqli_result_bindvar('SELECT AVG(score) FROM media WHERE user_id=? AND score!=0', 'i', $page_user['id']);
-				$avg_score = $avg_score->fetch_row()[0];
-				echo round($avg_score, 2);
-				?>
-				<br />
-				Avg. Score of Completed: 
-				<?php
-				$avg_score = sqli_result_bindvar('SELECT AVG(score) FROM media WHERE user_id=? AND status="completed" AND score!=0', 'i', $page_user['id']);
-				$avg_score = $avg_score->fetch_row()[0];
-				echo round($avg_score, 2);
-				?>
+				<div>
+					Total Items:
+					<?php
+					$total_items = sqli_result_bindvar('SELECT COUNT(id) FROM media WHERE user_id=?', 'i', $page_user['id']);
+					echo $total_items->fetch_row()[0];
+					?>
+				</div>
+
+				<div>
+					Episodes Complete: 
+					<?php
+					$episodes = sqli_result_bindvar('
+						SELECT SUM(media.episodes)
+						FROM media
+						INNER JOIN collections
+						ON collections.id = media.collection_id
+						WHERE media.user_id = ?
+						AND collections.type = "video"
+					', 'i', $page_user['id']);
+					$episodes = $episodes->fetch_row()[0];
+					echo round($episodes, 2);
+					?>
+				</div>
+
+				<div>
+					Chapters Complete: 
+					<?php
+					$chapters = sqli_result_bindvar('
+						SELECT SUM(media.episodes)
+						FROM media
+						INNER JOIN collections
+						ON collections.id = media.collection_id
+						WHERE media.user_id = ?
+						AND collections.type = "literature"
+					', 'i', $page_user['id']);
+					$chapters = $chapters->fetch_row()[0];
+					echo round($chapters, 2);
+					?>
+				</div>
+
+				<div>
+					Avg. Score: 
+					<?php
+					$avg_score = sqli_result_bindvar('SELECT AVG(score) FROM media WHERE user_id=? AND score!=0', 'i', $page_user['id']);
+					$avg_score = $avg_score->fetch_row()[0];
+					echo round($avg_score, 2);
+					?>
+				</div>
+
+				<div>
+					Avg. Score of Completed: 
+					<?php
+					$avg_score = sqli_result_bindvar('SELECT AVG(score) FROM media WHERE user_id=? AND status="completed" AND score!=0', 'i', $page_user['id']);
+					$avg_score = $avg_score->fetch_row()[0];
+					echo round($avg_score, 2);
+					?>
+				</div>
 			</div>
 
 			<!-- if favourite > 1 -->

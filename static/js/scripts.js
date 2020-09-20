@@ -70,7 +70,6 @@ function modalConfirmation($msg, $action, $data, $value) {
 // Autofill Forms
 
 var fills = document.getElementsByClassName('js-autofill');
-
 for(var i = 0; i < fills.length; i++) {
 	var fillEle = fills.item(i),
 		fillValue = fillEle.getAttribute('data-autofill');
@@ -78,4 +77,13 @@ for(var i = 0; i < fills.length; i++) {
 	if(fillValue !== null) {
 		fillEle.value = fillValue;
 	}
+}
+
+function setToday($id) {
+	var $today = new Date(),
+		$y = new Intl.DateTimeFormat('en', { year: 'numeric' }).format($today),
+		$m = new Intl.DateTimeFormat('en', { month: '2-digit' }).format($today),
+		$d = new Intl.DateTimeFormat('en', { day: '2-digit' }).format($today),
+		$todayFormatted = `${$y}-${$m}-${$d}`;
+	document.getElementById($id).value = $todayFormatted;
 }
