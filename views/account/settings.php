@@ -20,7 +20,7 @@ if(!$has_session) {
 
 
 		<div class="split__section split__section--primary">
-			<form id="form-settings" style="display:none" action="/interface" method="POST">
+			<form id="form-settings" style="display:none" action="/interface/generic" method="POST">
 				<input type="hidden" name="action" value="change_settings">
 				<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 			</form>
@@ -161,7 +161,7 @@ if(!$has_session) {
 
 			<h3 class="settings__header">Import/Export Lists</h3>
 
-			<form action="/interface" method="POST">
+			<form action="/interface/generic" method="POST">
 				<input type="hidden" name="action" value="import_list">
 				<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 
@@ -206,7 +206,7 @@ if(!$has_session) {
 			<span class="settings__notice">List exporting coming soon.</span>
 			<!--
 
-			<form action="/interface" method="POST">
+			<form action="/interface/generic" method="POST">
 				<input type="hidden" name="action" value="export-list">
 				<button class="settings__button button button--spaced" type="submit">
 					Export

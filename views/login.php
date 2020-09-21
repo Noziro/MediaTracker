@@ -1,16 +1,15 @@
 <main id="content" class="wrapper wrapper--content">
 	<div class="wrapper__inner login-flow">
-		<?php if(isset($_COOKIE["session"]) && sql("SELECT id FROM sessions WHERE id=? LIMIT 1", "s", $_COOKIE["session"])['rows'] > 0) :
+		<?php if($has_session) :
 		
-		header("Location: /");
-		exit();
+		finalize('/');
 		
 		elseif(isset($_GET["action"]) && $_GET["action"] == "register") : ?>
 		
 		<div class="login-flow__form">
 			<h3 class="login-flow__title">Register</h5>
 			
-			<form action="/session" method="POST">
+			<form action="/interface/session" method="POST">
 				<input type="hidden" name="action" value="register">
 				
 				<label class="login-flow__label" for="login-username">Username</label>
@@ -88,7 +87,7 @@
 		<div class="login-flow__form">
 			<h5 class="login-flow__title">Login</h5>
 			
-			<form action="/session" method="POST">
+			<form action="/interface/session" method="POST">
 				<input type="hidden" name="action" value="login">
 				<input type="hidden" name="return_to" value="<?=$_GET['return_to']?>">
 				

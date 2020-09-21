@@ -10,9 +10,15 @@ RewriteCond %{REQUEST_FILENAME} -f
 ## Allows access
 RewriteRule ^static - [L,NC]
 
-# Provides access to session and interface php files
-RewriteRule ^session(|\.php)$ session.php [L,NC]
-RewriteRule ^interface(|\.php)$ interface.php [L,NC]
+# Provides access to files in interface folder (but not directories)
+## Only matches if NOT directory
+RewriteCond %{REQUEST_FILENAME} !-d
+## Only matches if valid file
+RewriteCond "%{REQUEST_FILENAME}.php" -f
+## Allows access
+RewriteRule ^interface\/(.*)$ interface/$1.php [L,NC]
 
 # Redirects everything else to index
+RewriteRule ^(?!static|interface).* index.php [L]
+RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule . index.php [L]

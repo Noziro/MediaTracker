@@ -1,5 +1,5 @@
 <?php
-include 'server/server.php';
+include '../server/server.php';
 
 $action = $_POST['action'];
 
@@ -95,5 +95,5 @@ elseif($action === "logout") {
 }
 
 // File should only reach this point if no other actions have reached finalization.
-finalize('/?error=disallowed-action');
+finalize($r2login, 'disallowed_action', 'error');
 ?>

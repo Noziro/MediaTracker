@@ -4,7 +4,7 @@
 
 // SETUP
 
-include 'server/server.php';
+include '../server/server.php';
 
 // AUTH
 

@@ -204,7 +204,7 @@
 				<h3 class="modal__header">
 					Edit Collection
 				</h3>
-				<form action="/interface" method="POST">
+				<form action="/interface/generic" method="POST">
 					<input type="hidden" name="action" value="collection_edit">
 					<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 					<input type="hidden" name="collection_id" value="<?=$collection['id']?>">
@@ -275,7 +275,7 @@
 				<h3 class="modal__header">
 					Add Item
 				</h3>
-				<form action="/interface" method="POST">
+				<form action="/interface/generic" method="POST">
 					<input type="hidden" name="action" value="collection_item_create">
 					<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 					<input type="hidden" name="collection_id" value="<?=$collection['id']?>">
@@ -546,7 +546,7 @@
 					Create Collection
 				</h3>
 
-				<form action="/interface" method="POST">
+				<form action="/interface/generic" method="POST">
 					<input type="hidden" name="action" value="collection_create">
 					<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 					

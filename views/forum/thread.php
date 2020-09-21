@@ -232,7 +232,7 @@ if(isset($_GET["page"])) {
 				<?php if($has_session && $reply['user_id'] === $user['id']) : ?>
 				
 				<div id="js-reply-edit-<?=$reply['id']?>" class="thread-reply__edit js-reply-edit" style="display:none">
-					<form id="form-edit-reply-<?=$reply['id']?>" style="display:none" action="/interface" method="POST">
+					<form id="form-edit-reply-<?=$reply['id']?>" style="display:none" action="/interface/generic" method="POST">
 						<input type="hidden" name="action" value="forum_reply_edit">
 						<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI'].'#reply-'.$reply['id']?>">
 						<input type="hidden" name="reply_id" value="<?=$reply['id']?>">
@@ -320,7 +320,7 @@ if(isset($_GET["page"])) {
 				<h3 class="modal__header">
 					New Reply
 				</h3>
-				<form action="/interface" method="POST">
+				<form action="/interface/generic" method="POST">
 					<input type="hidden" name="action" value="forum_reply_create">
 					<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 					<input type="hidden" name="thread_id" value="<?=$thread['id']?>">
@@ -340,7 +340,7 @@ if(isset($_GET["page"])) {
 			<div class="modal__inner">
 				<h3 id="js-confirmation-msg" class="modal__header"></h3>
 				<div class="js-confirmation-preview"><!-- TODO - unused atm - plan to put post content here to display what user is deleting --></div>
-				<form id="form-confirmation" action="/interface" method="POST" style="display:none">
+				<form id="form-confirmation" action="/interface/generic" method="POST" style="display:none">
 					<input id="js-confirmation-action" type="hidden" name="action">
 					<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 					<input id="js-confirmation-data" type="hidden">

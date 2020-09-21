@@ -139,7 +139,7 @@ $url_readable = end($url_split);
 							<a class="site-nav__item" href="<?=FILEPATH."user?id=".$user["id"]?>">Profile</a>
 							<a class="site-nav__item" href="<?=FILEPATH?>account/settings">Settings</a>
 							
-							<form id="form-logout"style="display:none" action="/session" method="POST">
+							<form id="form-logout"style="display:none" action="/interface/session" method="POST">
 								<input type="hidden" name="action" value="logout">
 								<input type="hidden" name="return_to" value="<?=$_SERVER["REQUEST_URI"]?>">
 							</form>

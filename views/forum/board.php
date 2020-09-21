@@ -210,7 +210,7 @@ if(isset($_GET["page"])) {
 				<h3 class="modal__header">
 					New Thread
 				</h3>
-				<form action="/interface" method="POST">
+				<form action="/interface/generic" method="POST">
 					<input type="hidden" name="action" value="forum_thread_create">
 					<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 					<input type="hidden" name="board_id" value="<?=$board['id']?>">
