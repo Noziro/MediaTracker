@@ -1,20 +1,18 @@
 <?php
 if(isset($_GET["id"])) {
-	$thread = sqli_result_bindvar("SELECT id, board_id, title, locked, deleted FROM threads WHERE id=?", "s", $_GET["id"]);
+	$thread = sql('SELECT id, board_id, title, locked, deleted FROM threads WHERE id=? LIMIT 1', ['i', $_GET['id']]);
 	
-	if($thread->num_rows < 1) {
+	if($thread['rows'] < 1) {
 		header('Location: /404');
 		exit();
 	}
 	
-	$thread = $thread->fetch_assoc();
+	$thread = $thread['result'][0];
 	
-	$board = sqli_result_bindvar("SELECT id, name, permission_level FROM boards WHERE id=?", "s", $thread['board_id']);
-	$board = $board->fetch_assoc();
-	$board_permission_level = $board['permission_level'];
+	$board = sql('SELECT id, name, permission_level FROM boards WHERE id=?', ['i', $thread['board_id']])['result'][0];
 	
 	// redirect if user lacks access
-	if($permission_level < $board_permission_level || $thread['deleted'] === 1 && $permission_level < $permission_levels['Moderator']) {
+	if($permission_level < $board['permission_level'] || $thread['deleted'] === 1 && $permission_level < $permission_levels['Moderator']) {
 		header('Location: /403');
 		exit();
 	}
@@ -23,30 +21,16 @@ if(isset($_GET["id"])) {
 	exit();
 }
 
-$stmt = $db->prepare('SELECT COUNT(id) FROM replies WHERE thread_id=? AND deleted=0');
-$stmt->bind_param('i', $thread['id']);
-$stmt->execute();
-$total_replies = $stmt->get_result();
-$stmt->free_result();
-$total_replies = $total_replies->fetch_row()[0];
+$total_replies = reset(sql('SELECT COUNT(id) FROM replies WHERE thread_id=? AND deleted=0', ['i', $thread['id']])['result'][0]);
 
 $pagination_offset = 20;
 
 if(isset($_GET["page"])) {
 	$pagination_offset_current = ($_GET['page'] - 1) * $pagination_offset;
-	
-	$stmt = $db->prepare("SELECT id, user_id, body, created_at, updated_at, deleted FROM replies WHERE thread_id=? ORDER BY created_at ASC LIMIT ?, ?");
-	$stmt->bind_param("sii", $thread['id'], $pagination_offset_current, $pagination_offset);
+	$replies = sql('SELECT id, user_id, body, created_at, updated_at, deleted FROM replies WHERE thread_id=? ORDER BY created_at ASC LIMIT ?, ?', ['iii', $thread['id'], $pagination_offset_current, $pagination_offset]);
 } else {
-	$stmt = $db->prepare("SELECT id, user_id, body, created_at, updated_at, deleted FROM replies WHERE thread_id=? ORDER BY created_at ASC LIMIT 20");
-	$stmt->bind_param("s", $thread['id']);
+	$replies = sql('SELECT id, user_id, body, created_at, updated_at, deleted FROM replies WHERE thread_id=? ORDER BY created_at ASC LIMIT 20', ['i', $thread['id']]);
 }
-
-$stmt->execute();
-$replies = $stmt->get_result();
-$replies__count = $replies->num_rows;
-$stmt->free_result();
-$replies = $replies->fetch_all(MYSQLI_ASSOC);
 ?>
 
 
@@ -191,25 +175,22 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 
 
 		<?php
-		if($replies__count < 1) :
+		if($replies['rows'] < 1) :
 		?>
 
 		<div class="dialog-box dialog-box--fullsize">No replies in specified search.</div>
 		
 		<?php 
 		else :
-			foreach($replies as $reply) :
+			foreach($replies['result'] as $reply) :
 				if($reply['deleted'] === 0) :
 		?>
 		
 		<div id="reply-<?=$reply['id']?>" class="thread-reply">
 			<div class="thread-reply__info">
 				<?php
-				$reply_user = sqli_result_bindvar("SELECT id, nickname, permission_level FROM users WHERE id=?", "s", $reply['user_id']);
-				$reply_user = $reply_user->fetch_assoc();
-				
-				$user_rank = sqli_result_bindvar("SELECT title FROM permission_levels WHERE permission_level <= ? ORDER BY permission_level DESC", "s", $reply_user['permission_level']);
-				$user_rank = $user_rank->fetch_row()[0];
+				$reply_user = sql('SELECT id, nickname, permission_level FROM users WHERE id=?', ['i', $reply['user_id']])['result'][0];
+				$user_rank = sql('SELECT title FROM permission_levels WHERE permission_level <= ? ORDER BY permission_level DESC LIMIT 1', ['i', $reply_user['permission_level']])['result'][0]['title'];
 				?>
 				
 				<a class="thread-reply__username" href="<?=FILEPATH."user?id=".$reply_user['id']?>">
@@ -302,11 +283,6 @@ $replies = $replies->fetch_all(MYSQLI_ASSOC);
 		
 		<div id="reply-<?=$reply['id']?>" class="thread-reply thread-reply--deleted">
 			<div class="thread-reply__deleted">
-				<?php
-				$reply_user = sqli_result_bindvar("SELECT id FROM users WHERE id=?", "s", $reply['user_id']);
-				$reply_user = $reply_user->fetch_assoc();
-				?>
-				
 				- Deleted - Posted <span title="<?=utc_date_to_user($reply['created_at'])?>">
 					<?=readable_date($reply['created_at'])?>
 				</span>

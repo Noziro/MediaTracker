@@ -1,6 +1,6 @@
 <main id="content" class="wrapper wrapper--content">
 	<div class="wrapper__inner login-flow">
-		<?php if(isset($_COOKIE["session"]) && sqli_result_bindvar("SELECT id FROM sessions WHERE id=?", "s", $_COOKIE["session"])->num_rows > 0) :
+		<?php if(isset($_COOKIE["session"]) && sql("SELECT id FROM sessions WHERE id=? LIMIT 1", "s", $_COOKIE["session"])['rows'] > 0) :
 		
 		header("Location: /");
 		exit();

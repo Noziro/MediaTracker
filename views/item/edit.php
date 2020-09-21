@@ -1,21 +1,15 @@
 <?php
 if(isset($_GET['id'])) {
-    $item__id = $_GET['id'];
-
-    $item = sqli_result_bindvar('SELECT id, user_id, collection_id, status, name, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments, links, adult, favourite FROM media WHERE id=? LIMIT 1', 's', $item__id);
-	$item_count = $item->num_rows;
-	$item = $item->fetch_assoc();
-
-	$collection = sqli_result_bindvar('SELECT id, user_id, name, type, display_score, display_progress, display_user_started, display_user_finished, display_days, rating_system, private FROM collections WHERE id=?', 's', $item['collection_id']);
-	$collection = $collection->fetch_assoc();
-
-	// Item exists
-	if($item_count < 1) {
+    $item = sql('SELECT id, user_id, collection_id, status, name, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments, links, adult, favourite FROM media WHERE id=? LIMIT 1', ['s', $_GET['id']]);
+	if($item['rows'] < 1) {
 		finalize('/404');
 	}
+	$item = $item['result'][0];
+
+	$collection = sql('SELECT id, user_id, name, type, display_score, display_progress, display_user_started, display_user_finished, display_days, rating_system, private FROM collections WHERE id=?', ['s', $item['collection_id']])['result'][0];
 
 	// User authority
-	elseif(!$has_session || $user['id'] !== $item['user_id']) {
+	if(!$has_session || $user['id'] !== $item['user_id']) {
 		finalize('/403');
 	}
 } else {
@@ -28,7 +22,7 @@ if(isset($_GET['id'])) {
 		<form id="collection-item-edit" action="/interface" method="POST">
 			<input type="hidden" name="action" value="collection_item_edit">
 			<input type="hidden" name="return_to" value="/collection?id=<?=$item['collection_id'].'#item-'.$item['id']?>">
-			<input type="hidden" name="item" value="<?=$item['id']?>">
+			<input type="hidden" name="item_id" value="<?=$item['id']?>">
 
 			<div class="item-fields">
 				<div class="item-fields__divider">
@@ -158,7 +152,7 @@ if(isset($_GET['id'])) {
 
 		<div class="button-list">
 			<button form="collection-item-edit" class="button-list__button button button--spaced" type="submit">Edit</button>
-			<button class="button-list__button button button--spaced" onclick="modalConfirmation('Are you sure you wish to delete this item?', 'collection_item_delete', 'item', <?=$item['id']?>)">Delete</button>
+			<button class="button-list__button button button--spaced" onclick="modalConfirmation('Are you sure you wish to delete this item?', 'collection_item_delete', 'item_id', <?=$item['id']?>)">Delete</button>
 		</div>
 
 		<div class="dialog-box dialog-box--subcontent">

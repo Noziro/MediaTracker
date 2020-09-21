@@ -1,6 +1,9 @@
 <?php
-$boards = sqli_result_bindvar('SELECT id, name, description FROM boards WHERE permission_level <= ? ORDER BY display_order ASC', 's', $permission_level);
-$boards = $boards->fetch_all(MYSQLI_ASSOC);
+$sql = sql('SELECT id, name, description FROM boards WHERE permission_level <= ? ORDER BY display_order ASC', ['i', $permission_level]);
+if(!$sql['result']) {
+	finalize('/404', $sql['response_code'], $sql['response_type']);
+}
+$boards = $sql['result'];
 ?>
 
 <main id="content" class="wrapper wrapper--content">
@@ -39,14 +42,12 @@ $boards = $boards->fetch_all(MYSQLI_ASSOC);
 				</div>
 				<div class="forum-boards__board-aside">
 					<?php 				
-					$threads = sqli_result_bindvar("SELECT id, user_id, title, updated_at, anonymous FROM threads WHERE board_id=? AND deleted=FALSE ORDER BY updated_at DESC LIMIT 2", "s", $board['id']);
+					$threads = sql("SELECT id, user_id, title, updated_at, anonymous FROM threads WHERE board_id=? AND deleted=0 ORDER BY updated_at DESC LIMIT 2", ["i", $board['id']]);
 					
-					if($threads->num_rows > 0) :
-					
-					$threads->fetch_all(MYSQLI_ASSOC);
-					
-					foreach($threads as $thread) :
-					
+					if($threads['rows'] > 0) :
+						$threads = $threads['result'];
+
+						foreach($threads as $thread) :
 					?>
 					
 					<div class="forum-boards__recent-thread">
@@ -63,8 +64,7 @@ $boards = $boards->fetch_all(MYSQLI_ASSOC);
 
 							<?php
 							if($thread['anonymous'] !== 1) :
-							$thread_username = sqli_result_bindvar("SELECT nickname FROM users WHERE id=?", "s", $thread['user_id']);
-							$thread_username = $thread_username->fetch_row()[0];
+								$thread_username = sql("SELECT nickname FROM users WHERE id=?", ["i",$thread['user_id']])['result'][0]['nickname'];
 							?>
 
 							<span class="forum-boards__thread-author">
@@ -80,7 +80,10 @@ $boards = $boards->fetch_all(MYSQLI_ASSOC);
 						</div>
 					</div>
 					
-					<?php endforeach; endif ?>
+					<?php
+						endforeach;
+					endif;
+					?>
 				</div>
 			</div>
 			<?php endforeach ?>
@@ -88,10 +91,8 @@ $boards = $boards->fetch_all(MYSQLI_ASSOC);
 
 		<div class="dialog-box dialog-box--fullsize">
 			<?php
-			$threads = sqli_result('SELECT COUNT(*) FROM threads WHERE deleted=0');
-			$threads = $threads->fetch_row()[0];
-			$replies = sqli_result('SELECT COUNT(*) FROM replies WHERE deleted=0');
-			$replies = $replies->fetch_row()[0];
+			$threads = reset(sql('SELECT COUNT(*) FROM threads WHERE deleted=0')['result'][0]);
+			$replies = reset(sql('SELECT COUNT(*) FROM replies WHERE deleted=0')['result'][0]);
 			?>
 
 			Total Threads: <?=$threads?> - Total Replies: <?=$replies?>

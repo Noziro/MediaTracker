@@ -8,20 +8,21 @@ if(!$has_session) {
 <main id="content" class="wrapper wrapper--content">
 	<div class="wrapper__inner split">
 		<div class="split__section split__section--sidebar">
-			<div class="">
-				<span class="split__sidebar-header">Settings</span>
+			<span class="split__sidebar-header">Settings</span>
 
-				<a class="split__sidebar-item" href="?section=profile">Profile</a>
-				<a class="split__sidebar-item" href="?section=security">Security</a>
-				<a class="split__sidebar-item" href="?section=privacy">Privacy</a>
-				<a class="split__sidebar-item" href="?section=preferences">Preferences</a>
-				<a class="split__sidebar-item" href="?section=data">Data</a>
-			</div>
+			<a class="split__sidebar-item" href="?section=profile">Profile</a>
+			<a class="split__sidebar-item" href="?section=security">Security</a>
+			<a class="split__sidebar-item" href="?section=privacy">Privacy</a>
+			<a class="split__sidebar-item" href="?section=preferences">Preferences</a>
+			<a class="split__sidebar-item" href="?section=data">Data</a>
 		</div>
 		
+
+
 		<div class="split__section split__section--primary">
 			<form id="form-settings" style="display:none" action="/interface" method="POST">
 				<input type="hidden" name="action" value="change_settings">
+				<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 			</form>
 			
 			<?php if(!isset($_GET['section']) || $_GET['section'] === 'profile') : ?>
@@ -83,8 +84,7 @@ if(!$has_session) {
 				</tr>
 				
 				<?php 
-				$profile__active_sessions = sqli_result_bindvar('SELECT id, started, expiry, user_ip FROM sessions WHERE user_id=?', 's', $user['id']);
-				$profile__active_sessions = $profile__active_sessions->fetch_all(MYSQLI_ASSOC);
+				$profile__active_sessions = sql('SELECT id, started, expiry, user_ip FROM sessions WHERE user_id=? ORDER BY started DESC', ['i', $user['id']])['result'];
 				
 				foreach($profile__active_sessions as $session) : ?>
 				
@@ -163,6 +163,7 @@ if(!$has_session) {
 
 			<form action="/interface" method="POST">
 				<input type="hidden" name="action" value="import_list">
+				<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 
 				<label class="settings__label">File to import</label>
 				<input type="file" name="file">
@@ -186,8 +187,7 @@ if(!$has_session) {
 
 				<label class="label">Which collection should it be imported to?</label>
 					<?php
-					$collections = sqli_result_bindvar('SELECT id, name, type FROM collections WHERE user_id=? AND deleted=FALSE ORDER BY name ASC', 'i', $user['id']);
-					$collections = $collections->fetch_all(MYSQLI_ASSOC);
+					$collections = sql('SELECT id, name, type FROM collections WHERE user_id=? AND deleted=0 ORDER BY name ASC', ['i', $user['id']])['result'];
 					$i = 0;
 					foreach($collections as $collection) :
 					?>

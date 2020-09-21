@@ -14,6 +14,14 @@ $db = new mysqli(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB, MYSQL_PORT);
 
 session_start();
 
+set_error_handler("errorHandler");
+function errorHandler($errno, $errstr, $errfile, $errline)
+{
+    error_log("$errstr in $errfile:$errline");
+	echo $errstr.'<br><br>';
+    #header('Location: /500');
+}
+
 
 
 // GENERIC FUNCTIONS
@@ -114,12 +122,10 @@ class Authentication {
 		if (!array_key_exists('session', $_COOKIE)) {
 			return false;
 		}
-		
-		$que = sqli_result_bindvar("SELECT expiry FROM sessions WHERE id=?", "s", $_COOKIE['session']);
-		$res = $que->fetch_assoc();
-		if($que->num_rows > 0) {
-			if($res["expiry"] < time()) {
-				sqli_execute("DELETE FROM sessions WHERE id=?", "s", $_COOKIE['session']);
+		$session = sql("SELECT expiry FROM sessions WHERE id=? LIMIT 1", ["s", $_COOKIE['session']]);
+		if($session['rows'] > 0) {
+			if($session['result'][0]['expiry'] < time()) {
+				sql("DELETE FROM sessions WHERE id=?", ["s", $_COOKIE['session']]);
 				setcookie('session', '', time() - 3600);
 				return false;
 			}
@@ -180,7 +186,7 @@ class Authentication {
 		$id = bin2hex(random_bytes(16));
 		
 		// If ID exists, get new one
-		if (sqli_result_bindvar("SELECT id FROM sessions WHERE id=?", "s", $id)->num_rows > 0) {
+		if (sql("SELECT id FROM sessions WHERE id=?", ["s", $id])['rows'] > 0) {
 			$id = generateSessionID();
 		}
 		
@@ -207,8 +213,7 @@ if($has_session) {
 
 // ACCESS LEVEL
 
-$permission_levels_temp = sqli_result('SELECT title, permission_level FROM permission_levels ORDER BY permission_level ASC');
-$permission_levels_temp = $permission_levels_temp->fetch_all(MYSQLI_ASSOC);
+$permission_levels_temp = sql('SELECT title, permission_level FROM permission_levels ORDER BY permission_level ASC')['result'];
 $permission_levels = [];
 
 foreach($permission_levels_temp as $perm_pair) {
@@ -724,48 +729,70 @@ function readable_date($date, $suffix = true, $verbose = false) {
 
 // DATABASE FUNCTIONS
 
-// Passes database an SQL statement and returns result.
-function sqli_result(string $sql) {
+// Passes database a statement and returns result.
+// Returns an array:
+//     result -> false if failed, null if no change, true or a result if successfull
+//     response_code -> string to describe outcome, used in notices
+//     response_type -> string to describe type of outcome, used in notices
+//     rows -> number of affected/returned rows
+function sql(string $stmt, $params = false) {
 	global $db;
+	$dbfail = [
+			'result' => false,
+			'response_code' => 'database_failure',
+			'response_type' => 'error',
+			'rows' => -1
+		];
 	
-	$q = $db->prepare($sql);
-	$q->execute();
-	$e = $q->error;
-	$r = $q->get_result();
+	// Execute statement
+	if(!$q = $db->prepare($stmt)) { return $dbfail; }
+	if($params !== false) { $q->bind_param(...$params); }
+	if(!$q->execute()) { return $dbfail; }
+
+	// SELECT
+	if(strpos(trim($stmt), 'SELECT') === 0) {
+		$res = $q->get_result();
+		$rows = $res->num_rows;
+		if($rows < 1) {
+			$res = true;
+		} else {
+			$res = $res->fetch_all(MYSQLI_ASSOC);
+		}
+	}
+	
+	// UPDATE && DELETE
+	elseif(strpos(trim($stmt), 'UPDATE') === 0 || strpos(trim($stmt), 'DELETE') === 0) {
+		$rows = $q->affected_rows;
+		if($rows < 1) {
+			return [
+					'result' => null,
+					'response_code' => 'database_null_commit',
+					'response_type' => 'error',
+					'rows' => $rows
+				];
+		} else {
+			$res = true;
+		}
+	}
+
+	// INSERT
+	else {
+		$rows = $q->affected_rows;
+		$res = true;
+	}
+
 	$q->close();
-	
-	if($e !== '') { return False; }
-	return $r;
+
+	// Return result
+	return [
+			'result' => $res,
+			'response_code' => 'success',
+			'response_type' => 'generic',
+			'rows' => $rows
+		];
 }
 
-// Passes database an SQL statement with sanitized variable and returns result.
-function sqli_result_bindvar(string $sql, string $insert_type, string $insert_variable) {
-	global $db;
-	
-	$q = $db->prepare($sql);
-	$q->bind_param($insert_type, $insert_variable);
-	$q->execute();
-	$e = $q->error;
-	$r = $q->get_result();
-	$q->close();
 
-	if($e !== '') { return False; }
-	return $r;
-}
-
-// Executes an SQL statement. Returns TRUE for success and STRING for error.
-function sqli_execute(string $sql, string $insert_type, string $insert_variable) {
-	global $db;
-
-	$q = $db->prepare($sql);
-	$q->bind_param($insert_type, $insert_variable);
-	$q->execute();
-	$error = $q->error;
-	$q->close();
-
-	if($error !== "") { return False; }
-	return true;
-}
 
 // For use on user POST pages. Closes relevant pieces and redirects user to a page.
 function finalize(string $page = '/', string $notice_case = null, string $notice_type = 'generic', string $details = '') {

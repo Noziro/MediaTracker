@@ -1,10 +1,33 @@
 <main id="content" class="wrapper wrapper--content">
 	<div class="wrapper__inner">
-		TODO
+		<?php if(count($_GET) > 0) : ?>
 		
-		if $_GET['user']
-		if $_GET['thread']
-		if $_GET['reply']
+
+
+
+		<?php if $_GET['user'] ?>
+
+
+
+		<?php if $_GET['thread'] ?>
+
+
+
+		<?php if $_GET['reply'] ?>
+
+
+
+		<?php endif; ?>
+
+
+
+
+
+		<?php else : ?>
+
+		What would you like to report?
+
+		<?php endif; ?>
 		<form>
 		</form>
 	</div>

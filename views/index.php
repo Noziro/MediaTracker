@@ -1,24 +1,21 @@
 <?php if($has_session) : ?>
 
 <main id="content" class="wrapper wrapper--content">
-	<div class="wrapper__inner">
-		<div class="page-split">
-			<div class="split mainbar">
-				Currently Watching / From Your Lists
-				<br /><br />
-				(Friend) Activity Feed
-				<br /><br />
-				More?
-				<br /><br />
-			</div>
-			<div class="split sidebar">
-				Popular Now
-				<br /><br />
-				Recent Announcements
-				<br /><br />
-				Recent Threads
-				<br /><br />
-			</div>
+	<div class="wrapper__inner split">
+		<div class="split__section">
+			<span class="split__sidebar-header">Currently Watching / From Your Lists</span>
+			<br /><br />
+			<span class="split__sidebar-header">(Friend) Activity Feed</span>
+			<br /><br />
+		</div>
+
+
+
+		<div class="split__section split__section--sidebar">
+			<span class="split__sidebar-header">Announcements</span>
+			<br /><br />
+			<span class="split__sidebar-header">Recent Threads</span>
+			<br /><br />
 		</div>
 	</div>
 </main>

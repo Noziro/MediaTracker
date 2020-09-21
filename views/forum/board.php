@@ -1,13 +1,13 @@
 <?php
 if(isset($_GET["id"])) {
-	$board = sqli_result_bindvar("SELECT id, name, description, permission_level FROM boards WHERE id=?", "i", $_GET["id"]);
+	$board = sql("SELECT id, name, description, permission_level FROM boards WHERE id=? LIMIT 1", ["i", $_GET["id"]]);
 	
-	if($board->num_rows < 1) {
+	if($board['rows'] < 1) {
 		header('Location: /404');
 		exit();
 	}
 	
-	$board = $board->fetch_assoc();
+	$board = $board['result'][0];
 	
 	// redirect if user lacks access
 	if($permission_level < $board['permission_level']) {
@@ -19,30 +19,16 @@ if(isset($_GET["id"])) {
 	exit();
 }
 
-$stmt = $db->prepare('SELECT COUNT(id) FROM threads WHERE board_id=? AND deleted=FALSE');
-$stmt->bind_param('i', $board['id']);
-$stmt->execute();
-$total_threads = $stmt->get_result();
-$stmt->free_result();
-$total_threads = $total_threads->fetch_row()[0];
+$total_threads = reset(sql('SELECT COUNT(id) FROM threads WHERE board_id=? AND deleted=0', ['i', $board['id']])['result'][0]);
 
 $pagination_offset = 15;
 
 if(isset($_GET["page"])) {
 	$pagination_offset_current = ($_GET['page'] - 1) * $pagination_offset;
-	
-	$stmt = $db->prepare("SELECT id, user_id, title, created_at, updated_at, anonymous FROM threads WHERE board_id=? AND deleted=FALSE ORDER BY updated_at DESC LIMIT ?, ?");
-	$stmt->bind_param("sii", $board['id'], $pagination_offset_current, $pagination_offset);
+	$threads = sql("SELECT id, user_id, title, created_at, updated_at, anonymous FROM threads WHERE board_id=? AND deleted=0 ORDER BY updated_at DESC LIMIT ?, ?", ["iii", $board['id'], $pagination_offset_current, $pagination_offset]);
 } else {
-	$stmt = $db->prepare("SELECT id, user_id, title, created_at, updated_at, anonymous FROM threads WHERE board_id=? AND deleted=FALSE ORDER BY updated_at DESC LIMIT 20");
-	$stmt->bind_param("s", $board['id']);
+	$threads = sql("SELECT id, user_id, title, created_at, updated_at, anonymous FROM threads WHERE board_id=? AND deleted=0 ORDER BY updated_at DESC LIMIT 20", ["i", $board['id']]);
 }
-
-$stmt->execute();
-$threads = $stmt->get_result();
-$threads__count = $threads->num_rows;
-$stmt->free_result();
-$threads = $threads->fetch_all(MYSQLI_ASSOC);
 ?>
 
 <main id="content" class="wrapper wrapper--content">
@@ -120,7 +106,7 @@ $threads = $threads->fetch_all(MYSQLI_ASSOC);
 		<div class="dialog-box dialog-box--fullsize">No threads yet.</div>
 
 		<?php
-		elseif($threads__count < 1) :
+		elseif($threads['rows'] < 1) :
 		?>
 
 		<div class="dialog-box dialog-box--fullsize">No threads in specified search.</div>
@@ -140,7 +126,7 @@ $threads = $threads->fetch_all(MYSQLI_ASSOC);
 				</div>
 			</div>
 			
-			<?php foreach($threads as $thread): ?>
+			<?php foreach($threads['result'] as $thread): ?>
 			<div class="forum-threads__thread">
 				<div class="forum-threads__thread-description">
 					<a href="<?=FILEPATH?>forum/thread?id=<?=$thread['id']?>">
@@ -154,8 +140,7 @@ $threads = $threads->fetch_all(MYSQLI_ASSOC);
 
 						<?php
 						if($thread['anonymous'] !== 1) :
-						$thread_user = sqli_result_bindvar("SELECT id, nickname FROM users WHERE id=?", "s", $thread['user_id']);
-						$thread_user = $thread_user->fetch_assoc();
+						$thread_user = sql("SELECT id, nickname FROM users WHERE id=?", ["s", $thread['user_id']])['result'][0];
 						?>
 
 						<a class="user" href="<?=FILEPATH."user?id=".$thread_user['id']?>">
@@ -171,15 +156,14 @@ $threads = $threads->fetch_all(MYSQLI_ASSOC);
 				</div>
 				<div class="forum-threads__recent-replies">
 					<?php 				
-					$replies = sqli_result_bindvar("SELECT id, user_id, updated_at FROM replies WHERE thread_id=? ORDER BY created_at DESC LIMIT 1", "i", $thread['id']);
+					$replies = sql('SELECT id, user_id, updated_at FROM replies WHERE thread_id=? ORDER BY created_at DESC LIMIT 1', ['i', $thread['id']]);
 					
-					if($replies->num_rows > 0) :
+					if($replies['rows'] > 0) :
 					
-					$reply = $replies->fetch_assoc(); ?>
+					$reply = $replies['result'][0] ?>
 					
 					<div class="reply">
-						<?php $post_user = sqli_result_bindvar("SELECT id, nickname FROM users WHERE id=?", "s", $reply['user_id']);
-						$post_user = $post_user->fetch_assoc(); ?>
+						<?php $post_user = sql('SELECT id, nickname FROM users WHERE id=?', ['s', $reply['user_id']])['result'][0]; ?>
 						
 						<span class="forum-threads__date" title="<?=utc_date_to_user($thread['updated_at'])?>">
 							<?=readable_date($thread['updated_at'])?>
@@ -192,8 +176,8 @@ $threads = $threads->fetch_all(MYSQLI_ASSOC);
 							>>
 						</a>
 						<div><?php
-							$reply__count = sqli_result_bindvar("SELECT COUNT(id) FROM replies WHERE thread_id=?", "i", $thread['id']);
-							$reply__count = $reply__count->fetch_row()[0] - 1;
+							$reply__count = reset(sql('SELECT COUNT(id) FROM replies WHERE thread_id=?', ['i', $thread['id']])['result'][0]);
+							$reply__count -= 1;
 							if($reply__count == 0) {
 								echo 'No replies';
 							} elseif($reply__count == 1) {
@@ -225,6 +209,7 @@ $threads = $threads->fetch_all(MYSQLI_ASSOC);
 				</h3>
 				<form action="/interface" method="POST">
 					<input type="hidden" name="action" value="forum_thread_create">
+					<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 					<input type="hidden" name="board_id" value="<?=$board['id']?>">
 					
 					<label class="label">Title</label>

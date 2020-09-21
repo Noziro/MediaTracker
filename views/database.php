@@ -1,3 +1,4 @@
+<?php header("Location: /404"); exit(); ?>
 <main id="content" class="wrapper wrapper--content">
 	<div class="wrapper__inner">
 		<div class="database-search">
@@ -5,7 +6,7 @@
 		</div>
 		
 		<div class="database-results">
-			Placeholder
+			TODO
 		</div>
 	</div>
 </main>

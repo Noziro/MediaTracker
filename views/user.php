@@ -3,12 +3,12 @@
 
 /*if(!isset($_GET["id"]) && !isset($_GET["name"]) {
 	header('Location: /404');
-} elseif(isset($_GET["id"]) && sqli_result_bindvar($db, "SELECT id FROM users WHERE id=?", "s", $_GET["id"])->num_rows < 1) {
+} elseif(isset($_GET["id"]) && sql($db, "SELECT id FROM users WHERE id=?", "s", $_GET["id"])->num_rows < 1) {
 	header('Location: /404');
-} elseif(isset($_GET["name"]) && sqli_result_bindvar($db, "SELECT username FROM users WHERE id=?", "s", $_GET["id"])->num_rows < 1) {
+} elseif(isset($_GET["name"]) && sql($db, "SELECT username FROM users WHERE id=?", "s", $_GET["id"])->num_rows < 1) {
 	header('Location: /404');
 }
-sqli_result_bindvar($db, "SELECT id, username FROM users WHERE id=?", "s", $_GET["id"])->num_rows < 1*/
+sql($db, "SELECT id, username FROM users WHERE id=?", "s", $_GET["id"])->num_rows < 1*/
 
 if(!isset($_GET["id"])) {
 	if($has_session) {
@@ -20,14 +20,14 @@ if(!isset($_GET["id"])) {
 	$page_user__id = $_GET["id"];
 }
 
-$page_user = sqli_result_bindvar("SELECT id, username, nickname, created_at, permission_level, about FROM users WHERE id=?", "s", $page_user__id);
+$page_user = sql('SELECT id, username, nickname, created_at, permission_level, about FROM users WHERE id=?', ['i', $page_user__id]);
 
-if($page_user->num_rows < 1) {
+if($page_user['rows'] < 1) {
 	header('Location: /404');
 	exit();
 }
 
-$page_user = $page_user->fetch_assoc();
+$page_user = $page_user['result'][0];
 ?>
 
 <!-- TODO: Fix classes. Having two BEM blocks layered on top of each other is disgusting -->
@@ -43,11 +43,8 @@ $page_user = $page_user->fetch_assoc();
 	<div class="wrapper__inner banner__contents">
 		<div class="content-header">
 			<h2 class="content-header__title">
+				<?php $rank = sql('SELECT title FROM permission_levels WHERE permission_level <= ? ORDER BY permission_level DESC LIMIT 1', ['i', $page_user['permission_level']])['result'][0]['title']; ?>
 				<?=$page_user['nickname']?>
-				<?php
-				$rank = sqli_result_bindvar("SELECT title FROM permission_levels WHERE permission_level <= ? ORDER BY permission_level DESC", "s", $page_user["permission_level"]);
-				$rank = $rank->fetch_row()[0];
-				?>
 				<span class="site-rank site-rank--<?=strtolower(str_replace(' ', '-', $rank))?>">
 					<?=$rank?>
 				</span>
@@ -104,23 +101,21 @@ $page_user = $page_user->fetch_assoc();
 				<div>
 					Total Items:
 					<?php
-					$total_items = sqli_result_bindvar('SELECT COUNT(id) FROM media WHERE user_id=?', 'i', $page_user['id']);
-					echo $total_items->fetch_row()[0];
+					echo reset(sql('SELECT COUNT(id) FROM media WHERE user_id=?', ['i', $page_user['id']])['result'][0]);
 					?>
 				</div>
 
 				<div>
 					Episodes Complete: 
 					<?php
-					$episodes = sqli_result_bindvar('
+					$episodes = reset(sql('
 						SELECT SUM(media.episodes)
 						FROM media
 						INNER JOIN collections
 						ON collections.id = media.collection_id
 						WHERE media.user_id = ?
 						AND collections.type = "video"
-					', 'i', $page_user['id']);
-					$episodes = $episodes->fetch_row()[0];
+					', ['i', $page_user['id']])['result'][0]);
 					echo round($episodes, 2);
 					?>
 				</div>
@@ -128,15 +123,14 @@ $page_user = $page_user->fetch_assoc();
 				<div>
 					Chapters Complete: 
 					<?php
-					$chapters = sqli_result_bindvar('
+					$chapters = reset(sql('
 						SELECT SUM(media.episodes)
 						FROM media
 						INNER JOIN collections
 						ON collections.id = media.collection_id
 						WHERE media.user_id = ?
 						AND collections.type = "literature"
-					', 'i', $page_user['id']);
-					$chapters = $chapters->fetch_row()[0];
+					', ['i', $page_user['id']])['result'][0]);
 					echo round($chapters, 2);
 					?>
 				</div>
@@ -144,8 +138,7 @@ $page_user = $page_user->fetch_assoc();
 				<div>
 					Avg. Score: 
 					<?php
-					$avg_score = sqli_result_bindvar('SELECT AVG(score) FROM media WHERE user_id=? AND score!=0', 'i', $page_user['id']);
-					$avg_score = $avg_score->fetch_row()[0];
+					$avg_score = reset(sql('SELECT AVG(score) FROM media WHERE user_id=? AND score!=0', ['i', $page_user['id']])['result'][0]);
 					echo round($avg_score, 2);
 					?>
 				</div>
@@ -153,8 +146,7 @@ $page_user = $page_user->fetch_assoc();
 				<div>
 					Avg. Score of Completed: 
 					<?php
-					$avg_score = sqli_result_bindvar('SELECT AVG(score) FROM media WHERE user_id=? AND status="completed" AND score!=0', 'i', $page_user['id']);
-					$avg_score = $avg_score->fetch_row()[0];
+					$avg_score = reset(sql('SELECT AVG(score) FROM media WHERE user_id=? AND status="completed" AND score!=0', ['i', $page_user['id']])['result'][0]);
 					echo round($avg_score, 2);
 					?>
 				</div>

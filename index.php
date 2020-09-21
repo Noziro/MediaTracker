@@ -215,6 +215,9 @@ $url_readable = end($url_split);
 					case 'database_failure':
 						echo "An error occured in the server database while performing your request.";
 						break;
+					case 'database_null_commit':
+						echo "An attempted database commit did not result in an action.";
+						break;
 					case 'disallowed_action':
 						echo "Attempted to perform an invalid or unrecognized action.";
 						break;
@@ -225,8 +228,7 @@ $url_readable = end($url_split);
 						echo "A value you entered was invalid or out of expected bounds. Please try again.";
 						break;
 
-					case 'generic':
-						echo $msg['details'];
+					case 'blank':
 						break;
 
 					// Default
@@ -234,6 +236,7 @@ $url_readable = end($url_split);
 						echo "This was meant to say something, but it doesn't!";
 						break;
 				}
+				echo '<br />'.$msg['details'];
 				?>
 			</div>
 		</div>

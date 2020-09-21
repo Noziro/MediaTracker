@@ -2,21 +2,17 @@
 	<div class="wrapper__inner">
 		<?php
 		if(isset($_GET['id'])) :
-			$collection__id = $_GET['id'];
-			$collection = sqli_result_bindvar('SELECT id, user_id, name, type, display_score, display_progress, display_user_started, display_user_finished, display_days, rating_system, private FROM collections WHERE id=?', 's', $collection__id);
-			if($collection->num_rows < 1) {
+			$collection = sql('SELECT id, user_id, name, type, display_score, display_progress, display_user_started, display_user_finished, display_days, rating_system, private FROM collections WHERE id=?', ['i', $_GET['id']]);
+			if($collection['rows'] < 1) {
 				finalize('/404');
 			}
-			$collection = $collection->fetch_assoc();
+			$collection = $collection['result'][0];
 
-			$items = sqli_result_bindvar('SELECT id, status, name, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments, favourite FROM media WHERE collection_id=? AND deleted=0 ORDER BY status ASC, name ASC', 's', $collection['id']);
-			$items_count = $items->num_rows;
-			$items = $items->fetch_all(MYSQLI_ASSOC);
+			$items = sql('SELECT id, status, name, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments, favourite FROM media WHERE collection_id=? AND deleted=0 ORDER BY status ASC, name ASC', ['i', $collection['id']]);
 
-			$page_user = sqli_result_bindvar('SELECT id, nickname FROM users WHERE id=?', 's', $collection['user_id']);
-			$page_user = $page_user->fetch_assoc();
+			$page_user = sql('SELECT id, nickname FROM users WHERE id=?', ['i', $collection['user_id']])['result'][0];
 			
-			// $page_user_prefs = sqli_result_bindvar('SELECT rating_system FROM user_preferences WHERE user_id=?', 's', $page_user['id']);
+			// $page_user_prefs = sql('SELECT rating_system FROM user_preferences WHERE user_id=?', 's', $page_user['id']);
 			// $page_user_prefs = $page_user_prefs->fetch_assoc();
 
 			$columns = [
@@ -63,7 +59,7 @@
 
 
 		<?php
-		if($items_count < 1) :
+		if($items['rows'] < 1) :
 		?>
 
 		<div class="dialog-box dialog-box--fullsize">No items yet. Add one?</div>
@@ -91,13 +87,17 @@
 				</tr>
 			</thead>
 			<tbody>
-				<?php foreach($items as $item) : ?>
+				<?php foreach($items['result'] as $item) : ?>
 
 				<tr id="item-<?=$item['id']?>" class="table__row">
 					<td class="table__cell">
+						<?php if($collection['user_id'] === $user['id']) : ?>
 						<a class="js-item-edit" href="item/edit?id=<?=$item['id']?>&frame=1" onclick="editItem(<?=$item['id']?>)">
 							<?=$item['name']?>
 						</a>
+						<?php else : ?>
+						<span><?=$item['name']?></span>
+						<?php endif; ?>
 					</td>
 
 					<?php if($collection['display_score'] === 1) : ?>
@@ -278,7 +278,7 @@
 				<form action="/interface" method="POST">
 					<input type="hidden" name="action" value="collection_item_create">
 					<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
-					<input type="hidden" name="collection" value="<?=$collection['id']?>">
+					<input type="hidden" name="collection_id" value="<?=$collection['id']?>">
 
 					<div class="item-fields">
 						<div class="item-fields__divider">
@@ -437,12 +437,9 @@
 				$page_user__id = $_GET['user'];
 			}
 
-			$page_user = sqli_result_bindvar('SELECT id, nickname FROM users WHERE id=?', 's', $page_user__id);
-			$page_user = $page_user->fetch_assoc();
+			$page_user = sql('SELECT id, nickname FROM users WHERE id=?', ['i', $page_user__id])['result'][0];
 
-			$collections = sqli_result_bindvar('SELECT id, user_id, name, type, private FROM collections WHERE user_id=? AND deleted=FALSE ORDER BY name ASC', 's', $page_user['id']);
-			$collections_count = $collections->num_rows;
-			$collections = $collections->fetch_all(MYSQLI_ASSOC);
+			$collections = sql('SELECT id, user_id, name, type, private FROM collections WHERE user_id=? AND deleted=0 ORDER BY name ASC', ['i', $page_user['id']]);
 		?>
 
 
@@ -485,7 +482,7 @@
 
 
 		<?php
-		if($collections_count < 1) :
+		if($collections['rows'] < 1) :
 		?>
 
 		<div class="dialog-box dialog-box--fullsize">No collections yet. Create one?</div>
@@ -504,7 +501,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				<?php foreach($collections as $collection) :
+				<?php foreach($collections['result'] as $collection) :
 					// TODO - optimize this. Can probably be incorporated into the SQL query.
 					if($user['id'] !== $page_user['id'] && $collection['private'] === 9) { continue; } ?>
 
@@ -516,8 +513,7 @@
 					</td>
 					<td class="table__cell">
 						<?php
-						$items = sqli_result_bindvar('SELECT COUNT(id) FROM media WHERE collection_id=?', 'i', $collection['id']);
-						echo $items->fetch_row()[0];
+						echo reset(sql('SELECT COUNT(id) FROM media WHERE collection_id=?', ['i', $collection['id']])['result'][0]);
 						?>
 					</td>
 					<td class="table__cell">
