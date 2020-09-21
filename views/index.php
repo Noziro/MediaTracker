@@ -1,5 +1,3 @@
-<?php if($has_session) : ?>
-
 <main id="content" class="wrapper wrapper--content">
 	<div class="wrapper__inner split">
 		<div class="split__section">
@@ -19,10 +17,3 @@
 		</div>
 	</div>
 </main>
-
-<?php else : 
-
-include('about.php');
-
-endif
-?>

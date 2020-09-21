@@ -57,20 +57,22 @@ if(isset($_GET["page"])) {
 			<?php if($permission_levels['Moderator'] || $thread['locked'] === 0) : ?>
 			<div class="page-actions__button-list">
 				<?php
-				if($thread['locked'] === 0) :
+				if($thread['locked'] === 0 || $permission_level >= $permission_levels['Moderator']) :
 				?>
 
 				<button class="page-actions__action button" type="button" onclick="toggleModal('modal--reply-create', true)">
 					New Reply
 				</button>
 				
+				<?php
+				endif;
+				?>
+				
 				<button id="js-watchthread" class="page-actions__action button button--disabled" type="button" disabled>
 					Watch Thread
 				</button>
-				
-				<?php
-				endif;
 
+				<?php
 				if($permission_level >= $permission_levels['Moderator']) :
 					if($thread['locked'] === 1) :
 				?>
@@ -223,7 +225,7 @@ if(isset($_GET["page"])) {
 			
 			
 			<div class="thread-reply__content">
-				<p id="js-reply-body-<?=$reply['id']?>" class="thread-reply__text global__long-text js-reply-body">
+				<p id="js-reply-body-<?=$reply['id']?>" class="thread-reply__text u-readable-line-height js-reply-body">
 					<?=format_user_text($reply['body'])?>
 				</p>
 				
@@ -251,11 +253,13 @@ if(isset($_GET["page"])) {
 				
 				<?php endif ?>
 				
-				<?php if($has_session && $thread['locked'] === 0 || $permission_level >= $permission_levels['Moderator']) : ?>
+				<?php if($has_session || $permission_level >= $permission_levels['Moderator']) : ?>
 				<div class="thread-reply__actions">
+					<?php if($has_session && $thread['locked'] === 0 || $permission_level >= $permission_levels['Moderator']) : ?>
 					<button id="js-reply-<?=$reply['id']?>" class="thread-reply__action button button--small button--disabled" type="button" disabled>
 						Reply
 					</button>
+					<?php endif; ?>
 					
 					<?php if($reply['user_id'] === $user['id']) : ?>
 					

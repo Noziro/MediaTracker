@@ -98,57 +98,69 @@ $page_user = $page_user['result'][0];
 			<div class="profile__section">
 				<span class="profile__section-header">Stats</span>
 
-				<div>
-					Total Items:
-					<?php
-					echo reset(sql('SELECT COUNT(id) FROM media WHERE user_id=?', ['i', $page_user['id']])['result'][0]);
-					?>
-				</div>
+				<div class="c-stats">
+					<div class="c-stats__stat">
+						<span class="c-stats__title">Items</span>
+						<span class="c-stats__number">
+							<?php
+							echo reset(sql('SELECT COUNT(id) FROM media WHERE user_id=?', ['i', $page_user['id']])['result'][0]);
+							?>
+						</span>
+					</div>
 
-				<div>
-					Episodes Complete: 
-					<?php
-					$episodes = reset(sql('
-						SELECT SUM(media.episodes)
-						FROM media
-						INNER JOIN collections
-						ON collections.id = media.collection_id
-						WHERE media.user_id = ?
-						AND collections.type = "video"
-					', ['i', $page_user['id']])['result'][0]);
-					echo round($episodes, 2);
-					?>
-				</div>
+					<div class="c-stats__stat">
+						<span class="c-stats__title">Episodes CMPL</span>
+						<span class="c-stats__number">
+							<?php
+							$episodes = reset(sql('
+								SELECT SUM(media.episodes)
+								FROM media
+								INNER JOIN collections
+								ON collections.id = media.collection_id
+								WHERE media.user_id = ?
+								AND collections.type = "video"
+							', ['i', $page_user['id']])['result'][0]);
+							echo round($episodes, 2);
+							?>
+						</span>
+					</div>
 
-				<div>
-					Chapters Complete: 
-					<?php
-					$chapters = reset(sql('
-						SELECT SUM(media.episodes)
-						FROM media
-						INNER JOIN collections
-						ON collections.id = media.collection_id
-						WHERE media.user_id = ?
-						AND collections.type = "literature"
-					', ['i', $page_user['id']])['result'][0]);
-					echo round($chapters, 2);
-					?>
-				</div>
+					<div class="c-stats__stat">
+						<span class="c-stats__title">Chapters CMPL</span>
+						<span class="c-stats__number">
+							<?php
+							$chapters = reset(sql('
+								SELECT SUM(media.episodes)
+								FROM media
+								INNER JOIN collections
+								ON collections.id = media.collection_id
+								WHERE media.user_id = ?
+								AND collections.type = "literature"
+							', ['i', $page_user['id']])['result'][0]);
+							echo round($chapters, 2);
+							?>
+						</span>
+					</div>
 
-				<div>
-					Avg. Score: 
-					<?php
-					$avg_score = reset(sql('SELECT AVG(score) FROM media WHERE user_id=? AND score!=0', ['i', $page_user['id']])['result'][0]);
-					echo round($avg_score, 2);
-					?>
-				</div>
+					<div class="c-stats__stat">
+						<span class="c-stats__title">Avg. Score</span>
+						<span class="c-stats__number">
+							<?php
+							$avg_score = reset(sql('SELECT AVG(score) FROM media WHERE user_id=? AND score!=0', ['i', $page_user['id']])['result'][0]);
+							echo round($avg_score, 2);
+							?>
+						</span>
+					</div>
 
-				<div>
-					Avg. Score of Completed: 
-					<?php
-					$avg_score = reset(sql('SELECT AVG(score) FROM media WHERE user_id=? AND status="completed" AND score!=0', ['i', $page_user['id']])['result'][0]);
-					echo round($avg_score, 2);
-					?>
+					<div class="c-stats__stat">
+						<span class="c-stats__title">Avg. CMPL Score</span>
+						<span class="c-stats__number">
+							<?php
+							$avg_score = reset(sql('SELECT AVG(score) FROM media WHERE user_id=? AND status="completed" AND score!=0', ['i', $page_user['id']])['result'][0]);
+							echo round($avg_score, 2);
+							?>
+						</span>
+					</div>
 				</div>
 			</div>
 
@@ -156,7 +168,12 @@ $page_user = $page_user['result'][0];
 			<div class="profile__section">
 				<span class="profile__section-header">Favourites</span>
 
-				Favourite shows here.
+				<?php
+				$favs = sql('SELECT id, name, image FROM media WHERE user_id=? AND favourite=1 ORDER BY name ASC', ['i', $page_user['id']]);
+				foreach($favs['result'] as $fav) :
+				?>
+				<div><?=$fav['name']?></div>
+				<?php endforeach; ?>
 			</div>
 		</div>
 	</div>

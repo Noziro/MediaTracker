@@ -1,0 +1,24 @@
+.c-page-failure, .c-page-failure__inner {
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: center;
+	align-items: center;
+}
+
+.c-page-failure__title {
+	margin: 0;
+	font-size: 48px;
+	font-weight: 600;
+	text-shadow: 5px 2.5px 0px var(--border-medium);
+}
+
+.c-page-failure__subtitle {
+	margin: 4px 0 0;
+	font-size: 22px;
+	font-weight: 600;
+}
+
+.c-page-failure__description {
+	margin: 8px 0 0;
+	font-size: 16px;
+}

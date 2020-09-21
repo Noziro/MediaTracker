@@ -224,7 +224,7 @@ elseif($action === 'forum_reply_delete' || $action === 'forum_reply_undelete') {
 	$stmt = sql('SELECT id, thread_id, user_id FROM replies WHERE id=?', ['i', $_POST['reply_id']]);
 	if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
 	if($stmt['rows'] < 1) { finalize($r2, 'disallowed_action', 'error'); }
-	$reply = $reply['result'][0];
+	$reply = $stmt['result'][0];
 
 	// Check user authority
 	if($user['id'] !== $reply['user_id'] && $permission_level < $permission_levels['Moderator']) {
@@ -236,7 +236,7 @@ elseif($action === 'forum_reply_delete' || $action === 'forum_reply_undelete') {
 	if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
 	
 	// Set thread anonymous if deleting first post.
-	$stmt = $db->prepare('SELECT id FROM replies WHERE thread_id=? ORDER BY created_at ASC LIMIT 1', ['i', $reply['thread_id']]);
+	$stmt = sql('SELECT id FROM replies WHERE thread_id=? ORDER BY created_at ASC LIMIT 1', ['i', $reply['thread_id']]);
 	if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
 	$first_reply_id = $stmt['result'][0]['id'];
 
@@ -685,7 +685,7 @@ if($action === 'collection_item_delete' || $action === 'collection_item_undelete
 	}
 
 	// Get info & check existence
-	$stmt = $db->prepare('SELECT id, user_id, collection_id FROM media WHERE id=?', ['i', $_POST['item']]);
+	$stmt = sql('SELECT id, user_id, collection_id FROM media WHERE id=?', ['i', $_POST['item']]);
 	if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
 	if($stmt['rows'] < 1) { finalize($r2, 'disallowed_action', 'error'); }
 	$item = $stmt['result'][0];

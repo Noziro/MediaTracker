@@ -70,26 +70,26 @@
 
 		<table class="table">
 			<thead>
-				<tr class="table__row">
-					<th class="table__heading table__heading--extra-wide">Name</th>
+				<tr>
+					<th class="table__cell table__cell--one-half"><b class="table__heading">Name</b></th>
 					<?php if($collection['display_score'] === 1) : ?>
-					<th class="table__heading">Score<br /><span class="table__subheading">of <?=$collection['rating_system']?></span></th>
+					<th class="table__cell"><b class="table__heading">Score</b><br /><span class="table__subheading">of <?=$collection['rating_system']?></span></th>
 					<?php endif; if($collection['display_progress'] === 1) : ?>
-					<th class="table__heading">Progress</th>
+					<th class="table__cell"><b class="table__heading">Progress</b></th>
 					<?php endif; if($collection['display_user_started'] === 1) : ?>
-					<th class="table__heading">Started</th>
+					<th class="table__cell"><b class="table__heading">Started</b></th>
 					<?php endif; if($collection['display_user_finished'] === 1) : ?>
-					<th class="table__heading">Finished</th>
+					<th class="table__cell"><b class="table__heading">Finished</b></th>
 					<?php endif; if($collection['display_days'] === 1) : ?>
-					<th class="table__heading">Days</th>
+					<th class="table__cell"><b class="table__heading">Days</b></th>
 					<?php endif; ?>
-					<th class="table__heading">Status</th>
+					<th class="table__cell"><b class="table__heading">Status</b></th>
 				</tr>
 			</thead>
 			<tbody>
 				<?php foreach($items['result'] as $item) : ?>
 
-				<tr id="item-<?=$item['id']?>" class="table__row">
+				<tr id="item-<?=$item['id']?>" class="table__body-row">
 					<td class="table__cell">
 						<?php if($collection['user_id'] === $user['id']) : ?>
 						<a class="js-item-edit" href="item/edit?id=<?=$item['id']?>&frame=1" onclick="editItem(<?=$item['id']?>)">
@@ -180,7 +180,7 @@
 
 				<!--<?php if(isset($item['comments'])) : ?>
 				
-				<tr class="table__row">
+				<tr class="table__body-row">
 					<td class="table__cell" colspan="7">
 						<?=format_user_text($item['comments'])?>
 					</td>
@@ -493,11 +493,11 @@
 
 		<table class="table">
 			<thead>
-				<tr class="table__row">
-					<th class="table__heading">Name</th>
-					<th class="table__heading table__heading--extra-thin">Items</th>
-					<th class="table__heading table__heading--small">Type</th>
-					<th class="table__heading table__heading--small">Privacy</th>
+				<tr>
+					<th class="table__cell"><b class="table__heading">Name</b></th>
+					<th class="table__cell table__cell--extra-small"><b class="table__heading">Items</b></th>
+					<th class="table__cell table__cell--small"><b class="table__heading">Type</b></th>
+					<th class="table__cell table__cell--small"><b class="table__heading">Privacy</b></th>
 				</tr>
 			</thead>
 			<tbody>
@@ -505,9 +505,9 @@
 					// TODO - optimize this. Can probably be incorporated into the SQL query.
 					if($user['id'] !== $page_user['id'] && $collection['private'] === 9) { continue; } ?>
 
-				<tr class="table__row">
+				<tr class="table__body-row">
 					<td class="table__cell">
-						<a class="table__row-title" href="?id=<?=$collection['id']?>">
+						<a class="u-bold" href="?id=<?=$collection['id']?>">
 							<?=$collection['name']?>
 						</a>
 					</td>

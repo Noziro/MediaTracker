@@ -31,63 +31,65 @@ $boards = $sql['result'];
 		</div>
 		<?php endif; ?>
 		
-		<div class="forum-boards">
-			<?php foreach($boards as $board): ?>
-			<div class="forum-boards__board">
-				<div class="forum-boards__board-info">
-					<a href="<?=FILEPATH?>forum/board?id=<?=$board['id']?>">
-						<b class="forum-boards__board-title"><?=$board['name']?></b>
-					</a>
-					<div class="forum-boards__board-description"><?=$board['description']?></div>
-				</div>
-				<div class="forum-boards__board-aside">
-					<?php 				
-					$threads = sql("SELECT id, user_id, title, updated_at, anonymous FROM threads WHERE board_id=? AND deleted=0 ORDER BY updated_at DESC LIMIT 2", ["i", $board['id']]);
-					
-					if($threads['rows'] > 0) :
-						$threads = $threads['result'];
-
-						foreach($threads as $thread) :
-					?>
-					
-					<div class="forum-boards__recent-thread">
-						<b class="forum-boards__thread-title">
-							<a href="<?=FILEPATH."forum/thread?id=".$thread['id']?>"><?=htmlspecialchars($thread['title'])?></a>
-						</b>
-						<br />
+		<table class="table c-forum">
+			<tbody>
+				<?php foreach($boards as $board): ?>
+				<tr class="table__body-row table__body-row--spacious">
+					<td class="table__cell table__cell--extra-spacious">
+						<a href="<?=FILEPATH?>forum/board?id=<?=$board['id']?>">
+							<b class="forum-boards__board-title"><?=$board['name']?></b>
+						</a>
+						<p class="c-forum__board-description"><?=$board['description']?></p>
+					</td>
+					<td class="table__cell table__cell--extra-spacious table__cell--one-third">
+						<?php
+						$threads = sql("SELECT id, user_id, title, updated_at, anonymous FROM threads WHERE board_id=? AND deleted=0 ORDER BY updated_at DESC LIMIT 2", ["i", $board['id']]);
 						
-						<div class="forum-boards__thread-description">
-							<span class="forum-boards__thread-date" title="<?=utc_date_to_user($thread['updated_at'])?>">
-								<?=readable_date($thread['updated_at'])?>
-							</span>
-							by
+						if($threads['rows'] > 0) :
+							$threads = $threads['result'];
 
-							<?php
-							if($thread['anonymous'] !== 1) :
-								$thread_username = sql("SELECT nickname FROM users WHERE id=?", ["i",$thread['user_id']])['result'][0]['nickname'];
-							?>
-
-							<span class="forum-boards__thread-author">
-								<?=$thread_username?>
-							</span>
-
-							<?php else : ?>
-
-							<i>- deleted -</i>
-
-							<?php endif; ?>
+							foreach($threads as $thread) :
+						?>
+						
+						<div class="c-forum__aside-item">
+							<b class="u-bold">
+								<a href="<?=FILEPATH."forum/thread?id=".$thread['id']?>"><?=htmlspecialchars($thread['title'])?></a>
+							</b>
+							<br />
 							
+							<div class="c-forum__aside-description">
+								<span class="forum-boards__thread-date" title="<?=utc_date_to_user($thread['updated_at'])?>">
+									<?=readable_date($thread['updated_at'])?>
+								</span>
+								by
+
+								<?php
+								if($thread['anonymous'] !== 1) :
+									$thread_username = sql("SELECT nickname FROM users WHERE id=?", ["i",$thread['user_id']])['result'][0]['nickname'];
+								?>
+
+								<span class="forum-boards__thread-author">
+									<?=$thread_username?>
+								</span>
+
+								<?php else : ?>
+
+								<i>- deleted -</i>
+
+								<?php endif; ?>
+								
+							</div>
 						</div>
-					</div>
-					
-					<?php
-						endforeach;
-					endif;
-					?>
-				</div>
-			</div>
-			<?php endforeach ?>
-		</div>
+						
+						<?php
+							endforeach;
+						endif;
+						?>
+					</td>
+				</tr>
+				<?php endforeach ?>
+			</tbody>
+		</table>
 
 		<div class="dialog-box dialog-box--fullsize">
 			<?php

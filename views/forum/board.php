@@ -115,83 +115,86 @@ if(isset($_GET["page"])) {
 		else :
 		?>
 
-		<div class="forum-threads">
-			<div class="forum-threads__thread-header">
-				<div class="forum-threads__thread-description-header">
-					Thread Information
-				</div>
-				
-				<div class="forum-threads__recent-replies-header">
-					Most Recent Reply
-				</div>
-			</div>
+		<table class="table">
+			<thead>
+				<tr>
+					<td class="table__cell table__cell--emphasized">
+						<b class="table__heading">Thread Information</b>
+					</td>
+					
+					<td class="table__cell table__cell--emphasized table__cell--small u-text-center">
+						<b class="table__heading">Replies</b>
+					</td>
+
+					<td class="table__cell table__cell--emphasized table__cell--one-third">
+						<b class="table__heading">Most Recent Reply</b>
+					</td>
+				</tr>
+			</thead>
 			
-			<?php foreach($threads['result'] as $thread): ?>
-			<div class="forum-threads__thread">
-				<div class="forum-threads__thread-description">
-					<a href="<?=FILEPATH?>forum/thread?id=<?=$thread['id']?>">
-						<h6 class="forum-threads__thread-title"><?=htmlspecialchars($thread['title'])?></h6>
-					</a>
-					<p class="forum-threads__description">
-						<span class="forum-threads__date" title="<?=utc_date_to_user($thread['created_at'])?>">
-							<?=readable_date($thread['created_at'])?>
-						</span>
-						by
+			<tbody>
+				<?php foreach($threads['result'] as $thread): ?>
+				<tr class="table__body-row">
+					<td class="table__cell">
+						<a href="<?=FILEPATH?>forum/thread?id=<?=$thread['id']?>">
+							<b class="table__body-row-title"><?=htmlspecialchars($thread['title'])?></b>
+						</a>
+						<p class="c-forum__thread-description">
+							<span title="<?=utc_date_to_user($thread['created_at'])?>">
+								<?=readable_date($thread['created_at'])?>
+							</span>
+							by
 
+							<?php
+							if($thread['anonymous'] !== 1) :
+							$thread_user = sql("SELECT id, nickname FROM users WHERE id=?", ["s", $thread['user_id']])['result'][0];
+							?>
+
+							<a href="<?=FILEPATH."user?id=".$thread_user['id']?>">
+								<?=$thread_user['nickname']?>
+							</a>
+
+							<?php else : ?>
+
+							<i>- deleted -</i>
+
+							<?php endif; ?>
+						</p>
+					</td>
+					<td class="table__cell u-text-center">
 						<?php
-						if($thread['anonymous'] !== 1) :
-						$thread_user = sql("SELECT id, nickname FROM users WHERE id=?", ["s", $thread['user_id']])['result'][0];
+						$reply__count = reset(sql('SELECT COUNT(id) FROM replies WHERE thread_id=?', ['i', $thread['id']])['result'][0]);
+						echo $reply__count - 1;
 						?>
-
-						<a class="user" href="<?=FILEPATH."user?id=".$thread_user['id']?>">
-							<?=$thread_user['nickname']?>
-						</a>
-
-						<?php else : ?>
-
-						<i>- deleted -</i>
-
-						<?php endif; ?>
-					</p>
-				</div>
-				<div class="forum-threads__recent-replies">
-					<?php 				
-					$replies = sql('SELECT id, user_id, updated_at FROM replies WHERE thread_id=? ORDER BY created_at DESC LIMIT 1', ['i', $thread['id']]);
-					
-					if($replies['rows'] > 0) :
-					
-					$reply = $replies['result'][0] ?>
-					
-					<div class="reply">
-						<?php $post_user = sql('SELECT id, nickname FROM users WHERE id=?', ['s', $reply['user_id']])['result'][0]; ?>
+					</td>
+					<td class="table__cell">
+						<?php 				
+						$replies = sql('SELECT id, user_id, updated_at FROM replies WHERE thread_id=? ORDER BY created_at DESC LIMIT 1', ['i', $thread['id']]);
 						
-						<span class="forum-threads__date" title="<?=utc_date_to_user($thread['updated_at'])?>">
-							<?=readable_date($thread['updated_at'])?>
-						</span>
-						by
-						<a class="user" href="<?=FILEPATH."user?id=".$post_user['id']?>">
-							<?=$post_user['nickname']?>
-						</a>
-						<a class="goto-reply" href="<?=FILEPATH."forum/thread?id=".$thread['id']."#reply-".$reply['id']?>">
-							>>
-						</a>
-						<div><?php
-							$reply__count = reset(sql('SELECT COUNT(id) FROM replies WHERE thread_id=?', ['i', $thread['id']])['result'][0]);
-							$reply__count -= 1;
-							if($reply__count == 0) {
-								echo 'No replies';
-							} elseif($reply__count == 1) {
-								echo $reply__count.' reply';
-							} else {
-								echo $reply__count.' replies';
-							}
-						?></div>
-					</div>
-					<?php endif ?>
+						if($replies['rows'] > 0) :
+						
+						$reply = $replies['result'][0] ?>
+						
+						<div class="reply">
+							<?php $post_user = sql('SELECT id, nickname FROM users WHERE id=?', ['s', $reply['user_id']])['result'][0]; ?>
+							
+							<span class="forum-threads__date" title="<?=utc_date_to_user($thread['updated_at'])?>">
+								<?=readable_date($thread['updated_at'])?>
+							</span>
+							by
+							<a class="user" href="<?=FILEPATH."user?id=".$post_user['id']?>">
+								<?=$post_user['nickname']?>
+							</a>
+							<a class="goto-reply" href="<?=FILEPATH."forum/thread?id=".$thread['id']."#reply-".$reply['id']?>">
+								>>
+							</a>
+						</div>
+						<?php endif ?>
+					</td>
 				</div>
-			</div>
-			<?php endforeach ?>
-		</div>
+				<?php endforeach ?>
+			</tbody>
+		</table>
 
 		<?php
 		endif;

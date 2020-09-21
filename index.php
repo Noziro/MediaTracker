@@ -22,11 +22,16 @@ $url = strtok($_SERVER["REQUEST_URI"], '?');
 
 # Check for various conditions related to the URL and make usable later in code
 
-if($url == '/') {
+if($url == '/' && !$has_session) {
+	$url = 'about';
+}
+elseif($url == '/' && $has_session) {
 	$url = 'index';
-} elseif(file_exists("views/$url.php") != 1) {
+}
+elseif(file_exists("views/$url.php") != 1) {
 	header('Location: /404');
-} else {
+}
+else {
 	#generic pages - strips the / off the beginning
 	$url = substr($url, 1);
 }
@@ -38,14 +43,13 @@ if(mysqli_connect_errno()) {
 	$url = '500';
 }
 
-
 $url_split = explode('/', $url);
 $url_readable = end($url_split);
 
 ?>
 
 <!DOCTYPE HTML>
-<html lang="en" class="theme-light">
+<html lang="en" class="t-light">
 	<head>
 		<title><?php
 			echo $website . " - ";
@@ -64,8 +68,16 @@ $url_readable = end($url_split);
 		
 		<link rel="stylesheet" href="<?=FILEPATH?>static/css/style.css">
 		
-		<?php if (file_exists(PATH."static/css/".$url_readable.".css")) : ?>
-		<link rel="stylesheet" href="<?=FILEPATH."static/css/".$url_readable?>.css">
+		<?php
+		// TODO - this is rather garbage. Better to redirect all number error codes in .htaccess to error.php or something
+		if($url_readable === '403' || $url_readable === '404' || $url_readable === '500') {
+			$file = 'error';
+		} else {
+			$file = $url_readable;
+		}
+		if (file_exists(PATH."static/css/".$file.".css")) :
+		?>
+		<link rel="stylesheet" href="<?=FILEPATH."static/css/".$file?>.css">
 		<?php endif ?>
 		
 		<?php if (file_exists(PATH."static/js/".$url_readable.".js")) : ?>
@@ -81,18 +93,13 @@ $url_readable = end($url_split);
 		<?php include(PATH . "static/js/include.js") ?>
 		</script>
 	</head>
-	<body class="page page--<?php
-	
-	if ($url == "404") {
-		echo "error";
-	} else {
-		echo implode(" page--", $url_split);
-	}
+	<body class="page <?php
+			if(isset($_GET['frame'])) {
+				echo " page--frame";
+			}
 
-	if(isset($_GET['frame'])) {
-		echo " page--frame";
-	}
-	?>">
+			echo 't-'.implode(" t-", $url_split);
+		?>">
 		<?php if(!isset($_GET['frame'])) : ?> 
 		<nav id="nav" class="wrapper wrapper--site-nav">
 			<div class="wrapper__inner site-nav">
@@ -275,7 +282,7 @@ $url_readable = end($url_split);
 						foreach($themes as $theme) : ?>
 						
 						<a id="theme-<?=$theme?>" class="footer__theme-option theme-preview" role="button" onclick="selectTheme(this.getAttribute('data-value'))" data-value="<?=$theme?>">
-							<div class="theme-preview__backing theme-<?=$theme?>" aria-hidden="true">
+							<div class="theme-preview__backing t-<?=$theme?>" aria-hidden="true">
 								<span class="theme-preview__text">Aa</span>
 							</div>
 							

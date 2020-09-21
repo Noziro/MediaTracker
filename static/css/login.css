@@ -1,0 +1,87 @@
+/* Login - still needs work to make this less jank */
+
+.login-flow__form {
+	position: relative;
+	display: flex;
+	width: 340px;
+	padding: 20px;
+	background: var(--backing-content);
+	border-radius: var(--rounding);
+	flex-flow: column nowrap;
+	margin: 0 auto;
+}
+
+.login-flow__title {
+	font-size: 20px;
+	font-weight: 600;
+	margin: 0 0 4px;
+}
+
+.login-flow__label {
+	display: block;
+	margin: 16px 0 4px;
+	color: var(--text-medium);
+	font-size: 14px;
+	font-weight: 600;
+}
+
+.login-flow__input {
+	display: block;
+	width: 100%;
+	padding: 5px;
+	margin: 5px 0;
+	background: var(--backing-subcontent);
+	border-radius: var(--rounding);
+	border: 1px solid var(--border-light);
+	color: var(--text);
+}
+.login-flow__input:focus {
+	border-color: var(--border-active);
+	outline: none;
+}
+
+.login-flow__subtext {
+	font-size: 12px;
+}
+
+.login-flow__button {
+	display: block;
+	margin: 20px auto 0;
+}
+
+.login-flow__prompt {
+	width: 340px;
+	padding: 20px;
+	background: var(--backing-content);
+	border-radius: var(--rounding);
+	margin: 15px auto 0;
+	text-align: center;
+}
+
+.login-flow__only-button {
+	display: block;
+	width: 150px;
+	margin: 0 auto 20px;
+	text-align: center;
+}
+
+.reqs {
+	position: absolute;
+	top: 0;
+	left: 110%;
+	width: 250px;
+	padding: 10px;
+	background: var(--backing-content);
+	pointer-events: none;
+	opacity: 0;
+	transform: translateY(22px);
+	transition:
+		opacity   0.3s ease,
+		transform 0.4s ease;
+}
+
+#login-username:focus ~ .reqs--username,
+input[type="password"]:focus ~ .reqs--password {
+	opacity: 1;
+	transform: translateY(0);
+}

@@ -32,7 +32,7 @@ if(!$has_session) {
 			<label for="change-nickname" class="settings__label">Change nickname</label>
 			<input form="form-settings" id="change-nickname" class="input input--disabled" type="text" max="50" placeholder="<?=$user['nickname']?>" disabled>
 
-			<span class="settings__subtext">Your nickname is <b>not</b> your username! You will still sign in with your original username, but publicly your new nickname will display.</span>
+			<span class="settings__subtext">Your nickname is <b class="u-bold">not</b> your username! You will still sign in with your original username, but publicly your new nickname will display.</span>
 
 			<label for="change-about" class="settings__label">Change about</label>
 			<input form="form-settings" id="change-about" class="input input--disabled" type="text" value="" disabled>

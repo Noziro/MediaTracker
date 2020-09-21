@@ -4,12 +4,12 @@ function setTheme(theme) {
 	var classes = document.documentElement.classList;
 	
 	for (var cls of classes) {
-		if (cls.startsWith('theme-')) {
+		if (cls.startsWith('t-')) {
 			classes.remove(cls);
 		}
 	}
 	
-	classes.add('theme-' + theme);
+	classes.add('t-' + theme);
 }
 
 function selectTheme(theme) {

@@ -1,0 +1,49 @@
+.c-about {
+	color: var(--text-regular);
+}
+
+.c-about__title {
+	font-size: 24px;
+	font-weight: 600;
+}
+
+.c-about__paragraph {
+	max-width: 75ch;
+	margin: 20px 0 0;
+	font-size: 16px;
+}
+
+.c-about__section {
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: center;
+	height: 350px;
+}
+.c-about__section--primary {
+	height: 500px;
+	background:
+		linear-gradient(35deg, rgba(191, 161, 209, 0.7), rgba(98, 73, 212, 0.7)),
+		url('/static/img/about--primary.jpg');
+	color: var(--backing-content);
+	text-shadow:
+		1px .5px .5px rgba(0,0,0,0.5),
+		2px 1px 3px rgba(0,0,0,0.5);
+}
+.c-about__section--stats {
+	background: rgb(204, 136, 58);
+	padding-bottom: 30px;
+}
+/* .c-about__section--signup {
+	
+} */
+
+.c-about__primary {
+	max-width: 795px;
+	margin: 0 auto;
+}
+
+.c-about__signup {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+}
