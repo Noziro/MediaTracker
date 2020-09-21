@@ -34,8 +34,8 @@
 					ON collections.id = media.collection_id
 					AND collections.type = "literature"')['result'][0]
 				);
-			$stat_forum_posts = reset(sql('SELECT COUNT(id) FROM threads WHERE deleted=0')['result'][0]);
-			$stat_forum_threads = reset(sql('SELECT COUNT(id) FROM replies WHERE deleted=0')['result'][0]);
+			$stat_forum_threads = reset(sql('SELECT COUNT(id) FROM threads WHERE deleted=0')['result'][0]);
+			$stat_forum_posts = reset(sql('SELECT COUNT(id) FROM replies WHERE deleted=0')['result'][0]);
 			?>
 
 			<h3 class="c-about__title">Join <?=$stat_users?> others in tracking your favourite media.</h3>
