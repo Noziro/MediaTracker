@@ -170,10 +170,22 @@ $page_user = $page_user['result'][0];
 
 				<?php
 				$favs = sql('SELECT id, name, image FROM media WHERE user_id=? AND favourite=1 ORDER BY name ASC', ['i', $page_user['id']]);
-				foreach($favs['result'] as $fav) :
+				if($favs['rows'] > 0) :
+					foreach($favs['result'] as $fav) :
 				?>
+
 				<div><?=$fav['name']?></div>
-				<?php endforeach; ?>
+
+				<?php
+					endforeach;
+				else :
+				?>
+
+				None yet!
+
+				<?php
+				endif;
+				?>
 			</div>
 		</div>
 	</div>
