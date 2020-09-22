@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 19, 2020 at 09:22 AM
+-- Generation Time: Sep 22, 2020 at 05:48 AM
 -- Server version: 10.3.16-MariaDB
 -- PHP Version: 7.3.6
 
@@ -19,6 +19,17 @@ SET time_zone = "+00:00";
 --
 -- Database: `collections`
 --
+
+--
+-- Dumping data for table `boards`
+--
+
+INSERT INTO `boards` (`id`, `name`, `description`, `display_order`, `permission_level`) VALUES
+(1, 'General', 'For all your discussion needs.', 2, 0),
+(2, 'Site Feedback', 'Give a suggestion or tell us how we\'re doing.', 3, 0),
+(3, 'Support', 'Gain help with issues and report bugs.', 4, 0),
+(4, 'Announcements', 'Official announcements from the staff.', 1, 0),
+(5, 'Admin Discussion', 'A place to regroup.', 5, 95);
 
 --
 -- Dumping data for table `permission_levels`

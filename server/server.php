@@ -12,8 +12,12 @@ include("keyring.php");
 
 $db = new mysqli(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB, MYSQL_PORT);
 
+$stmt = $db->prepare('SET @@global.time_zone = "+00:00"');
+$stmt->execute();
+
 session_start();
 
+// TODO - this should be cleaned up or deleted
 set_error_handler("errorHandler");
 function errorHandler($errno, $errstr, $errfile, $errline)
 {

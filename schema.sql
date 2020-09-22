@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 20, 2020 at 04:32 AM
+-- Generation Time: Sep 22, 2020 at 05:56 AM
 -- Server version: 10.3.16-MariaDB
 -- PHP Version: 7.3.6
 
@@ -19,6 +19,8 @@ SET time_zone = "+00:00";
 --
 -- Database: `collections`
 --
+CREATE DATABASE IF NOT EXISTS `collections` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+USE `collections`;
 
 -- --------------------------------------------------------
 
@@ -66,7 +68,7 @@ CREATE TABLE `media` (
   `id` int(15) NOT NULL,
   `user_id` int(11) NOT NULL,
   `collection_id` int(11) NOT NULL,
-  `status` tinytext NOT NULL DEFAULT 'planned',
+  `status` tinytext NOT NULL,
   `name` tinytext NOT NULL,
   `image` varchar(2048) NOT NULL,
   `score` int(3) DEFAULT 0,
@@ -87,6 +89,14 @@ CREATE TABLE `media` (
   `private` tinyint(1) NOT NULL,
   `deleted` tinyint(1) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Triggers `media`
+--
+DELIMITER $$
+CREATE TRIGGER `new_media` BEFORE INSERT ON `media` FOR EACH ROW SET NEW.`status` = CASE WHEN NEW.status = '' THEN 'planned' ELSE NEW.status END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -162,7 +172,7 @@ CREATE TABLE `users` (
   `password` varchar(255) NOT NULL,
   `permission_level` int(2) NOT NULL DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `about` text NOT NULL DEFAULT ''
+  `about` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -173,8 +183,16 @@ CREATE TABLE `users` (
 
 CREATE TABLE `user_preferences` (
   `user_id` int(11) NOT NULL,
-  `timezone` tinytext NOT NULL DEFAULT 'UTC'
+  `timezone` tinytext NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+--
+-- Triggers `user_preferences`
+--
+DELIMITER $$
+CREATE TRIGGER `new_user_preferences` BEFORE INSERT ON `user_preferences` FOR EACH ROW SET NEW.`timezone` = CASE WHEN NEW.timezone = '' THEN 'UTC' ELSE NEW.timezone END
+$$
+DELIMITER ;
 
 --
 -- Indexes for dumped tables
