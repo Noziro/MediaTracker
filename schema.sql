@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 22, 2020 at 05:56 AM
+-- Generation Time: Sep 22, 2020 at 09:59 AM
 -- Server version: 10.3.16-MariaDB
 -- PHP Version: 7.3.6
 
@@ -297,6 +297,14 @@ ALTER TABLE `threads`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+DELIMITER $$
+--
+-- Events
+--
+CREATE DEFINER=`root`@`localhost` EVENT `clear_expired_sessions` ON SCHEDULE EVERY 1 DAY STARTS '2020-09-22 07:48:15' ON COMPLETION NOT PRESERVE ENABLE DO DELETE FROM sessions WHERE expiry < UNIX_TIMESTAMP()$$
+
+DELIMITER ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
