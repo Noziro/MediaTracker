@@ -505,12 +505,17 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 			|| (int)$m < 1
 			|| (int)$m > 12
 			|| (int)$d < 1
-			|| (int)$d > 31 // yes, this will accept invalid day ranges. will fix with a different if statement when/if it becomes a problem (such as SQL refusing the date). This requires some testing.
+			|| (int)$d > 31 // yes, this will accept invalid day ranges. this is dealt with below
 			) {
 				finalize($r2, 'invalid_value', 'error');
 		}
 
-		// if all check passed, return
+		// Uses PHP date functions to validate that the year/day is actually valid
+		// TODO - a lot of the above IF checks can probably be scrapped in favour of just using this str->date->str method
+		$dateObj = date_create_from_format('Y-m-d', $date);
+		$date = date_format($dateObj, 'Y-m-d');
+
+		// If all checks passed, return
 		return $date;
 	}
 
