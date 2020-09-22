@@ -81,7 +81,7 @@ class Authentication {
 		$stmt->bind_param("ssss", $id, $user_id, $expiry, $user_ip);
 		$stmt->execute();
 		
-		setcookie('session', $id, $expiry);
+		setcookie('session', $id, $expiry, '/');
 		return true;
 	}
 	
@@ -122,10 +122,10 @@ class Authentication {
 		if (!array_key_exists('session', $_COOKIE)) {
 			return false;
 		}
-		$session = sql("SELECT expiry FROM sessions WHERE id=? LIMIT 1", ["s", $_COOKIE['session']]);
+		$session = sql('SELECT expiry FROM sessions WHERE id=? LIMIT 1', ['s', $_COOKIE['session']]);
 		if($session['rows'] > 0) {
 			if($session['result'][0]['expiry'] < time()) {
-				sql("DELETE FROM sessions WHERE id=?", ["s", $_COOKIE['session']]);
+				sql('DELETE FROM sessions WHERE id=?', ['s', $_COOKIE['session']]);
 				setcookie('session', '', time() - 3600);
 				return false;
 			}
