@@ -18,13 +18,13 @@ $stmt->execute();
 session_start();
 
 // TODO - this should be cleaned up or deleted
-set_error_handler("errorHandler");
-function errorHandler($errno, $errstr, $errfile, $errline)
-{
-    error_log("$errstr in $errfile:$errline");
-	echo $errstr.'<br><br>';
-    #header('Location: /500');
-}
+#set_error_handler("errorHandler");
+#function errorHandler($errno, $errstr, $errfile, $errline)
+#{
+#    error_log("$errstr in $errfile:$errline");
+#	echo $errstr.'<br><br>';
+#    #header('Location: /500');
+#}
 
 
 
@@ -52,81 +52,73 @@ class Authentication {
 	}
 	
 	// Function called by user attempting login. Returns BOOL for success/fail.
-	public function login(string $user, string $pass) {
+	public function login(string $post_name, string $post_pass) {
+		// Username is case insensitive.
+		$post_name_normalized = strtolower($post_name);
+
+		// Check user exists & get info
+		$stmt = sql('SELECT id, username, password FROM users WHERE username=?', ['s', $post_name_normalized]);
+		if(!$stmt['result'] || $stmt['rows'] < 1) {
+			return false;
+		}
+		
+		$user = $stmt['result'][0];
+		
+		// Validate password
+		$valid = password_verify($post_pass, $user['password']);
+		if (!$valid) {
+			return false;
+		}
+
 		// Set expiry date in Unix time for use in database and cookies
 		$offset = 90 * 24 * 60 * 60; // days * hours * minutes * seconds
 		$expiry = time() + $offset;
 		
-		// Check user exists. Username is case insensitive.
-		$stmt = $this->db->prepare("SELECT id, username, password FROM users WHERE username=?");
-		$normalized_user = strtolower($user);
-		$stmt->bind_param("s", $normalized_user);
-		$stmt->execute();
-		$res = $stmt->get_result();
-		$stmt->free_result();
-		
-		if ($res->num_rows === 0) {
-			return false;
-		}
-		
-		$resData = $res->fetch_assoc();
-		
-		// Validate password
-		$valid = password_verify($pass, $resData['password']);
-		if (!$valid) {
-			return false;
-		}
-		
-		// Create new user session
-		$stmt = $this->db->prepare("INSERT INTO sessions (id, user_id, expiry, user_ip) VALUES (?, ?, ?, ?)");
-		$id = $this->generateSessionID();
-		$user_id = $resData['id'];
+		// Set other variables
+		$session = $this->generate_session_id();
 		$user_ip = $_SERVER['REMOTE_ADDR'];
-		$stmt->bind_param("ssss", $id, $user_id, $expiry, $user_ip);
-		$stmt->execute();
+
+		// Create new user session
+		$stmt = sql('INSERT INTO sessions (id, user_id, expiry, user_ip) VALUES (?, ?, ?, ?)', ['siis', $session, $user['id'], $expiry, $user_ip]);
+		if(!$stmt['result']) {
+			return false;
+		}
 		
-		setcookie('session', $id, $expiry, '/');
+		setcookie('session', $session, $expiry, '/');
 		return true;
 	}
 	
 	// Function called by user attempting register. Returns BOOL for success/fail.
-	public function register(string $user, string $pass, string $email = '') {
-		// Check for existing user
-		$stmt = $this->db->prepare("SELECT id FROM users WHERE username=?");
-		$normalized_user = strtolower($user);
-		$stmt->bind_param("s", $normalized_user);
-		$stmt->execute();
-		$res = $stmt->get_result();
-		if ($res->num_rows > 0) {
+	public function register(string $post_name, string $post_pass, string $email = '') {
+		$post_name_normalized = strtolower($post_name);
+
+		// Check for existence & get info
+		$stmt = sql('SELECT id FROM users WHERE username=?', ['s', $post_name_normalized]);
+		if (!$stmt['result'] || $stmt['rows'] > 0) {
 			return false;
 		}
+
+		$user = $stmt['result'][0];
 		
 		// Hash password
-		$hash = password_hash($pass, PASSWORD_BCRYPT);
+		$pass_hashed = password_hash($pass, PASSWORD_BCRYPT);
 		
 		// Insert user into DB
-		$stmt = $this->db->prepare("INSERT INTO users (username, nickname, email, password) VALUES (?, ?, ?, ?)");
-		$stmt->bind_param("ssss", strtolower($user), $user, $email, $hash);
-		$stmt->execute();
-		
-		// Setup basic user preferences
-		$stmt = $this->db->prepare("INSERT INTO user_preferences (user_id) VALUES (LAST_INSERT_ID())");
-		$stmt->execute();
-		
-		$stmt->close();
+		sql('INSERT INTO users (username, nickname, email, password) VALUES (?, ?, ?, ?)', ['ssss', $post_name_normalized, $post_name, $email, $pass_hashed]);
+		sql('INSERT INTO user_preferences (user_id) VALUES (LAST_INSERT_ID())');
 		
 		// Automatically login after registration.
-		$this->login($user, $pass);
+		$this->login($post_name, $post_pass);
 		
 		return true;
 	}
 	
 	// Function used internally to check if visitor has an active user session. Returns BOOL.
-	public function isLoggedIn() {
+	public function is_logged_in() {
 		if (!array_key_exists('session', $_COOKIE)) {
 			return false;
 		}
-		$session = sql('SELECT expiry FROM sessions WHERE id=? LIMIT 1', ['s', $_COOKIE['session']]);
+		$session = sql('SELECT expiry FROM sessions WHERE id=?', ['s', $_COOKIE['session']]);
 		if($session['rows'] > 0) {
 			if($session['result'][0]['expiry'] < time()) {
 				sql('DELETE FROM sessions WHERE id=?', ['s', $_COOKIE['session']]);
@@ -139,45 +131,43 @@ class Authentication {
 		}
 	}
 	
-	// Gets info about current user. Used after checking if they are logged in with isLoggedIn(). Returns SQL_ASSOC or FALSE
-	public function getCurrentUser() {
-		// INNER JOIN pulls data from the users table where the ID matches
-		$stmt = $this->db->prepare("SELECT users.id, users.username, users.nickname, users.email, users.permission_level FROM users INNER JOIN sessions ON sessions.user_id = users.id WHERE sessions.id=?");
-		$stmt->bind_param("s", $_COOKIE['session']);
-		$stmt->execute();
-		$res = $stmt->get_result();
-		
-		if ($res->num_rows > 0) {
-			return $res->fetch_assoc();
-		} else {
+	// Gets info about current user. Used after checking if they are logged in with is_logged_in(). Returns SQL_ASSOC or FALSE
+	public function get_current_user() {
+		$stmt = sql('SELECT users.id, users.username, users.nickname, users.email, users.permission_level FROM users INNER JOIN sessions ON sessions.user_id = users.id WHERE sessions.id=?', ['s', $_COOKIE['session']]);
+
+		if (!$stmt['result'] || $stmt['rows'] < 1) {
 			return false;
+		} else {
+			return $stmt['result'][0];
 		}
 	}
 
-	public function getCurrentUserPrefs() {
-		// INNER JOIN pulls data from the users table where the ID matches
-		$stmt = $this->db->prepare("SELECT * FROM user_preferences INNER JOIN sessions ON sessions.user_id = user_preferences.user_id WHERE sessions.id=?");
-		$stmt->bind_param("s", $_COOKIE['session']);
-		$stmt->execute();
-		$res = $stmt->get_result();
+	public function get_current_user_prefs() {
+		$stmt = sql('SELECT * FROM user_preferences INNER JOIN sessions ON sessions.user_id = user_preferences.user_id WHERE sessions.id=?', ['s', $_COOKIE['session']]);
 		
-		if ($res->num_rows > 0) {
-			return $res->fetch_assoc();
-		} else {
+		if (!$stmt['result'] || $stmt['rows'] < 1) {
 			return false;
+		} else {
+			return $stmt['result'][0];
 		}
 	}
 	
-	// Logs out user via wiping their session. Returns BOOL on success/failure.
-	public function logout() {
+	// Logs out user via wiping their session. Provies option for wiping only your session or all sessions. Returns BOOL on success/failure.
+	public function logout($logout_all = false) {
 		if (!array_key_exists('session', $_COOKIE)) {
 			return false;
 		}
 		
 		// Remove session from the database
-		$stmt = $this->db->prepare("DELETE FROM sessions WHERE id=?");
-		$stmt->bind_param("s", $_COOKIE['session']);
-		$stmt->execute();
+		if($logout_all) {
+			$user = $this->get_current_user();
+			$stmt = sql('DELETE FROM sessions WHERE user_id=?', ['s', $user['id']]);
+		} else {
+			$stmt = sql('DELETE FROM sessions WHERE id=?', ['s', $_COOKIE['session']]);
+		}
+		if(!$stmt['result']) {
+			return false;
+		}
 		
 		// Remove the cookie by setting expiry time to the past
 		setcookie('session', '', time() - 3600);
@@ -186,12 +176,12 @@ class Authentication {
 	}
 	
 	// Generate and return 32 character session ID.
-	private function generateSessionID() {
+	private function generate_session_id() {
 		$id = bin2hex(random_bytes(16));
 		
 		// If ID exists, get new one
-		if (sql("SELECT id FROM sessions WHERE id=?", ["s", $id])['rows'] > 0) {
-			$id = generateSessionID();
+		if (sql('SELECT id FROM sessions WHERE id=?', ['s', $id])['rows'] > 0) {
+			$id = generate_session_id();
 		}
 		
 		return $id;
@@ -201,11 +191,11 @@ class Authentication {
 // Set user variables because god knows I'm checking if users are logged on literally every page
 
 $auth = new Authentication();
-$has_session = $auth->isLoggedIn();
+$has_session = $auth->is_logged_in();
 
 if($has_session) {
-	$user = $auth->getCurrentUser();
-	$prefs = $auth->getCurrentUserPrefs();
+	$user = $auth->get_current_user();
+	$prefs = $auth->get_current_user_prefs();
 	$permission_level = $user['permission_level'];
 } else {
 	$user = False;

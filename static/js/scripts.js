@@ -58,7 +58,8 @@ function toggleModal(id, mode = null) {
 
 // Confirmation Modal
 
-function modalConfirmation($msg, $action, $data, $value) {
+function modalConfirmation($msg, $action, $data = '', $value = '', $post = '/interface/generic') {
+	document.getElementById('form-confirmation').setAttribute('action', $post);
 	document.getElementById('js-confirmation-msg').innerHTML = $msg;
 	document.getElementById('js-confirmation-action').setAttribute('value', $action);
 	document.getElementById('js-confirmation-data').setAttribute('name', $data);

@@ -83,7 +83,7 @@ if(!$has_session) {
 					<th class="active-sessions__cell active-sessions__cell--header">User IP</th>
 				</tr>
 				
-				<?php 
+				<?php
 				$profile__active_sessions = sql('SELECT id, started, expiry, user_ip FROM sessions WHERE user_id=? ORDER BY started DESC', ['i', $user['id']])['result'];
 				
 				foreach($profile__active_sessions as $session) : ?>
@@ -105,8 +105,15 @@ if(!$has_session) {
 				
 				<?php endforeach; ?>
 			</table>
+
+			<form id="form-logout-all" style="display:none" action="/interface/session" method="POST">
+				<input type="hidden" name="action" value="logout_all">
+				<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
+			</form>
 			
-			
+			<button class="settings__button button button--spaced" onclick="modalConfirmation('Are you sure you wish to logout all sessions?', 'logout_all', '', '', '/interface/session')">
+				Logout All Sessions
+			</button>
 
 
 			
@@ -225,6 +232,25 @@ if(!$has_session) {
 			
 			endif;
 			?>
+
+
+
+			<div id="modal--confirmation" class="modal modal--hidden" role="dialog" aria-modal="true">
+			<button class="modal__background" onclick="toggleModal('modal--confirmation', false)"></button>
+			<div class="modal__inner">
+				<h3 id="js-confirmation-msg" class="modal__header"></h3>
+				<div class="js-confirmation-preview"><!-- TODO - unused atm - plan to put post content here to display what user is deleting --></div>
+				<form id="form-confirmation" action="/interface/generic" method="POST" style="display:none">
+					<input id="js-confirmation-action" type="hidden" name="action">
+					<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
+					<input id="js-confirmation-data" type="hidden">
+				</form>
+				<div class="button-list">
+					<button form="form-confirmation" class="button-list__button button button--medium button--negative" type="submit">Confirm</a>
+					<button class="button-list__button button button--medium" onclick="toggleModal('modal--confirmation', false)">Cancel</a>
+				</div>
+			</div>
+		</div>
 		</div>
 	</div>
 </main>

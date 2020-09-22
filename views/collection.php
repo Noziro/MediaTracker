@@ -154,19 +154,26 @@
 						<?php
 						$s = $item['user_started_at'];
 						$e = $item['user_finished_at'];
+						$sd = date_create($s);
+						$ed = date_create($e);
+						$n = date_create();
 
 						if(isset($s) && isset($e)) {
-							$days = date_diff(date_create($s),date_create($e))->format('%a');
+							$days = date_diff($sd,$ed)->format('%a');
 							if($days < 1) {
 								$days = 1;
 							}
 							echo $days;
 						} elseif(isset($s)) {
-							$days = date_diff(date_create($s),date_create())->format('%a');
-							if($days < 1) {
-								$days = 1;
+							$days = date_diff($sd,$n)->format('%a');
+							if($sd > $n) {
+								echo 'N/A';
+							} else {
+								if($days < 1) {
+									$days = 1;
+								}
+								echo '>'.$days;
 							}
-							echo '>'.$days;
 						}
 						?>
 					</td>

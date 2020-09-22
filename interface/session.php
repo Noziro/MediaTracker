@@ -7,7 +7,7 @@ if(isset($_POST['return_to'])) {
 	$r2prev = $_POST['return_to'];
 	$r2login = '/login?action=login&return_to='.urlencode($r2prev);
 } else {
-	$r2prev = '/?';
+	$r2prev = '/';
 	$r2login = '/login?action=login';
 }
 
@@ -86,6 +86,16 @@ elseif($action === "register") {
 
 elseif($action === "logout") {
 	$logout = $auth->logout();
+	
+	if($logout) {
+		finalize($r2prev, 'logout_success');
+	} else {
+		finalize($r2prev, 'logout_failure');
+	}
+}
+
+elseif($action === "logout_all") {
+	$logout = $auth->logout(true);
 	
 	if($logout) {
 		finalize($r2prev, 'logout_success');
