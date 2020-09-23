@@ -9,7 +9,7 @@ include '../server/server.php';
 // AUTH
 
 if(!$has_session)  {
-	finalize('/', 'require_sign_in', 'error'); 
+	finalize('/', ['require_sign_in', 'error']); 
 }
 
 $action = $_POST['action'];
@@ -29,23 +29,23 @@ if(isset($_POST['return_to'])) {
 
 if($action === "forum_thread_create") {
 	if(!isset($_POST['board_id'])) {
-		finalize($r2, 'disallowed_action', 'error');
+		finalize($r2, ['disallowed_action', 'error']);
 	}
 	
 	// Check required fields
 	if(!isset($_POST['title']) || !isset($_POST['body']) || trim($_POST['body']) === '') {
-		finalize($r2, 'required_field', 'error');
+		finalize($r2, ['required_field', 'error']);
 	}
 
 	// Get info
 	$stmt = sql('SELECT id, permission_level FROM boards WHERE id=?', ['i', $_POST['board_id']]);
-	if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
-	if($stmt['rows'] < 1) { finalize($r2, 'disallowed_action', 'error'); }
+	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
+	if($stmt['rows'] < 1) { finalize($r2, ['disallowed_action', 'error']); }
 	$board = $stmt['result'][0];
 	
 	// Check user authority
 	if($permission_level < $board['permission_level']) { 
-		finalize($r2, 'unauthorized', 'error');
+		finalize($r2, ['unauthorized', 'error']);
 	}
 
 	$title = trim($_POST['title']);
@@ -53,7 +53,7 @@ if($action === "forum_thread_create") {
 
 	// Add thread to DB
 	$stmt = sql('INSERT INTO threads (user_id, board_id, title) VALUES (?, ?, ?)', ['iis', $user['id'], $board['id'], $title]);
-	if(!stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
+	if(!stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
 	
 	// Get newly added thread ID
 	$stmt = sql('SELECT LAST_INSERT_ID()');
@@ -64,7 +64,7 @@ if($action === "forum_thread_create") {
 
 	// Add thread reply to DB
 	$stmt = sql('INSERT INTO replies (user_id, thread_id, body) VALUES (?, ?, ?)', ['iis', $user['id'], $new_thread_id, $body]);
-	if(!stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
+	if(!stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
 	
 	finalize($r2);
 }
@@ -75,34 +75,34 @@ if($action === "forum_thread_create") {
 
 elseif($action === "forum_reply_create") {
 	if(!isset($_POST['thread_id'])) {
-		finalize($r2, 'disallowed_action', 'error');
+		finalize($r2, ['disallowed_action', 'error']);
 	}
 
 	// Check required fields
 	if(!isset($_POST['body']) || trim($_POST['body']) === '') {
-		finalize($r2, 'required_field', 'error');
+		finalize($r2, ['required_field', 'error']);
 	}
 
 	// Get info
 	$stmt = sql('SELECT threads.id, threads.board_id, threads.locked, boards.permission_level FROM threads INNER JOIN boards ON threads.board_id = boards.id WHERE threads.id=?', ['i', $_POST['thread_id']]);
-	if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
-	if($stmt['rows'] < 1) { finalize($r2, 'disallowed_action', 'error'); }
+	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
+	if($stmt['rows'] < 1) { finalize($r2, ['disallowed_action', 'error']); }
 	$thread = $stmt['result'][0];
 
 	// Check user authority
 	if($thread['locked'] === 1 && $permission_level < $permission_levels['Moderator'] || $permission_level < $thread['permission_level']) {
-		finalize($r2, 'unauthorized', 'error');
+		finalize($r2, ['unauthorized', 'error']);
 	}
 
 	// Execute DB
 	$stmt = sql('INSERT INTO replies (user_id, thread_id, body) VALUES (?, ?, ?)', ['iis', $user['id'], $thread['id'], $_POST['body']]);
-	if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
+	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
 	
 	// Set thread updated_at date for sorting purposes
 	$stmt = sql('UPDATE threads SET updated_at=CURRENT_TIMESTAMP WHERE id=?', ['i', $thread['id']]);
-	if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
+	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
 	
-	finalize($r2, 'success');
+	finalize($r2, ['success']);
 }
 
 
@@ -111,7 +111,7 @@ elseif($action === "forum_reply_create") {
 
 elseif($action === 'forum_thread_lock' || $action === 'forum_thread_unlock') {
 	if(!isset($_POST['thread_id'])) {
-		finalize($r2, 'disallowed_action', 'error');
+		finalize($r2, ['disallowed_action', 'error']);
 	}
 
 	if($action === 'forum_thread_lock') {
@@ -122,20 +122,20 @@ elseif($action === 'forum_thread_lock' || $action === 'forum_thread_unlock') {
 
 	// Check user authority
 	if($permission_level < $permission_levels['Moderator']) {
-		finalize($r2, 'unauthorized', 'error');
+		finalize($r2, ['unauthorized', 'error']);
 	}
 
 	// Check existence
 	$stmt = sql('SELECT id FROM threads WHERE id=?', ['i', $_POST['thread_id']]);
-	if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
-	if($stmt['rows'] < 1) { finalize($r2, 'disallowed_action', 'error'); }
+	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
+	if($stmt['rows'] < 1) { finalize($r2, ['disallowed_action', 'error']); }
 	$thread = $stmt['result'][0];
 
 	// Execute DB
 	$stmt = sql('UPDATE threads SET locked=? WHERE id=?', ['ii', $lock, $thread['id']]);
-	if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
+	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
 
-	finalize($r2, 'success');
+	finalize($r2, ['success']);
 }
 
 
@@ -144,7 +144,7 @@ elseif($action === 'forum_thread_lock' || $action === 'forum_thread_unlock') {
 
 elseif($action === 'forum_thread_delete' || $action === 'forum_thread_undelete') {
 	if(!isset($_POST['thread_id'])) {
-		finalize($r2, 'disallowed_action', 'error');
+		finalize($r2, ['disallowed_action', 'error']);
 	}
 
 	if($action === 'forum_thread_delete') {
@@ -155,24 +155,24 @@ elseif($action === 'forum_thread_delete' || $action === 'forum_thread_undelete')
 
 	// Check existence
 	$stmt = sql('SELECT threads.id, threads.board_id, threads.user_id, boards.permission_level FROM threads INNER JOIN boards ON threads.board_id = boards.id WHERE threads.id=?', ['i', $_POST['thread_id']]);
-	if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
-	if($stmt['rows'] < 1) { finalize($r2, 'disallowed_action', 'error'); }
+	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
+	if($stmt['rows'] < 1) { finalize($r2, ['disallowed_action', 'error']); }
 	$thread = $stmt['result'][0];
 
 	// Check user authority
 	if($user['id'] !== $thread['user_id'] && $permission_level < $thread['permission_level']) {
-		finalize($r2, 'unauthorized', 'error');
+		finalize($r2, ['unauthorized', 'error']);
 	}
 
 	// Execute DB
 	$stmt = sql('UPDATE threads SET deleted=? WHERE id=?', ['ii', $delete, $thread['id']]);
-	if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
+	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
 
 	if($action === 'forum_thread_delete') {
 		$r2 = '/forum/board?id='.$thread['board_id'];
 	}
 
-	finalize($r2, 'success');
+	finalize($r2, ['success']);
 }
 
 
@@ -181,37 +181,37 @@ elseif($action === 'forum_thread_delete' || $action === 'forum_thread_undelete')
 
 elseif($action === "forum_reply_edit") {
 	if(!isset($_POST['reply_id'])) {
-		finalize($r2, 'disallowed_action', 'error');
+		finalize($r2, ['disallowed_action', 'error']);
 	}
 
 	// Check required fields
 	if(!isset($_POST['body']) || trim($_POST['body']) === '') {
-		finalize($r2, 'required_field', 'error');
+		finalize($r2, ['required_field', 'error']);
 	}
 
 	// Check existence
 	$stmt = sql('SELECT id, thread_id, user_id FROM replies WHERE id=?', ['i', $_POST['reply_id']]);
-	if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
-	if($stmt['rows'] < 1) { finalize($r2, 'disallowed_action', 'error'); }
+	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
+	if($stmt['rows'] < 1) { finalize($r2, ['disallowed_action', 'error']); }
 	$reply = $stmt['result'][0];
 
 	// Check user authority
 	if($user['id'] !== $reply['user_id']) {
-		finalize($r2, 'unauthorized', 'error');
+		finalize($r2, ['unauthorized', 'error']);
 	}
 
 	// Execute DB
 	$stmt = sql('UPDATE replies SET body=?, updated_at=CURRENT_TIMESTAMP WHERE id=?', ['si', $_POST['body'], $reply['id']]);
-	if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
+	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
 
-	finalize($r2, 'success');
+	finalize($r2, ['success']);
 }
 
 
 
 elseif($action === 'forum_reply_delete' || $action === 'forum_reply_undelete') {
 	if(!isset($_POST['reply_id'])) {
-		finalize($r2, 'disallowed_action', 'error');
+		finalize($r2, ['disallowed_action', 'error']);
 	}
 
 	if($action === 'forum_reply_delete') {
@@ -222,30 +222,30 @@ elseif($action === 'forum_reply_delete' || $action === 'forum_reply_undelete') {
 	
 	// Check existence
 	$stmt = sql('SELECT id, thread_id, user_id FROM replies WHERE id=?', ['i', $_POST['reply_id']]);
-	if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
-	if($stmt['rows'] < 1) { finalize($r2, 'disallowed_action', 'error'); }
+	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
+	if($stmt['rows'] < 1) { finalize($r2, ['disallowed_action', 'error']); }
 	$reply = $stmt['result'][0];
 
 	// Check user authority
 	if($user['id'] !== $reply['user_id'] && $permission_level < $permission_levels['Moderator']) {
-		finalize($r2, 'unauthorized', 'error');
+		finalize($r2, ['unauthorized', 'error']);
 	}
 
 	// Execute DB
 	$stmt = sql('UPDATE replies SET deleted=? WHERE id=?', ['ii', $delete, $reply['id']]);
-	if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
+	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
 	
 	// Set thread anonymous if deleting first post.
 	$stmt = sql('SELECT id FROM replies WHERE thread_id=? ORDER BY created_at ASC LIMIT 1', ['i', $reply['thread_id']]);
-	if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
+	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
 	$first_reply_id = $stmt['result'][0]['id'];
 
 	if($first_reply_id === $reply['id']) {
 		$stmt = sql('UPDATE threads SET anonymous=? WHERE id=?', ['ii', $delete, $reply['thread_id']]);
-		if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
+		if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
 	}
 	
-	finalize($r2, 'success');
+	finalize($r2, ['success']);
 }
 
 
@@ -255,7 +255,7 @@ elseif($action === 'forum_reply_delete' || $action === 'forum_reply_undelete') {
 elseif($action === "collection_create") {
 	// Required fields
 	if(!isset($_POST['name']) || !isset($_POST['type'])) {
-		finalize($r2, 'required_field', 'error');
+		finalize($r2, ['required_field', 'error']);
 	}
 
 	// Define variables
@@ -263,7 +263,7 @@ elseif($action === "collection_create") {
 
 	$type = trim($_POST['type']);
 	if(!in_array((string)$type, $valid_coll_types, True)) {
-		finalize($r2, 'invalid_value', 'error');
+		finalize($r2, ['invalid_value', 'error']);
 	}
 
 	if(!isset($_POST['private']) || !in_array((int)$_POST['private'], [0,9], True)) {
@@ -274,9 +274,9 @@ elseif($action === "collection_create") {
 
 	// Execute DB
 	$stmt = sql('INSERT INTO collections (user_id, name, type, private) VALUES (?, ?, ?, ?)', ['issi', $user['id'], $name, $type, $private]);
-	if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
+	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
 	
-	finalize($r2, 'success');
+	finalize($r2, ['success']);
 }
 
 
@@ -285,23 +285,23 @@ elseif($action === "collection_create") {
 
 elseif($action === "collection_edit") {
 	if(!isset($_POST['collection_id'])) {
-		finalize($r2, 'disallowed_action', 'error');
+		finalize($r2, ['disallowed_action', 'error']);
 	}
 
 	// Required Fields
 	if(!isset($_POST['name']) || !isset($_POST['type'])) {
-		finalize($r2, 'required_field', 'error');
+		finalize($r2, ['required_field', 'error']);
 	}
 	
 	// Check existence
 	$stmt = sql('SELECT id, user_id, rating_system FROM collections WHERE id=?', ['i', $_POST['collection_id']]);
-	if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
-	if($stmt['rows'] < 1) { finalize($r2, 'disallowed_action', 'error'); }
+	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
+	if($stmt['rows'] < 1) { finalize($r2, ['disallowed_action', 'error']); }
 	$collection = $stmt['result'][0];
 
 	// Check user authority
 	if($user['id'] !== $collection['user_id']) {
-		finalize($r2, 'unauthorized', 'error');
+		finalize($r2, ['unauthorized', 'error']);
 	}
 
 	// Define variables
@@ -309,7 +309,7 @@ elseif($action === "collection_edit") {
 
 	$type = trim($_POST['type']);
 	if(!in_array((string)$type, $valid_coll_types, True)) {
-		finalize($r2, 'invalid_value', 'error');
+		finalize($r2, ['invalid_value', 'error']);
 	}
 
 	if(!isset($_POST['private']) || !in_array((int)$_POST['private'], [0,9], True)) {
@@ -328,7 +328,7 @@ elseif($action === "collection_edit") {
 
 	foreach($columns as $col => $val) {
 		if(!isset($_POST[$col])) {
-			finalize($r2, 'invalid_value', 'error');
+			finalize($r2, ['invalid_value', 'error']);
 		} else {
 			$columns[$col] = $_POST[$col];
 		}
@@ -339,7 +339,7 @@ elseif($action === "collection_edit") {
 
 		// If not valid input
 		if(!in_array((int)$rating_system, [3,5,10,20,100], True)) {
-			finalize($r2, 'invalid_value', 'error');
+			finalize($r2, ['invalid_value', 'error']);
 		}
 	} else {
 		$rating_system = $collection['rating_system'];
@@ -370,9 +370,9 @@ elseif($action === "collection_edit") {
 		$private,
 		$collection['id']
 	]);
-	if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
+	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
 
-	finalize($r2, 'success');
+	finalize($r2, ['success']);
 }
 
 
@@ -382,34 +382,34 @@ elseif($action === "collection_edit") {
 elseif($action === "collection_item_create" || $action === "collection_item_edit") {
 	if($action === "collection_item_create") {
 		if(!isset($_POST['collection_id'])) {
-			finalize($r2, 'disallowed_action', 'error');
+			finalize($r2, ['disallowed_action', 'error']);
 		}
 
 		// Get info
 		$stmt = sql('SELECT id, user_id, rating_system FROM collections WHERE id=?', ['i', $_POST['collection_id']]);
-		if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
-		if($stmt['rows'] < 1) { finalize($r2, 'disallowed_action', 'error'); }
+		if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
+		if($stmt['rows'] < 1) { finalize($r2, ['disallowed_action', 'error']); }
 		$collection = $stmt['result'][0];
 	} elseif($action === "collection_item_edit") {
 		if(!isset($_POST['item_id'])) {
-			finalize($r2, 'disallowed_action', 'error');
+			finalize($r2, ['disallowed_action', 'error']);
 		}
 
 		// Get info
 		$stmt = sql('SELECT collections.id, collections.user_id, collections.rating_system FROM collections INNER JOIN media ON collections.id = media.collection_id WHERE media.id=?', ['i', $_POST['item_id']]);
-		if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
-		if($stmt['rows'] < 1) { finalize($r2, 'disallowed_action', 'error'); }
+		if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
+		if($stmt['rows'] < 1) { finalize($r2, ['disallowed_action', 'error']); }
 		$collection = $stmt['result'][0];
 	}
 
 	// Check user authority
 	if($user['id'] !== $collection['user_id']) {
-		finalize('/collection', 'unauthorized', 'error');
+		finalize('/collection', ['unauthorized', 'error']);
 	}
 	
 	// Required fields
 	if(!isset($_POST['name']) || !isset($_POST['status'])) {
-		finalize($r2, 'required_field', 'error');
+		finalize($r2, ['required_field', 'error']);
 	}
 
 
@@ -435,7 +435,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 		$status = (string)$_POST['status'];
 
 		if(!in_array($status, $valid_status, True)) {
-			finalize($r2, 'invalid_value', 'error');
+			finalize($r2, ['invalid_value', 'error']);
 		}
 	}
 
@@ -443,7 +443,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 	if(array_key_exists('score', $_POST)) {
 		$score = (int)$_POST['score'];
 		if($score < 0 || $score > $collection['rating_system']) {
-			finalize($r2, 'invalid_value', 'error');
+			finalize($r2, ['invalid_value', 'error']);
 		}
 		$score = score_normalize($score, $collection['rating_system']);
 	}
@@ -453,14 +453,14 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 	if(array_key_exists('progress', $_POST)) {
 		$progress= (int)$_POST['progress'];
 		if($progress < 0) {
-			finalize($r2, 'invalid_value', 'error');
+			finalize($r2, ['invalid_value', 'error']);
 		}
 	}
 
 	if(array_key_exists('episodes', $_POST)) {
 		$episodes = (int)$_POST['episodes'];
 		if($episodes < 0) {
-			finalize($r2, 'invalid_value', 'error');
+			finalize($r2, ['invalid_value', 'error']);
 		}
 		// Increase total episodes to match watched episodes if needed
 		if($episodes < $progress) {
@@ -471,7 +471,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 	if(array_key_exists('rewatched', $_POST)) {
 		$rewatched = (int)$_POST['rewatched'];
 		if($rewatched < 0) {
-			finalize($r2, 'invalid_value', 'error');
+			finalize($r2, ['invalid_value', 'error']);
 		}
 	}
 
@@ -507,7 +507,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 			|| (int)$d < 1
 			|| (int)$d > 31 // yes, this will accept invalid day ranges. this is dealt with below
 			) {
-				finalize($r2, 'invalid_value', 'error');
+				finalize($r2, ['invalid_value', 'error']);
 		}
 
 		// Uses PHP date functions to validate that the year/day is actually valid
@@ -544,7 +544,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 		$comments = $_POST['comments'];
 		$maxlen = pow(2,16) - 1;
 		if(strlen($comments) > $maxlen) {
-			finalize($r2, 'invalid_value', 'error');
+			finalize($r2, ['invalid_value', 'error']);
 		}
 	}
 
@@ -566,14 +566,14 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 	if(array_key_exists('adult', $_POST)) {
 		$adult = $_POST['adult'];
 		if($adult < 0 || $adult > 1) {
-			finalize($r2, 'invalid_value', 'error');
+			finalize($r2, ['invalid_value', 'error']);
 		}
 	}
 
 	if(array_key_exists('favourite', $_POST)) {
 		$favourite = $_POST['favourite'];
 		if($favourite < 0 || $favourite > 1) {
-			finalize($r2, 'invalid_value', 'error');
+			finalize($r2, ['invalid_value', 'error']);
 		}
 	}
 
@@ -660,7 +660,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 			$_POST['item_id']
 		]);
 	}
-	if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
+	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
 
 	if($action === 'collection_item_create') {
 		// Get newly added ID
@@ -678,9 +678,9 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 	}
 	
 	if(isset($details)) {
-		finalize($r2, 'blank', 'generic', $details);
+		finalize($r2, ['blank', 'generic', $details]);
 	}
-	finalize($r2, 'success', 'generic');
+	finalize($r2, ['success', 'generic']);
 }
 
 
@@ -689,7 +689,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 
 if($action === 'collection_item_delete' || $action === 'collection_item_undelete') {
 	if(!isset($_POST['item_id'])) {
-		finalize($r2, 'disallowed_action', 'error');
+		finalize($r2, ['disallowed_action', 'error']);
 	}
 
 	if($action === 'collection_item_delete') {
@@ -700,20 +700,20 @@ if($action === 'collection_item_delete' || $action === 'collection_item_undelete
 
 	// Get info & check existence
 	$stmt = sql('SELECT id, user_id, collection_id FROM media WHERE id=?', ['i', $_POST['item']]);
-	if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
-	if($stmt['rows'] < 1) { finalize($r2, 'disallowed_action', 'error'); }
+	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
+	if($stmt['rows'] < 1) { finalize($r2, ['disallowed_action', 'error']); }
 	$item = $stmt['result'][0];
 
 	// Check user authority
 	if($user['id'] !== $item['user_id']) {
-		finalize($r2, 'unauthorized', 'error');
+		finalize($r2, ['unauthorized', 'error']);
 	}
 
 	// Execute DB
 	$stmt = sql('UPDATE media SET deleted=? WHERE id=?', ['ii', $delete, $item['id']]);
-	if(!$stmt['result']) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
+	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
 
-	finalize($r2, 'success');
+	finalize($r2, ['success']);
 }
 
 
@@ -723,88 +723,162 @@ if($action === 'collection_item_delete' || $action === 'collection_item_undelete
 elseif($action === 'change_settings') {
 	// ALL SETTINGS
 	if(!$has_session) {
-		finalize($r2, 'require_sign_in', 'error');
+		finalize($r2, ['require_sign_in', 'error']);
 	}
 
-	$changed = false;
+	// Variables which will be added onto as settings are changed.
+
+	$to_update = [];
+	$error_list = [];
+
+	// $to_update contains information on what SQL to update.
+	// It will follow the format: table => [column, type, value]
+	// It may look something like this:
+	//
+	// $to_update = [
+	//   'users' => [
+	// 	    [
+	//        'column' =>'nickname',
+	// 		  'type' => 's',
+	// 		  'value' => 'xXSnipesXx'
+	// 	    ],
+	// 	    [
+	//        'column' =>'password',
+	// 		  'type' => 's',
+	// 		  'value' => '12345'
+	// 	    ]
+	//   ],	
+	//   'user_preferences' => [
+	// 	    [
+	//        'column' =>'timezone',
+	// 		  'type' => 's',
+	// 		  'value' => 'UTC'
+	// 	    ],
+	//   ]	
+	// ]
+
+	// $error_list contains multiple sub-arrays containing error code/detail combinations
+	//
+	// $error_list = [
+	// 	 'database_failure'
+	// ]
+
 
 	$user_extra = sql('SELECT about FROM users WHERE id=?', ['i', $user['id']]);
 
 	// NICKNAME
 	if(isset($_POST['nickname'])) {
-		$nick = $_POST['nickname'];
-
-		// If value the same as before
-		if($nick === $user['nickname']) {
-			goto skip_nickname;
-		}
+		$nick = trim($_POST['nickname']);
 
 		// If not valid input
-		if(!valid_name($nick)) {
-			finalize($r2, 'invalid_name', 'error');
+		if(!valid_name($nick) || $nick === '') {
+			$error_list[] = ['invalid_name', 'error'];
 		}
-
-		// If valid, continue
-		$stmt = sql('UPDATE users SET nickname=? WHERE id=?', ['si', $nick, $user['id']]);
-		if($stmt['result'] === false) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
-
-		$changed = true;
+		// If value valid and not the same as before 
+		elseif($nick !== $user['nickname']) {
+			$to_update['users'][] = [
+				'column' => 'nickname',
+				'type' => 's',
+				'value' => $nick
+			];
+		}
 	}
-	skip_nickname:
 
 	// ABOUT
 	if(isset($_POST['about'])) {
 		$about = $_POST['about'];
 
-		// If value the same as before
-		if($about === $user_extra['about']) {
-			goto skip_about;
+		// If value not the same as before
+		if($about !== $user_extra['about']) {
+			// If valid, continue
+			$to_update['users'][] = [
+				'column' => 'about',
+				'type' => 's',
+				'value' => $about
+			];
 		}
-
-		// If valid, continue
-		$stmt = sql('UPDATE users SET about=? WHERE id=?', ['si', $about, $user['id']]);
-		if($stmt['result'] === false) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
-
-		$changed = true;
 	}
-	skip_about:
+
+	#finalize($r2, ['blank', 'generic', var_export($to_update, true)]);
 
 	// TIMEZONE
 	if(isset($_POST['timezone'])) {
 		$tz = $_POST['timezone'];
 
-		// If value the same as before
-		if($tz === $user_timezone) {
-			goto skip_timezone;
-		}
+		// If value not the same as before
+		if($tz !== $user_timezone) {
+			// If not valid input
+			$needle = false;
+			foreach($valid_timezones as $zone_group) {
+				if(in_array($tz, $zone_group, True)) {
+					$needle = true;
+					break;
+				}
+			}
 
-		// If not valid input
-		$needle = false;
-		foreach($valid_timezones as $zone_group) {
-			if(in_array($tz, $zone_group, True)) {
-				$needle = true;
-				break;
+			if($needle === false) {
+				$error_list[] = ['invalid_value', 'error', 'Please choose a valid timezone'];
+			}
+
+			// If valid, continue
+			$to_update['user_preferences'][] = [
+				'column' => 'timezone',
+				'type' => 's',
+				'value' => $tz
+			];
+		}
+	}
+
+	// Start updating database
+	if(count($to_update) > 0) {
+		// Setup basic variables
+		$columns = [];
+		$types = '';
+		$values = [];
+		
+		foreach($to_update as $table => $updates) {
+			if($table === 'users') {
+				$query = "UPDATE {$table} SET %columns% WHERE id=?";
+			} else {
+				$query = "UPDATE {$table} SET %columns% WHERE user_id=?";
+			}
+
+			$query = str_replace('%table%', $table, $query);
+
+			foreach($updates as $upd) {
+				$columns[] = $upd['column'].'=?';
+				$types .= $upd['type'];
+				$values[] = $upd['value'];
 			}
 		}
 
-		if($needle === false) {
-			finalize($r2, 'invalid_value', 'error');
+		// Format columns
+		$columns = implode(', ', $columns);
+		$query = str_replace('%columns%', $columns, $query);
+
+		// Add user ID onto end of params.
+		$types .= 'i';
+		$values[] = $user['id'];
+		$params = array_merge([$types], $values);
+
+		// Execute statement
+		$stmt = sql($query, $params);
+		if($stmt['result'] === false) {
+			$error_list[] = [$stmt['response_code'], $stmt['response_type'], $query.var_export($params, true)];
 		}
 
-		// If valid, continue
-		$stmt = sql('UPDATE user_preferences SET timezone=? WHERE user_id=?', ['si', $tz, $user['id']]);
-		if($stmt['result'] === false) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
-
 		$changed = true;
-	}
-	skip_timezone:
-
-
-	// FINALIZE - should only reach this point after clearing all conditions
-	if($changed === true) {
-		finalize($r2, 'success');
 	} else {
-		finalize($r2, 'no_change_detected');
+		$changed = false;
+	}
+
+	// Finalize
+	if($changed && count($error_list) > 0) {
+		finalize($r2, ['partial_success'], ...$error_list);
+	} elseif($changed) {
+		finalize($r2, ['success']);
+	} else {
+		finalize($r2, ['no_change_detected'], ...$error_list);
 	}
 }
 
@@ -814,10 +888,10 @@ elseif($action === 'change_settings') {
 
 elseif($action === 'import-list') {
 	if(!array_key_exists('file', $_POST)) {
-		finalize($r2, 'required_field', 'error');
+		finalize($r2, ['required_field', 'error']);
 	}
 
-	finalize($r2, 'blank', 'generic', 'feature not implemented yet');
+	finalize($r2, ['blank', 'generic', 'feature not implemented yet']);
 }
 
 
@@ -825,5 +899,5 @@ elseif($action === 'import-list') {
 
 
 // File should only reach this point if no other actions have reached finalization.
-finalize($r2, 'disallowed_action', 'error');
+finalize($r2, ['disallowed_action', 'error']);
 ?>

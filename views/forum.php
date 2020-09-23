@@ -1,7 +1,7 @@
 <?php
 $sql = sql('SELECT id, name, description FROM boards WHERE permission_level <= ? ORDER BY display_order ASC', ['i', $permission_level]);
 if(!$sql['result']) {
-	finalize('/404', $sql['response_code'], $sql['response_type']);
+	finalize('/404', [$sql['response_code'], $sql['response_type']]);
 }
 $boards = $sql['result'];
 ?>

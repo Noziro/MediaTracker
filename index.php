@@ -95,7 +95,7 @@ $url_readable = end($url_split);
 	</head>
 	<body class="page <?php
 			if(isset($_GET['frame'])) {
-				echo " page--frame";
+				echo "page--frame ";
 			}
 
 			echo 't-'.implode(" t-", $url_split);
@@ -164,7 +164,7 @@ $url_readable = end($url_split);
 		<?php
 		if(isset($_SESSION['notice'])) :
 		$msg = $_SESSION['notice'];
-		//foreach($_SESSION['notice'] as $msg) :
+		foreach($_SESSION['notice'] as $msg) :
 		?>
 		
 		<div class="wrapper <?php
@@ -189,6 +189,9 @@ $url_readable = end($url_split);
 						break;
 					case 'success':
 						echo "Action performed successfully.";
+						break;
+					case 'partial_success':
+						echo "Action partially succeeded - some updates failed. See below for details.";
 						break;
 					case 'no_change_detected':
 						echo "No changes were applied, as none were detected.";
@@ -249,7 +252,7 @@ $url_readable = end($url_split);
 		</div>
 		
 		<?php
-		//endforeach;
+		endforeach;
 		endif;
 		?>
 		

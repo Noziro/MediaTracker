@@ -15,25 +15,20 @@ if($action === "login") {
 	if(	   !array_key_exists('username', $_POST)
 		|| !array_key_exists('password', $_POST)
 	) {
-		finalize($r2login, 'required_field', 'error');
+		finalize($r2login, ['required_field', 'error']);
 	}
 
 	$login = $auth->login($_POST['username'], $_POST['password']);
 	
 	if ($login) {
-		finalize($r2prev, 'login_success');
+		finalize($r2prev, ['login_success']);
 	} else {
-		finalize($r2login, 'login_bad', 'error');
+		finalize($r2login, ['login_bad', 'error']);
 	}
 }
 
 elseif($action === "register") {
 	$r2page = '/login?action=register';
-
-	// Set email if not already set
-	if(!array_key_exists('email', $_POST)) {
-		$_POST['email'] = '';
-	}
 
 	// Check all required fields filled
 	if(	   !array_key_exists('username', $_POST)
@@ -43,29 +38,40 @@ elseif($action === "register") {
 		|| strlen($_POST['password']) == 0
 		|| strlen($_POST['password-confirm']) == 0
 	) {
-		finalize($r2page, 'required_field', 'error');
+		finalize($r2page, ['required_field', 'error']);
+	}
+
+	// Set variables
+	$post_user = trim($_POST['username']);
+	$post_pass = $_POST['password'];
+	$post_pass_confirm = $_POST['password-confirm'];
+	// Set email if not already set
+	if(array_key_exists('email', $_POST)) {
+		$post_email = $_POST['email'];
+	} else {
+		$post_email = '';
 	}
 	
 	// Confirm user password
-	elseif(strlen($_POST['password']) < 6 || strlen($_POST['password']) > 72) {
-		finalize($r2page, 'invalid_pass', 'error');
+	if(strlen($post_pass) < 6 || strlen($post_pass) > 72) {
+		finalize($r2page, ['invalid_pass', 'error']);
 	}
 
-	elseif($_POST['password'] != $_POST['password-confirm']) {
-		finalize($r2page, 'register_match', 'error');
+	if($post_pass != $post_pass_confirm) {
+		finalize($r2page, ['register_match', 'error']);
 	}
 
 	// Validate username
-	elseif(!valid_name($_POST["username"])) {
-		finalize($r2page, 'invalid_name', 'error');
+	if(!valid_name($post_user)) {
+		finalize($r2page, ['invalid_name', 'error']);
 	}
 
 	// Carry on if all fields good
 	else {
-		$register = $auth->register($_POST['username'], $_POST['password'], $_POST['email']);
+		$register = $auth->register($post_user, $post_pass, $post_email);
 		
 		if (!$register) {
-			finalize($r2page, 'register_exists', 'error');
+			finalize($r2page, ['register_exists', 'error']);
 		} else {
 			finalize('/welcome');
 		}
@@ -76,9 +82,9 @@ elseif($action === "logout") {
 	$logout = $auth->logout();
 	
 	if($logout) {
-		finalize($r2prev, 'logout_success');
+		finalize($r2prev, ['logout_success']);
 	} else {
-		finalize($r2prev, 'logout_failure');
+		finalize($r2prev, ['logout_failure']);
 	}
 }
 
@@ -86,12 +92,12 @@ elseif($action === "logout_all") {
 	$logout = $auth->logout(true);
 	
 	if($logout) {
-		finalize($r2prev, 'logout_success');
+		finalize($r2prev, ['logout_success']);
 	} else {
-		finalize($r2prev, 'logout_failure');
+		finalize($r2prev, ['logout_failure']);
 	}
 }
 
 // File should only reach this point if no other actions have reached finalization.
-finalize($r2login, 'disallowed_action', 'error');
+finalize($r2login, ['disallowed_action', 'error']);
 ?>

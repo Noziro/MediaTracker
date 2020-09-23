@@ -101,7 +101,7 @@ class Authentication {
 		$user = $stmt['result'][0];
 		
 		// Hash password
-		$pass_hashed = password_hash($pass, PASSWORD_BCRYPT);
+		$pass_hashed = password_hash($post_pass, PASSWORD_BCRYPT);
 		
 		// Insert user into DB
 		sql('INSERT INTO users (username, nickname, email, password) VALUES (?, ?, ?, ?)', ['ssss', $post_name_normalized, $post_name, $email, $pass_hashed]);
@@ -820,16 +820,32 @@ function sql(string $stmt, $params = false) {
 
 
 // For use on user POST pages. Closes relevant pieces and redirects user to a page.
-function finalize(string $page = '/', string $notice_case = null, string $notice_type = 'generic', string $details = '') {
+function finalize(string $page = '/', ...$input_notices) {
 	global $db;
 	$db->close();
 
-	if(isset($notice_case)) {
-		$_SESSION['notice'] = [
-			'type' => $notice_type,
-			'case' => $notice_case,
-			'details' => $details
-		];
+	if(isset($input_notices)) {
+		$output_notices = [];
+
+		$i = 0;
+		foreach($input_notices as $n) {
+			$output_notices[$i]['case'] = $n[0];
+
+			if(!isset($n[1])) {
+				$output_notices[$i]['type'] = 'generic';
+			} else {
+				$output_notices[$i]['type'] = $n[1];
+			}
+
+			if(!isset($n[2])) {
+				$output_notices[$i]['details'] = '';
+			} else {
+				$output_notices[$i]['details'] = $n[2];
+			}
+			$i++;
+		}
+
+		$_SESSION['notice'] = $output_notices;
 	}
 	
 	header('Location: '.$page);

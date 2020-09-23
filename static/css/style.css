@@ -319,11 +319,12 @@ html {
 	min-width: 600px;
 	min-height: 100%;
 	background: var(--backing-page);
-	padding: 0;
+	padding: 70px 0 0;
 	margin: 0;
 }
 .page--frame {
 	background: none;
+	padding-top: 0;
 }
 
 .wrapper {
@@ -341,9 +342,6 @@ html {
 }
 .wrapper--site-nav.js-fixed {
 	height: 52px;
-}
-.wrapper--site-nav + .wrapper {
-	margin-top: 70px;
 }
 .wrapper--content {
 	padding: 20px 0;
@@ -421,7 +419,7 @@ html {
 }
 
 .wrapper--notice-error {
-	background: var(--backing-footer);
+	background: var(--backing-negative);
 }
 
 .notice {
