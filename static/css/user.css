@@ -57,3 +57,35 @@
 	margin: 0;
 	line-height: 1.3;
 }
+
+
+
+.c-user-history {
+	text-align: center;
+}
+
+.c-user-history__block-wrap {
+	display: inline-block;
+}
+
+.c-user-history__block {
+	display: block;
+	width: 12px;
+	height: 12px;
+	background: var(--backing-subcontent);
+	border-radius: 3px;
+	margin: 2px;
+	overflow: hidden;
+	float: left;
+	/* these dont account for margin on left side,
+	making them 2px offset to the left. very annoying
+	this is the rough hack to fix that */
+	position: relative;
+	left: 2px;
+}
+
+.c-user-history__block-colour {
+	width: 100%;
+	height: 100%;
+	background: var(--accent-1);
+}

@@ -52,6 +52,10 @@
 				<button class="page-actions__action button button--disabled" type="button" disabled>
 					Mass Edit <!-- TODO - will activate a multi-selection mode with checkboxes for each item in which you can edit attributes or delete -->
 				</button>
+
+				<button class="page-actions__action button button--disabled" type="button" disabled>
+					Delete Collection
+				</button>
 			</div>
 		</div>
 		<?php endif ?>
@@ -540,6 +544,10 @@
 		</table>
 
 		<?php endif; ?>
+
+
+
+		TODO - If deleted collections, view them here.
 
 
 

@@ -669,8 +669,17 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 			$new_item_id = reset($stmt['result'][0]);
 			$r2 = $r2.'#item-'.$new_item_id;
 		}
+		
+		// Create activity
+		$stmt = sql('INSERT INTO activity (user_id, type, media_id) VALUES (?, ?, ?)', ['iii', $user['id'], $activity_types[$status], $new_item_id]);
+		if(!$stmt['result']) {
+			$details = 'Primary action performed successfully. Secondary action of creating activity post failed.';
+		}
 	}
 	
+	if(isset($details)) {
+		finalize($r2, 'blank', 'generic', $details);
+	}
 	finalize($r2, 'success', 'generic');
 }
 

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 22, 2020 at 09:59 AM
+-- Generation Time: Sep 22, 2020 at 10:56 AM
 -- Server version: 10.3.16-MariaDB
 -- PHP Version: 7.3.6
 
@@ -21,6 +21,21 @@ SET time_zone = "+00:00";
 --
 CREATE DATABASE IF NOT EXISTS `collections` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 USE `collections`;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `activity`
+--
+
+CREATE TABLE `activity` (
+  `user_id` int(11) NOT NULL,
+  `type` tinyint(2) NOT NULL DEFAULT 0,
+  `media_id` int(15) DEFAULT NULL,
+  `body` text NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -197,6 +212,12 @@ DELIMITER ;
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `activity`
+--
+ALTER TABLE `activity`
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `boards`

@@ -28,6 +28,24 @@ if($page_user['rows'] < 1) {
 }
 
 $page_user = $page_user['result'][0];
+
+if($user['id'] === $page_user['id']) {
+	$friendship = 9;
+} else {
+	$friendship = 0;
+}
+
+$activity = sql('SELECT user_id, type, media_id, body, created_at, updated_at FROM activity WHERE user_id=? ORDER BY created_at DESC', ['i', $page_user['id']]);
+
+function ceil_decimal(float $float, int $precision = 1) {
+	if($precision === 0) {
+		return ceil($float);
+	} else {
+		$precision *= 10;
+		return ceil($float * $precision) / $precision;
+	}
+}
+
 ?>
 
 <!-- TODO: Fix classes. Having two BEM blocks layered on top of each other is disgusting -->
@@ -60,7 +78,8 @@ $page_user = $page_user['result'][0];
 				<a class="profile__user-link profile__user-link--primary" href="<?=FILEPATH?>collection?user=<?=$page_user['id']?>">Collection</a>
 				<a class="profile__user-link profile__user-link--primary" href="<?=FILEPATH?>user/social?user=<?=$page_user['id']?>">Social</a>
 				<?php if($has_session && $user['id'] !== $page_user['id']) : ?>
-				<a class="profile__user-link profile__user-link--primary">Add Friend</a>
+				<div class="c-divider"></div>
+				<a class="profile__user-link">Add Friend</a>
 				<a class="profile__user-link" href="<?=FILEPATH?>report?user=<?=$page_user['id']?>">Report</a>
 				<?php endif ?>
 			</div>
@@ -72,25 +91,178 @@ $page_user = $page_user['result'][0];
 					User for <?=readable_date($page_user['created_at'], false)?>
 				</span>
 			</div>
+
+			<div class="profile__section">
+				<span class="profile__section-header">History</span>
+
+				<?php if($activity['rows'] > 0) : ?>
+				<div class="c-user-history">
+					<div class="c-user-history__block-wrap">
+						<?php
+						$history = sql('
+								SELECT
+									DATE(created_at) as day,
+									COUNT(user_id) as count
+								FROM activity
+								WHERE
+									user_id=?
+									AND DATE(created_at) BETWEEN DATE_SUB(CURDATE(), INTERVAL 90 DAY) AND CURDATE()
+								GROUP BY day
+								ORDER BY day DESC
+							', ['i', $page_user['id']]);
+						$history_flattened = [];
+						foreach($history['result'] as $row) {
+							$history_flattened[$row['day']] = $row['count'];
+						}
+						$history_max_num = sql('
+								SELECT MAX(count) as max
+								FROM
+								(
+									SELECT
+										DATE(created_at) as day,
+										COUNT(user_id) as count
+									FROM activity
+									WHERE
+										user_id=?
+										AND DATE(created_at) BETWEEN DATE_SUB(CURDATE(), INTERVAL 90 DAY) AND CURDATE()
+									GROUP BY day
+									ORDER BY day DESC
+								) as sub
+							', ['i', $page_user['id']])['result'][0]['max'];
+						
+						$last_month = [];
+						for($i = 0; $i < 90; $i++) {
+							$last_month[] = date('Y-m-d', strtotime('-'.$i.' days'));
+						}
+
+						foreach($last_month as $day) :
+
+						if(array_key_exists($day, $history_flattened))  {
+							// get opacity. checks level in relation to max
+							$count = $history_flattened[$day];
+							$opacity = ceil_decimal($count / $history_max_num, 1);
+						} else {
+							$count = 0;
+						}
+						?>
+
+						<div class="c-user-history__block" title="<?=$count?> updates on <?=utc_date_to_user($day, false)?>">
+							<?php if($count > 0) : ?>
+							<div class="c-user-history__block-colour" style="opacity: <?=$opacity?>">
+								
+							</div>
+							<?php endif; ?>
+						</div>
+
+						<?php endforeach; ?>
+					</div>
+				</div>
+				<?php endif; ?>
+			</div>
 		</div>
 		
 		<div class="profile__column profile__column--large">
+			<?php if(strlen(trim($page_user['about'])) !== 0) : ?>
 			<div class="profile__section">
 				<span class="profile__section-header">About</span>
 
 				<p class="profile__about">
-					<?php if(strlen(trim($page_user['about'])) === 0) : ?>
-					This user hasn't told told us about them yet!
-					<?php else : ?>
 					<?=format_user_text($page_user['about'])?>
-					<?php endif; ?>
 				</p>
 			</div>
+			<?php endif; ?>
 
 			<div class="profile__section">
 				<span class="profile__section-header">Activity</span>
 
-				List activity here: began watching... completed...
+				<!-- TODO - need pagination here -->
+
+				<?php
+				$i = 0;
+				if($activity['rows'] > 0) :
+					foreach($activity['result'] as $activity) :
+						if(isset($activity['media_id'])) :
+							$stmt = sql('SELECT media.id, media.collection_id, media.name, media.progress, collections.private FROM media INNER JOIN collections ON media.collection_id = collections.id WHERE media.id=?', ['i', $activity['media_id']]);
+							$item = $stmt['result'][0];
+							if(!$stmt['result'] || $item['private'] > $friendship) {
+								continue;
+							}
+
+						$i += 1;
+				?>
+
+				<div class="c-activity">
+					<?php
+					if($activity['type'] > 0 && $activity['type'] < 6) :
+					?>
+
+					<div class="c-activity__header">
+						<?php
+						switch($activity['type']) {
+								case 1:
+									echo 'Started ';
+									break;
+								case 2:
+									echo 'Completed ';
+									break;
+								case 3:
+									echo 'Paused ';
+									break;
+								case 4:
+									echo 'Dropped ';
+									break;
+								case 5:
+									echo 'Plans to start ';
+									break;
+							}
+						?>
+						<?=$item['name']?>
+					</div>
+
+					<?php
+					endif;
+					?>
+
+					<div class="c-activity__date">
+						<?=readable_date($activity['created_at'])?>
+					</div>
+
+					<?php
+					if($activity['body'] !== '') :
+					?>
+					
+					<div class="c-activity__body">
+						<?=$activity['body']?>
+					</div>
+
+					<?php
+					endif;
+					?>
+
+					<?php if($item['private'] > 0) : ?>
+					<div class="c-activity__actions">
+						<span class="c-activity__tag">
+							Private
+						</span>
+					</div>
+					<?php endif; ?>
+				</div>
+
+				<?php
+						endif;
+					endforeach;
+				endif;
+				
+				if($i === 0) :
+				?>
+
+				<div class="dialog-box dialog-box--subcontent">
+					None yet.
+				</div>
+
+				<?php
+				endif;
+				?>
 			</div>
 		</div>
 
@@ -109,11 +281,11 @@ $page_user = $page_user['result'][0];
 					</div>
 
 					<div class="c-stats__stat">
-						<span class="c-stats__title">Episodes CMPL</span>
+						<span class="c-stats__title">Episodes Watched</span>
 						<span class="c-stats__number">
 							<?php
 							$episodes = reset(sql('
-								SELECT SUM(media.episodes)
+								SELECT SUM(media.progress)
 								FROM media
 								INNER JOIN collections
 								ON collections.id = media.collection_id
@@ -126,11 +298,11 @@ $page_user = $page_user['result'][0];
 					</div>
 
 					<div class="c-stats__stat">
-						<span class="c-stats__title">Chapters CMPL</span>
+						<span class="c-stats__title">Chapters Read</span>
 						<span class="c-stats__number">
 							<?php
 							$chapters = reset(sql('
-								SELECT SUM(media.episodes)
+								SELECT SUM(media.progress)
 								FROM media
 								INNER JOIN collections
 								ON collections.id = media.collection_id
@@ -164,12 +336,11 @@ $page_user = $page_user['result'][0];
 				</div>
 			</div>
 
-			<!-- if favourite > 1 -->
 			<div class="profile__section">
 				<span class="profile__section-header">Favourites</span>
 
 				<?php
-				$favs = sql('SELECT id, name, image FROM media WHERE user_id=? AND favourite=1 ORDER BY name ASC', ['i', $page_user['id']]);
+				$favs = sql('SELECT media.id, media.name, media.image FROM media INNER JOIN collections ON collections.id = media.collection_id WHERE media.user_id=? AND media.favourite=1 AND collections.private <= ? ORDER BY name ASC', ['ii', $page_user['id'], $friendship]);
 				if($favs['rows'] > 0) :
 					foreach($favs['result'] as $fav) :
 				?>
@@ -181,7 +352,9 @@ $page_user = $page_user['result'][0];
 				else :
 				?>
 
-				None yet!
+				<div class="dialog-box dialog-box--subcontent">
+					None yet.
+				</div>
 
 				<?php
 				endif;

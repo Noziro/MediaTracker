@@ -675,13 +675,18 @@ $valid_timezones = [
 ];
 
 // Get user timezone
-function utc_date_to_user($utc) {
+function utc_date_to_user($utc, $hour = true) {
 	global $prefs;
 	$timezone_utc = new DateTimeZone('UTC');
 	$timezone = new DateTimeZone($prefs['timezone']);
 	$date = new DateTime($utc, $timezone_utc);
 	$date->setTimezone($timezone);
-	return $date->format('Y-m-d H:i:s O');
+	if($hour) {
+		$format = 'Y-m-d H:i:s O';
+	} else {
+		$format = 'Y-m-d O';
+	}
+	return $date->format($format);
 }
 
 
@@ -718,6 +723,20 @@ function readable_date($date, $suffix = true, $verbose = false) {
 	}
     return $string ? implode(', ', $string) . ' ago' : 'just now';
 }
+
+
+
+// ACTIVITY
+
+$activity_types = [
+	'unspecified' => 0,
+	'current' => 1,
+	'completed' => 2,
+	'paused' => 3,
+	'dropped' => 4,
+	'planned' => 5,
+	'post' => 10
+];
 
 
 

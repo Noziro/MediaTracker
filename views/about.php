@@ -21,18 +21,22 @@
 			$stat_users = reset(sql('SELECT COUNT(id) FROM users')['result'][0]);
 			$stat_items = reset(sql('SELECT COUNT(id) FROM media')['result'][0]);
 			$stat_episodes = reset(sql('
-					SELECT SUM(media.episodes)
+					SELECT SUM(media.progress)
 					FROM media
 					INNER JOIN collections
 					ON collections.id = media.collection_id
-					AND collections.type = "video"')['result'][0]
+					WHERE collections.type = "video"
+					AND collections.deleted = 0
+					AND media.deleted = 0')['result'][0]
 				);
 			$stat_chapters = reset(sql('
-					SELECT SUM(media.episodes)
+					SELECT SUM(media.progress)
 					FROM media
 					INNER JOIN collections
 					ON collections.id = media.collection_id
-					AND collections.type = "literature"')['result'][0]
+					WHERE collections.type = "literature"
+					AND collections.deleted = 0
+					AND media.deleted = 0')['result'][0]
 				);
 			$stat_forum_threads = reset(sql('SELECT COUNT(id) FROM threads WHERE deleted=0')['result'][0]);
 			$stat_forum_posts = reset(sql('SELECT COUNT(id) FROM replies WHERE deleted=0')['result'][0]);
