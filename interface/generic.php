@@ -721,16 +721,57 @@ if($action === 'collection_item_delete' || $action === 'collection_item_undelete
 
 
 elseif($action === 'change_settings') {
-	$changed = false;
-
 	// ALL SETTINGS
 	if(!$has_session) {
 		finalize($r2, 'require_sign_in', 'error');
 	}
 
+	$changed = false;
+
+	$user_extra = sql('SELECT about FROM users WHERE id=?', ['i', $user['id']]);
+
+	// NICKNAME
+	if(isset($_POST['nickname'])) {
+		$nick = $_POST['nickname'];
+
+		// If value the same as before
+		if($nick === $user['nickname']) {
+			goto skip_nickname;
+		}
+
+		// If not valid input
+		if(!valid_name($nick)) {
+			finalize($r2, 'invalid_name', 'error');
+		}
+
+		// If valid, continue
+		$stmt = sql('UPDATE users SET nickname=? WHERE id=?', ['si', $nick, $user['id']]);
+		if($stmt['result'] === false) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
+
+		$changed = true;
+	}
+	skip_nickname:
+
+	// ABOUT
+	if(isset($_POST['about'])) {
+		$about = $_POST['about'];
+
+		// If value the same as before
+		if($about === $user_extra['about']) {
+			goto skip_about;
+		}
+
+		// If valid, continue
+		$stmt = sql('UPDATE users SET about=? WHERE id=?', ['si', $about, $user['id']]);
+		if($stmt['result'] === false) { finalize($r2, $stmt['response_code'], $stmt['response_type']); }
+
+		$changed = true;
+	}
+	skip_about:
+
 	// TIMEZONE
-	if(isset($_POST['change_timezone'])) {
-		$tz = $_POST['change_timezone'];
+	if(isset($_POST['timezone'])) {
+		$tz = $_POST['timezone'];
 
 		// If value the same as before
 		if($tz === $user_timezone) {

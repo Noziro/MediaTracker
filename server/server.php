@@ -188,6 +188,18 @@ class Authentication {
 	}
 }
 
+function valid_name(string $str) {
+	$okay = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_";
+
+	foreach(str_split($str) as $c) {
+		if(strpos($okay, $c) === False) {
+			return False;
+		}
+	}
+	
+	return true;
+}
+
 // Set user variables because god knows I'm checking if users are logged on literally every page
 
 $auth = new Authentication();

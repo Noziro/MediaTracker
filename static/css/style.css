@@ -228,6 +228,7 @@ a {
 .text-input {
 	display: block;
 	width: 100%;
+	max-width: 100%;
 	min-height: 4em;
 	padding: 5px;
 	background-color: var(--backing-subcontent);

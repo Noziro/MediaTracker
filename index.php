@@ -207,10 +207,10 @@ $url_readable = end($url_split);
 					case 'register_match':
 						echo "Passwords do not match.";
 						break;
-					case 'register_invalid_name':
-						echo "Username contains invalid characters.";
+					case 'invalid_name':
+						echo "Name contains invalid characters.";
 						break;
-					case 'register_invalid_pass':
+					case 'invalid_pass':
 						echo "Password does not meet requirements.";
 						break;
 					case 'logout_failure':

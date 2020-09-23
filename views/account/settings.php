@@ -3,6 +3,9 @@ if(!$has_session) {
 	header('Location: /?error=require-sign-in');
 	exit();
 }
+
+$user_extra = sql('SELECT about FROM users WHERE id=?', ['i', $user['id']]);
+$user['about'] = $user_extra['result'][0]['about'];
 ?>
 
 <main id="content" class="wrapper wrapper--content">
@@ -30,12 +33,12 @@ if(!$has_session) {
 			<h3 class="settings__header">User Profile</h3>
 			
 			<label for="change-nickname" class="settings__label">Change nickname</label>
-			<input form="form-settings" id="change-nickname" class="input input--disabled" type="text" max="50" placeholder="<?=$user['nickname']?>" disabled>
+			<input form="form-settings" id="change-nickname" class="input" name="nickname" type="text" max="50" placeholder="<?=$user['nickname']?>">
 
 			<span class="settings__subtext">Your nickname is <b class="u-bold">not</b> your username! You will still sign in with your original username, but publicly your new nickname will display.</span>
 
 			<label for="change-about" class="settings__label">Change about</label>
-			<input form="form-settings" id="change-about" class="input input--disabled" type="text" value="" disabled>
+			<textarea form="form-settings" id="change-about" class="text-input text-input--resizable-v js-autofill" name="about" type="text" data-autofill="<?=$user['about']?>"></textarea>
 
 			<span class="settings__notice">Avatar & banner functionality will come in the future.</span>
 
@@ -122,7 +125,7 @@ if(!$has_session) {
 			<h3 class="settings__header">User Experience</h3>
 			
 			<label class="label">Change timezone</label>
-			<select class="select" form="form-settings" name="change_timezone">
+			<select class="select" form="form-settings" name="timezone">
 				<?php foreach($valid_timezones as $zone_group_label => $zone_group) : ?>
 				<optgroup label="<?=$zone_group_label?>">
 					<?php foreach($zone_group as $zone) : ?>

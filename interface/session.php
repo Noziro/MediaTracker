@@ -30,18 +30,6 @@ if($action === "login") {
 elseif($action === "register") {
 	$r2page = '/login?action=register';
 
-	function valid_name(string $str) {
-		$okay = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_";
-
-		foreach(str_split($str) as $c) {
-			if(strpos($okay, $c) === False) {
-				return False;
-			}
-		}
-		
-		return true;
-	}
-
 	// Set email if not already set
 	if(!array_key_exists('email', $_POST)) {
 		$_POST['email'] = '';
@@ -60,7 +48,7 @@ elseif($action === "register") {
 	
 	// Confirm user password
 	elseif(strlen($_POST['password']) < 6 || strlen($_POST['password']) > 72) {
-		finalize($r2page, 'register_invalid_pass', 'error');
+		finalize($r2page, 'invalid_pass', 'error');
 	}
 
 	elseif($_POST['password'] != $_POST['password-confirm']) {
@@ -69,7 +57,7 @@ elseif($action === "register") {
 
 	// Validate username
 	elseif(!valid_name($_POST["username"])) {
-		finalize($r2page, 'register_invalid_name', 'error');
+		finalize($r2page, 'invalid_name', 'error');
 	}
 
 	// Carry on if all fields good
