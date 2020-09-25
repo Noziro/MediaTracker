@@ -2,7 +2,7 @@
 	<div class="wrapper__inner">
 		<?php
 		if(isset($_GET['id'])) :
-			$collection = sql('SELECT id, user_id, name, type, display_score, display_progress, display_user_started, display_user_finished, display_days, rating_system, private FROM collections WHERE id=?', ['i', $_GET['id']]);
+			$collection = sql('SELECT id, user_id, name, type, display_score, display_progress, display_user_started, display_user_finished, display_days, rating_system, private, deleted FROM collections WHERE id=?', ['i', $_GET['id']]);
 			if($collection['rows'] < 1) {
 				finalize('/404');
 			}
@@ -53,7 +53,7 @@
 					Mass Edit <!-- TODO - will activate a multi-selection mode with checkboxes for each item in which you can edit attributes or delete -->
 				</button>
 
-				<button class="page-actions__action button button--disabled" type="button" disabled>
+				<button class="page-actions__action button" type="button" onclick="modalConfirmation('Are you sure you wish to delete this collection?', 'collection_delete', 'collection_id', <?=$collection['id']?>)">
 					Delete Collection
 				</button>
 			</div>
@@ -71,6 +71,12 @@
 		<?php
 		else :
 		?>
+
+		<?php if($collection['deleted'] === 1) : ?>
+
+		<div class="dialog-box">This collection and its items are marked for deletion and will be permanently lost within X months. <!-- TODO - specify months once feature is implemented --></div>
+
+		<?php endif; ?>
 
 		<table class="table">
 			<thead>
@@ -450,7 +456,16 @@
 
 			$page_user = sql('SELECT id, nickname FROM users WHERE id=?', ['i', $page_user__id])['result'][0];
 
-			$collections = sql('SELECT id, user_id, name, type, private FROM collections WHERE user_id=? AND deleted=0 ORDER BY name ASC', ['i', $page_user['id']]);
+			if($user['id'] === $page_user['id']) {
+				// TODO - once friend system implemented, move this to a function
+				// such as evaluate_friendship($user1, $user2) and have more nuance to levels
+				$friendship = 9;
+			} else {
+				$friendship = 0;
+			}
+
+			$collections = sql('SELECT id, user_id, name, type, private FROM collections WHERE user_id=? AND deleted=0 AND private<=? ORDER BY name ASC', ['ii', $page_user['id'], $friendship]);
+			$deleted_collections = sql('SELECT id, user_id, name, type, private FROM collections WHERE user_id=? AND deleted=1 AND private<=? ORDER BY name ASC', ['ii', $page_user['id'], $friendship]);
 		?>
 
 
@@ -512,9 +527,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				<?php foreach($collections['result'] as $collection) :
-					// TODO - optimize this. Can probably be incorporated into the SQL query.
-					if($user['id'] !== $page_user['id'] && $collection['private'] === 9) { continue; } ?>
+				<?php foreach($collections['result'] as $collection) : ?>
 
 				<tr class="table__body-row">
 					<td class="table__cell">
@@ -547,7 +560,52 @@
 
 
 
-		TODO - If deleted collections, view them here.
+		<?php
+		if($deleted_collections['rows'] > 0 && $user['id'] === $page_user['id']) :
+		?>
+
+		<h2 class="c-heading">Deleted Collections</h2>
+
+		<table class="table">
+			<thead>
+				<tr>
+					<th class="table__cell"><b class="table__heading">Name</b></th>
+					<th class="table__cell table__cell--extra-small"><b class="table__heading">Items</b></th>
+					<th class="table__cell table__cell--small"><b class="table__heading">Type</b></th>
+					<th class="table__cell table__cell--small"><b class="table__heading">Privacy</b></th>
+				</tr>
+			</thead>
+			<tbody>
+				<?php foreach($deleted_collections['result'] as $collection) : ?>
+
+				<tr class="table__body-row">
+					<td class="table__cell">
+						<a class="u-bold" href="?id=<?=$collection['id']?>">
+							<?=$collection['name']?>
+						</a>
+					</td>
+					<td class="table__cell">
+						<?php
+						echo reset(sql('SELECT COUNT(id) FROM media WHERE collection_id=?', ['i', $collection['id']])['result'][0]);
+						?>
+					</td>
+					<td class="table__cell">
+						<?=$collection['type']?>
+					</td>
+					<td class="table__cell">
+						<?php if($collection['private'] === 9) : ?>
+						Private
+						<?php else : ?>
+						Public
+						<?php endif; ?>
+					</td>
+				</tr>
+
+				<?php endforeach; ?>
+			</tbody>
+		</table>
+
+		<?php endif; ?>
 
 
 
@@ -599,5 +657,12 @@
 		
 		endif;
 		?>
+
+
+
+
+		<?php if($has_session && $user['id'] === $page_user['id']) {
+			include PATH.'server/includes/modal-confirmation.inc';
+		} ?>
 	</div>
 </main>

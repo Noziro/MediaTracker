@@ -4,7 +4,8 @@
 
 // SETUP
 
-include '../server/server.php';
+define("PATH", $_SERVER["DOCUMENT_ROOT"] . "/");
+include PATH.'server/server.php';
 
 // AUTH
 
@@ -371,6 +372,43 @@ elseif($action === "collection_edit") {
 		$collection['id']
 	]);
 	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
+
+	finalize($r2, ['success']);
+}
+
+
+
+
+
+elseif($action === 'collection_delete' || $action === 'collection_undelete') {
+	if(!isset($_POST['collection_id'])) {
+		finalize($r2, ['disallowed_action', 'error']);
+	}
+
+	if($action === 'collection_delete') {
+		$delete = 1;
+	} elseif($action === 'collection_undelete') {
+		$delete = 0;
+	}
+
+	// Check existence
+	$stmt = sql('SELECT id, user_id FROM collections WHERE id=?', ['i', $_POST['collection_id']]);
+	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
+	if($stmt['rows'] < 1) { finalize($r2, ['disallowed_action', 'error']); }
+	$collection = $stmt['result'][0];
+
+	// Check user authority
+	if($user['id'] !== $collection['user_id']) {
+		finalize($r2, ['unauthorized', 'error']);
+	}
+
+	// Execute DB
+	$stmt = sql('UPDATE collections SET deleted=? WHERE id=?', ['ii', $delete, $collection['id']]);
+	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
+
+	if($action === 'forum_thread_delete') {
+		$r2 = '/collection?user='.$user['id'];
+	}
 
 	finalize($r2, ['success']);
 }

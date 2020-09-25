@@ -11,7 +11,7 @@ $domain = ".com";
 define("PATH", $_SERVER["DOCUMENT_ROOT"] . "/");
 
 # Includes various important variables and functions
-include(PATH . "server/server.php");
+include PATH."server/server.php";
 
 
 
@@ -90,7 +90,7 @@ $url_readable = end($url_split);
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,400i,600,600i|Roboto+Mono">
 		
 		<script type="text/javascript">
-		<?php include(PATH . "static/js/include.js") ?>
+		<?php include PATH."static/js/include.js"; ?>
 		</script>
 	</head>
 	<body class="page <?php
@@ -257,7 +257,7 @@ $url_readable = end($url_split);
 		?>
 		
 		<?php 
-		include(PATH . "views/$url.php");
+		include PATH."views/$url.php";
 		?>
 		
 		<?php if(!isset($_GET['frame'])) : ?> 

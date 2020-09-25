@@ -1,5 +1,6 @@
 <?php
-include '../server/server.php';
+define("PATH", $_SERVER["DOCUMENT_ROOT"] . "/");
+include PATH.'server/server.php';
 
 $action = $_POST['action'];
 
