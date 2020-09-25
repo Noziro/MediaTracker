@@ -18,26 +18,11 @@
 }
 
 .login-flow__label {
-	display: block;
 	margin: 16px 0 4px;
-	color: var(--text-medium);
-	font-size: 14px;
-	font-weight: 600;
 }
 
 .login-flow__input {
-	display: block;
 	width: 100%;
-	padding: 5px;
-	margin: 5px 0;
-	background: var(--backing-subcontent);
-	border-radius: var(--rounding);
-	border: 1px solid var(--border-light);
-	color: var(--text);
-}
-.login-flow__input:focus {
-	border-color: var(--border-active);
-	outline: none;
 }
 
 .login-flow__subtext {
@@ -45,7 +30,6 @@
 }
 
 .login-flow__button {
-	display: block;
 	margin: 20px auto 0;
 }
 

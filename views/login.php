@@ -12,10 +12,10 @@
 			<form action="/interface/session" method="POST">
 				<input type="hidden" name="action" value="register">
 				
-				<label class="login-flow__label" for="login-username">Username</label>
+				<label class="login-flow__label label" for="login-username">Username</label>
 				<input
 					id="login-username"
-					class="login-flow__input"
+					class="login-flow__input input"
 					type="text"
 					name="username"
 					maxlength="50"
@@ -33,36 +33,36 @@
 					<small>Username is case-insensitive. You can change your display name later.</small>
 				</div>
 				
-				<label class="login-flow__label" for="login-email">Email (optional)</label>
+				<label class="login-flow__label label" for="login-email">Email (optional)</label>
 				<input
 					id="login-email"
-					class="login-flow__input"
+					class="login-flow__input input"
 					type="email"
 					name="email"
 					maxlength="254"
 					spellcheck="false"
 					autocomplete="email">
 				
-				<label class="login-flow__label" for="login-password">Password</label>
+				<label class="login-flow__label label" for="login-password">Password</label>
 				<input
 					id="login-password"
-					class="login-flow__input"
+					class="login-flow__input input"
 					type="password"
 					name="password"
 					maxlength="72"
 					spellcheck="false"
-					autocomplete="password"
+					autocomplete="new-password"
 					required>
 				
-				<label class="login-flow__label" for="login-password-confirm">Confirm Password</label>
+				<label class="login-flow__label label" for="login-password-confirm">Confirm Password</label>
 				<input
 					id="login-password-confirm"
-					class="login-flow__input"
+					class="login-flow__input input"
 					type="password"
 					name="password-confirm"
 					maxlength="72"
 					spellcheck="false"
-					autocomplete="password"
+					autocomplete="new-password"
 					required>
 				<div class="reqs reqs--password">
 					<h6>Your password must...</h6>
@@ -91,10 +91,10 @@
 				<input type="hidden" name="action" value="login">
 				<input type="hidden" name="return_to" value="<?=$_GET['return_to']?>">
 				
-				<label class="login-flow__label" for="login-username">Username</label>
+				<label class="login-flow__label label" for="login-username">Username</label>
 				<input
 					id="login-username"
-					class="login-flow__input"
+					class="login-flow__input input"
 					type="text"
 					name="username"
 					spellcheck="false"
@@ -104,10 +104,10 @@
 					
 				<a class="login-flow__subtext" href="/login?action=forgot&q=username">Forgot username?</a>
 				
-				<label class="login-flow__label" for="login-password">Password</label>
+				<label class="login-flow__label label" for="login-password">Password</label>
 				<input
 					id="login-password"
-					class="login-flow__input"
+					class="login-flow__input input"
 					type="password"
 					name="password"
 					maxlength="72"

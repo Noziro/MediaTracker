@@ -220,6 +220,11 @@ a {
 .label ~ .label {
 	margin-top: 16px;
 }
+.label--disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	pointer-events: none;
+}
 
 .label__desc {
 	font-size: 12px;
@@ -287,6 +292,11 @@ a {
 }
 .input--wide {
 	width: 400px;
+}
+.input--disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+	pointer-events: none;
 }
 .input:focus {
 	border-color: var(--border-active);
@@ -1181,94 +1191,4 @@ html {
 	background: var(--backing-subcontent);
 	border-radius: var(--rounding);
 	font-size: 12px;
-}
-
-/* SETTINGS */
-
-.settings {
-	
-}
-
-.settings__header {
-	margin: 0 0 10px;
-	font-size: 16px;
-	font-weight: 600;
-}
-.settings__header ~ .settings__header {
-	margin-top: 20px;
-}
-
-.settings__label {
-	display: block;
-	margin: 16px 0 4px;
-	color: var(--text-medium);
-	font-size: 14px;
-	font-weight: 600;
-}
-.settings__input {
-	display: block;
-	width: 100%;
-	padding: 5px;
-	margin: 5px 0;
-	background: var(--backing-subcontent);
-	border-radius: var(--rounding);
-	border: 1px solid var(--border-light);
-	color: var(--text);
-}
-.settings__input:focus {
-	border-color: var(--border-active);
-	outline: none;
-}
-.settings__subtext {
-	font-size: 12px;
-}
-.settings__notice {
-	display: block;
-	padding: 10px;
-	border: 1px solid var(--border-light);
-	margin: 10px 0;
-	width: max-content;
-}
-.settings__notice::before {
-	content: "?";
-	display: inline-block;
-	width: 1.5em;
-	height: 1.5em;
-	border: 1px solid var(--text-regular);
-	border-radius: 50%;
-	margin-right: 5px;
-	line-height: 1.5em;
-	font-weight: 600;
-	text-align: center;
-}
-
-.settings__button-list {
-	display: flex;
-	margin: 10px 0;
-}
-.settings__button + .settings__button {
-	margin-left: 8px;
-}
-
-.active-sessions {
-	width: 100%;
-	border: 2px solid var(--border-light);
-	border-collapse: collapse;
-}
-
-.active-sessions__row {
-	
-}
-
-.active-sessions__cell {
-	padding: 6px;
-	border: 2px solid var(--border-light);
-	text-align: left;
-}
-.active-sessions__cell--header {
-	font-weight: 400;
-}
-.active-sessions__cell--content {
-	font-size: 12px;
-	font-family: 'Roboto Mono', monospace;
 }

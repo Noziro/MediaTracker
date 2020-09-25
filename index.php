@@ -246,7 +246,7 @@ $url_readable = end($url_split);
 						echo "This was meant to say something, but it doesn't!";
 						break;
 				}
-				echo '<br />'.$msg['details'];
+				echo '<div>'.$msg['details'].'</div>';
 				?>
 			</div>
 		</div>

@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 22, 2020 at 10:56 AM
+-- Generation Time: Sep 25, 2020 at 02:38 AM
 -- Server version: 10.3.16-MariaDB
 -- PHP Version: 7.3.6
 
@@ -198,7 +198,8 @@ CREATE TABLE `users` (
 
 CREATE TABLE `user_preferences` (
   `user_id` int(11) NOT NULL,
-  `timezone` tinytext NOT NULL
+  `timezone` tinytext NOT NULL,
+  `profile_colour` varchar(7) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --

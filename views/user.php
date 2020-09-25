@@ -29,6 +29,8 @@ if($page_user['rows'] < 1) {
 
 $page_user = $page_user['result'][0];
 
+$page_user_prefs = sql('SELECT profile_colour FROM user_preferences WHERE user_id=?', ['i', $page_user['id']])['result'][0];
+
 if($user['id'] === $page_user['id']) {
 	$friendship = 9;
 } else {
@@ -72,7 +74,7 @@ function ceil_decimal(float $float, int $precision = 1) {
 </div>
 
 <main id="content" class="wrapper wrapper--content">
-	<div class="wrapper__inner profile">
+	<div class="wrapper__inner profile" <?php if($page_user_prefs['profile_colour'] !== null) { echo 'style="--profile-colour: '.$page_user_prefs['profile_colour'].'"'; } ?>>
 		<div class="profile__column profile__column--thin">
 			<div class="profile__section">
 				<span class="profile__section-header">Links</span>
@@ -159,6 +161,13 @@ function ceil_decimal(float $float, int $precision = 1) {
 						<?php endforeach; ?>
 					</div>
 				</div>
+
+				<?php else : ?>
+
+				<div class="dialog-box dialog-box--subcontent">
+					None yet.
+				</div>
+
 				<?php endif; ?>
 			</div>
 		</div>

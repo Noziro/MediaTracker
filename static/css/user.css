@@ -3,6 +3,8 @@
 .profile {
 	display: flex;
 	flex-flow: row nowrap;
+	/* this variable gets overridden in the HTML if user has their own colour set*/
+	--profile-colour: var(--accent-1);
 }
 
 .profile__column {
@@ -87,5 +89,5 @@
 .c-user-history__block-colour {
 	width: 100%;
 	height: 100%;
-	background: var(--accent-1);
+	background: var(--profile-colour);
 }

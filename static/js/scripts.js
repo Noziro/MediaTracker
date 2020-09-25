@@ -77,6 +77,7 @@ for(var i = 0; i < fills.length; i++) {
 
 	if(fillValue !== null) {
 		fillEle.value = fillValue;
+		fillEle.removeAttribute('data-autofill');
 	}
 }
 

@@ -5,7 +5,9 @@ if(!$has_session) {
 }
 
 $user_extra = sql('SELECT about FROM users WHERE id=?', ['i', $user['id']]);
-$user['about'] = $user_extra['result'][0]['about'];
+$user['about'] = array_merge($user, $user_extra['result'][0]);
+#$prefs_extra = sql('SELECT profile_colour FROM user_preferences WHERE user_id=?', ['i', $user['id']]);
+#$prefs['profile_colour'] = array_merge($prefs, $prefs_extra['result'][0]);
 ?>
 
 <main id="content" class="wrapper wrapper--content">
@@ -31,14 +33,24 @@ $user['about'] = $user_extra['result'][0]['about'];
 			<?php if(!isset($_GET['section']) || $_GET['section'] === 'profile') : ?>
 
 			<h3 class="settings__header">User Profile</h3>
+
+			<label for="change-nickname" class="settings__label label">Change nickname</label>
+			<input form="form-settings" id="change-nickname" class="input js-autofill" name="nickname" type="text" max="50" autocomplete="username" data-autofill="<?=$user['nickname']?>">
+
+			<span class="settings__subtext">Your nickname is <b class="u-bold">not</b> your username! You will still sign in with your original username, however your new nickname will be displayed to others.</span>
+
+			<label class="settings__label label label--disabled">Username <span class="label__desc">(not changeable)</span></label>
+			<input class="input input--disabled js-autofill" type="text" data-autofill="<?=$user['username']?>" disabled>
 			
-			<label for="change-nickname" class="settings__label">Change nickname</label>
-			<input form="form-settings" id="change-nickname" class="input" name="nickname" type="text" max="50" placeholder="<?=$user['nickname']?>">
-
-			<span class="settings__subtext">Your nickname is <b class="u-bold">not</b> your username! You will still sign in with your original username, but publicly your new nickname will display.</span>
-
-			<label for="change-about" class="settings__label">Change about</label>
-			<textarea form="form-settings" id="change-about" class="text-input text-input--resizable-v js-autofill" name="about" type="text" data-autofill="<?=$user['about']?>"></textarea>
+			<label for="change-about" class="settings__label label">Change about</label>
+			<textarea
+				form="form-settings"
+				id="change-about"
+				class="text-input text-input--resizable-v js-autofill"
+				name="about"
+				type="text"
+				spellcheck="true"
+				data-autofill="<?=$user['about']?>"></textarea>
 
 			<span class="settings__notice">Avatar & banner functionality will come in the future.</span>
 
@@ -60,11 +72,63 @@ $user['about'] = $user_extra['result'][0]['about'];
 			
 			<h3 class="settings__header">Modify Account</h3>
 			
-			<label for="change-email" class="settings__label">Change email</label>
+			<label for="change-email" class="settings__label label">Change email</label>
+			<input
+				form="form-settings"
+				id="change-email"
+				class="settings__input input input--disabled"
+				type="email"
+				name="email"
+				maxlength="254"
+				spellcheck="false"
+				autocomplete="email"
+				disabled>
+			<span class="subtext">You will be sent an email to confirm this change.</span>
 			
+			<h3 class="settings__header">Change Password</h3>
+
+			<div class="settings__aside">
+				<h6>Your password must...</h6>
+				<ul class="checkmark-list">
+					<li><span class="checkmark"></span> Be 6 or more characters long</li>
+					<li><span class="checkmark"></span> Not be more than 72 characters</li>
+					<li><span class="checkmark"></span> Match</li>
+				</ul>
+				<small>Please do not use the same password as another service.</small>
+			</div>
 			
-			<label for="change-password" class="settings__label">Change password</label>
+			<label for="previous-password" class="settings__label label">Previous password</label>
+			<input
+				form="form-settings"
+				id="previous-password"
+				class="settings__input input"
+				type="password"
+				name="previous_password"
+				maxlength="72"
+				spellcheck="false"
+				autocomplete="current-password">
 			
+			<label for="new-password" class="settings__label label">New password</label>
+			<input
+				form="form-settings"
+				id="new-password"
+				class="settings__input input"
+				type="password"
+				name="new_password"
+				maxlength="72"
+				spellcheck="false"
+				autocomplete="new-password">
+			
+			<label for="new-password-confirm" class="settings__label label">Confirm new password</label>
+			<input
+				form="form-settings"
+				id="new-password-confirm"
+				class="settings__input input"
+				type="password"
+				name="new_password_confirm"
+				maxlength="72"
+				spellcheck="false"
+				autocomplete="new-password">
 
 			<div class="settings__button button-list">
 				<button form="form-settings" class="settings__button button" type="submit">
@@ -137,6 +201,19 @@ $user['about'] = $user_extra['result'][0]['about'];
 				<?php endforeach; ?>
 			</select>
 
+			<label for="change-colour" class="label">Change profile colour</label>
+			<input form="form-settings" id="change-colour" type="color" name="profile_colour" value="<?php
+					if($prefs['profile_colour'] !== null) {
+						echo $prefs['profile_colour'];
+					} else {
+						echo '#ff3333';
+					}
+					?>">
+			<label class="checkbox">
+				<input form="form-settings" type="checkbox" name="reset_profile_colour" value="1">
+				Reset colour
+			</label>
+
 			<div class="settings__button button-list">
 				<button form="form-settings" class="settings__button button button--spaced" type="submit">
 					Apply
@@ -159,10 +236,6 @@ $user['about'] = $user_extra['result'][0]['about'];
 			- Anyone - Just friends - Only me
 
 
-			<label class="label">Hide adult entries</label>
-			Yes/no
-
-
 
 
 
@@ -175,7 +248,7 @@ $user['about'] = $user_extra['result'][0]['about'];
 				<input type="hidden" name="action" value="import_list">
 				<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 
-				<label class="settings__label">File to import</label>
+				<label class="settings__label label">File to import</label>
 				<input type="file" name="file">
 
 				<label class="label">What data are you importing?</label>
