@@ -144,8 +144,10 @@ $url_readable = end($url_split);
 								<input type="hidden" name="return_to" value="<?=$_SERVER["REQUEST_URI"]?>">
 							</form>
 							
-							<button form="form-logout" class="site-nav__item" type="submit">
-								Logout
+							<button form="form-logout" class="c-text-button" type="submit">
+								<span class="site-nav__item">
+									Logout
+								</span>
 							</button>
 						</div>
 					</div>
