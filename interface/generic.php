@@ -60,7 +60,7 @@ if($action === "forum_thread_create") {
 	$stmt = sql('SELECT LAST_INSERT_ID()');
 	if($stmt !== false) {
 		$new_thread_id = reset($stmt['result'][0]);
-		$r2 = '/forum/thread?id='.$new_thread_id;
+		$r2 = '/forum/thread/'.$new_thread_id;
 	}
 
 	// Add thread reply to DB
@@ -170,7 +170,7 @@ elseif($action === 'forum_thread_delete' || $action === 'forum_thread_undelete')
 	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
 
 	if($action === 'forum_thread_delete') {
-		$r2 = '/forum/board?id='.$thread['board_id'];
+		$r2 = '/forum/board/'.$thread['board_id'];
 	}
 
 	finalize($r2, ['success']);
@@ -407,7 +407,7 @@ elseif($action === 'collection_delete' || $action === 'collection_undelete') {
 	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
 
 	if($action === 'forum_thread_delete') {
-		$r2 = '/collection?user='.$user['id'];
+		$r2 = '/collection/user/'.$user['id'];
 	}
 
 	finalize($r2, ['success']);

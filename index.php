@@ -28,12 +28,32 @@ if($url == '/' && !$has_session) {
 elseif($url == '/' && $has_session) {
 	$url = 'index';
 }
-elseif(file_exists("views/$url.php") != 1) {
-	header('Location: /404');
+
+// strips the / off the beginning
+$url = substr($url, 1);
+
+// Check for URLs with GET params
+$param_pages = [
+	'forum/board',
+	'forum/thread',
+	'user/social',
+	'user',
+	'collection',
+	'account/settings',
+	'item/edit'
+];
+foreach($param_pages as $pg) {
+	if(strpos($url, $pg) === 0) {
+		$url = $pg;
+		break;
+	}
 }
-else {
-	#generic pages - strips the / off the beginning
-	$url = substr($url, 1);
+
+// replaces all slashes with ^. This matches the file names in "views" folder
+$url = str_replace('/', '^', $url);
+
+if(file_exists("views/$url.php") != 1) {
+	#finalize('/404');
 }
 
 # Check for SQL connection
@@ -133,10 +153,10 @@ $url_readable = end($url_split);
 					</div>
 					
 					<div class="dropdown profile">
-						<a class="site-nav__item" href="<?=FILEPATH."user?id=".$user["id"]?>"><?=$user["nickname"]?></a>
+						<a class="site-nav__item" href="<?=FILEPATH."user/".$user["id"]?>"><?=$user["nickname"]?></a>
 						
 						<div class="dropdown-menu list vertical">
-							<a class="site-nav__item" href="<?=FILEPATH."user?id=".$user["id"]?>">Profile</a>
+							<a class="site-nav__item" href="<?=FILEPATH."user/".$user["id"]?>">Profile</a>
 							<a class="site-nav__item" href="<?=FILEPATH?>account/settings">Settings</a>
 							
 							<form id="form-logout"style="display:none" action="/interface/session" method="POST">

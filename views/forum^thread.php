@@ -41,7 +41,7 @@ if(isset($_GET["page"])) {
 		<div class="content-header">
 			<div class="content-header__breadcrumb">
 				<a href="<?=FILEPATH."forum"?>">Forum</a> >
-				<a href="<?=FILEPATH."forum/board?id=".$board['id']?>"><?=$board['name']?></a> >
+				<a href="<?=FILEPATH."forum/board/".$board['id']?>"><?=$board['name']?></a> >
 				<span><?=htmlspecialchars($thread['title'])?></span>
 			</div>
 			
@@ -195,7 +195,7 @@ if(isset($_GET["page"])) {
 				$user_rank = sql('SELECT title FROM permission_levels WHERE permission_level <= ? ORDER BY permission_level DESC LIMIT 1', ['i', $reply_user['permission_level']])['result'][0]['title'];
 				?>
 				
-				<a class="thread-reply__username" href="<?=FILEPATH."user?id=".$reply_user['id']?>">
+				<a class="thread-reply__username" href="<?=FILEPATH."user/".$reply_user['id']?>">
 					<?=$reply_user['nickname']?>
 				</a>
 				

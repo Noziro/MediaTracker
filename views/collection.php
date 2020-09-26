@@ -28,8 +28,8 @@
 
 		<div class="content-header">
 			<div class="content-header__breadcrumb">
-				<a href="<?=FILEPATH."user?id=".$page_user['id']?>"><?=$page_user['nickname']?></a> >
-				<a href="<?=FILEPATH."collection?user=".$page_user['id']?>">Collection</a> >
+				<a href="<?=FILEPATH."user/".$page_user['id']?>"><?=$page_user['nickname']?></a> >
+				<a href="<?=FILEPATH."collection/user/".$page_user['id']?>">Collection</a> >
 				<span><?=$collection['name']?></span>
 			</div>
 			
@@ -102,7 +102,7 @@
 				<tr id="item-<?=$item['id']?>" class="table__body-row">
 					<td class="table__cell">
 						<?php if($collection['user_id'] === $user['id']) : ?>
-						<a class="js-item-edit" href="item/edit?id=<?=$item['id']?>&frame=1" onclick="editItem(<?=$item['id']?>)">
+						<a class="js-item-edit" href="item/edit/<?=$item['id']?>&frame=1" onclick="editItem(<?=$item['id']?>)">
 							<?=$item['name']?>
 						</a>
 						<?php else : ?>
@@ -472,7 +472,7 @@
 
 		<div class="content-header">
 			<div class="content-header__breadcrumb">
-				<a href="<?=FILEPATH."user?id=".$page_user['id']?>"><?=$page_user['nickname']?></a> >
+				<a href="<?=FILEPATH."user/".$page_user['id']?>"><?=$page_user['nickname']?></a> >
 				<span>Collection</span>
 			</div>
 			
@@ -531,7 +531,7 @@
 
 				<tr class="table__body-row">
 					<td class="table__cell">
-						<a class="u-bold" href="?id=<?=$collection['id']?>">
+						<a class="u-bold" href="/collection/<?=$collection['id']?>">
 							<?=$collection['name']?>
 						</a>
 					</td>
@@ -580,7 +580,7 @@
 
 				<tr class="table__body-row">
 					<td class="table__cell">
-						<a class="u-bold" href="?id=<?=$collection['id']?>">
+						<a class="u-bold" href="/collection/<?=$collection['id']?>">
 							<?=$collection['name']?>
 						</a>
 					</td>

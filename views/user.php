@@ -79,7 +79,7 @@ function ceil_decimal(float $float, int $precision = 1) {
 			<div class="profile__section">
 				<span class="profile__section-header">Links</span>
 
-				<a class="profile__user-link profile__user-link--primary" href="<?=FILEPATH?>collection?user=<?=$page_user['id']?>">Collection</a>
+				<a class="profile__user-link profile__user-link--primary" href="<?=FILEPATH?>collection/user/<?=$page_user['id']?>">Collection</a>
 				<a class="profile__user-link profile__user-link--primary" href="<?=FILEPATH?>user/social?user=<?=$page_user['id']?>">Social</a>
 				<?php if($has_session && $user['id'] !== $page_user['id']) : ?>
 				<div class="c-divider"></div>

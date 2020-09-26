@@ -5,7 +5,7 @@ if(!$has_session) {
 }
 
 $user_extra = sql('SELECT about FROM users WHERE id=?', ['i', $user['id']]);
-$user['about'] = array_merge($user, $user_extra['result'][0]);
+$user = array_merge($user, $user_extra['result'][0]);
 #$prefs_extra = sql('SELECT profile_colour FROM user_preferences WHERE user_id=?', ['i', $user['id']]);
 #$prefs['profile_colour'] = array_merge($prefs, $prefs_extra['result'][0]);
 ?>
@@ -15,11 +15,11 @@ $user['about'] = array_merge($user, $user_extra['result'][0]);
 		<div class="split__section split__section--sidebar">
 			<span class="split__sidebar-header">Settings</span>
 
-			<a class="split__sidebar-item" href="?section=profile">Profile</a>
-			<a class="split__sidebar-item" href="?section=security">Security</a>
-			<a class="split__sidebar-item" href="?section=privacy">Privacy</a>
-			<a class="split__sidebar-item" href="?section=preferences">Preferences</a>
-			<a class="split__sidebar-item" href="?section=data">Data</a>
+			<a class="split__sidebar-item" href="/account/settings/profile">Profile</a>
+			<a class="split__sidebar-item" href="/account/settings/security">Security</a>
+			<a class="split__sidebar-item" href="/account/settings/privacy">Privacy</a>
+			<a class="split__sidebar-item" href="/account/settings/preferences">Preferences</a>
+			<a class="split__sidebar-item" href="/account/settings/data">Data</a>
 		</div>
 		
 
@@ -303,8 +303,8 @@ $user['about'] = array_merge($user, $user_extra['result'][0]);
 			
 			<?php
 			else :
-				header("Location: /404");
-				exit();
+				// TODO - this fails
+				finalize('/404');
 			
 			endif;
 			?>

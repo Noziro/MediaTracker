@@ -16,7 +16,7 @@ function editItem(id) {
 	}
 
 	var frame = document.createElement('iframe');
-	frame.setAttribute('src', `/item/edit?id=${id}&frame=1`);
+	frame.setAttribute('src', `/item/edit/${id}&frame=1`);
 	modalInsert.appendChild(frame);
 	frame.classList.add('modal__frame');
 	frame.id = 'js-editframe';

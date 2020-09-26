@@ -21,7 +21,7 @@ if(isset($_GET['id'])) {
 	<div class="wrapper__inner">
 		<form id="collection-item-edit" action="/interface/generic" method="POST">
 			<input type="hidden" name="action" value="collection_item_edit">
-			<input type="hidden" name="return_to" value="/collection?id=<?=$item['collection_id'].'#item-'.$item['id']?>">
+			<input type="hidden" name="return_to" value="/collection/<?=$item['collection_id'].'#item-'.$item['id']?>">
 			<input type="hidden" name="item_id" value="<?=$item['id']?>">
 
 			<div class="item-fields">

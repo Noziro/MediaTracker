@@ -10,6 +10,7 @@ list forum posts etc here
 // 
 // 
 // 
+var_dump($_GET);
 ?>
 
 maybe friends too
