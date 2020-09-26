@@ -20,10 +20,10 @@ RewriteRule ^interface\/(.*)$ interface/$1.php [L,NC]
 
 # Redirects everything else to index
 ## Directing certain pages to their correct GET queries
-RewriteRule ^(user/social|user|forum/(board|thread)|item/edit)/([^/]*) ?id=$3 [NC]
-RewriteRule ^account/settings/([^/]*) ?section=$1 [NC]
-RewriteRule ^collection/user/([^/]*) ?user=$1 [NC]
-RewriteRule ^collection/([^/]*) ?id=$1 [NC]
+RewriteRule ^(user/social|user|forum/(board|thread)|item/edit)/([^/]+) ?id=$3 [NC]
+RewriteRule ^account/settings/([^/]+) ?section=$1 [NC]
+RewriteRule ^collection/user/([^/]+) ?user=$1 [NC]
+RewriteRule ^collection/([^/]+) ?id=$1 [NC]
 ## Directing to index
 RewriteRule ^(?!static|interface).* index.php [L]
 RewriteCond %{REQUEST_FILENAME} -d

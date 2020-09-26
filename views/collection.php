@@ -454,7 +454,9 @@
 				$page_user__id = $_GET['user'];
 			}
 
-			$page_user = sql('SELECT id, nickname FROM users WHERE id=?', ['i', $page_user__id])['result'][0];
+			$stmt = sql('SELECT id, nickname FROM users WHERE id=?', ['i', $page_user__id]);
+			if(!$stmt['result'] || $stmt['rows'] < 1) { finalize('/404'); }
+			$page_user = $stmt['result'][0];
 
 			if($user['id'] === $page_user['id']) {
 				// TODO - once friend system implemented, move this to a function
