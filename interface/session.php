@@ -6,10 +6,10 @@ $action = $_POST['action'];
 
 if(isset($_POST['return_to'])) {
 	$r2prev = $_POST['return_to'];
-	$r2login = '/login?action=login&return_to='.urlencode($r2prev);
+	$r2login = '/login?return_to='.urlencode($r2prev);
 } else {
 	$r2prev = '/';
-	$r2login = '/login?action=login';
+	$r2login = '/login';
 }
 
 if($action === "login") {
@@ -29,7 +29,7 @@ if($action === "login") {
 }
 
 elseif($action === "register") {
-	$r2page = '/login?action=register';
+	$r2 = '/register';
 
 	// Check all required fields filled
 	if(	   !array_key_exists('username', $_POST)
@@ -39,7 +39,7 @@ elseif($action === "register") {
 		|| strlen($_POST['password']) == 0
 		|| strlen($_POST['password-confirm']) == 0
 	) {
-		finalize($r2page, ['required_field', 'error']);
+		finalize($r2, ['required_field', 'error']);
 	}
 
 	// Set variables
@@ -55,16 +55,16 @@ elseif($action === "register") {
 	
 	// Confirm user password
 	if(strlen($post_pass) < 6 || strlen($post_pass) > 72) {
-		finalize($r2page, ['invalid_pass', 'error']);
+		finalize($r2, ['invalid_pass', 'error']);
 	}
 
 	if($post_pass != $post_pass_confirm) {
-		finalize($r2page, ['register_match', 'error']);
+		finalize($r2, ['register_match', 'error']);
 	}
 
 	// Validate username
 	if(!valid_name($post_user)) {
-		finalize($r2page, ['invalid_name', 'error']);
+		finalize($r2, ['invalid_name', 'error']);
 	}
 
 	// Carry on if all fields good
@@ -72,7 +72,7 @@ elseif($action === "register") {
 		$register = $auth->register($post_user, $post_pass, $post_email);
 		
 		if (!$register) {
-			finalize($r2page, ['register_exists', 'error']);
+			finalize($r2, ['register_exists', 'error']);
 		} else {
 			finalize('/welcome');
 		}

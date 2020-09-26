@@ -28,9 +28,10 @@ if($url == '/' && !$has_session) {
 elseif($url == '/' && $has_session) {
 	$url = 'index';
 }
-
-// strips the / off the beginning
-$url = substr($url, 1);
+else {
+	// strips the / off the beginning
+	$url = substr($url, 1);
+}
 
 // Check for URLs with GET params
 $param_pages = [
@@ -53,7 +54,7 @@ foreach($param_pages as $pg) {
 $url = str_replace('/', '^', $url);
 
 if(file_exists("views/$url.php") != 1) {
-	#finalize('/404');
+	finalize('/404');
 }
 
 # Check for SQL connection
@@ -63,8 +64,17 @@ if(mysqli_connect_errno()) {
 	$url = '500';
 }
 
-$url_split = explode('/', $url);
+$url_split = explode('^', $url);
 $url_readable = end($url_split);
+
+// TODO - this is rather garbage. Better to redirect all number error codes in .htaccess to error.php or something
+if($url_readable === '403' || $url_readable === '404' || $url_readable === '500') {
+	$file = 'error';
+} elseif($url_readable === 'register') {
+	$file = 'login';
+} else {
+	$file = $url_readable;
+}
 
 ?>
 
@@ -89,19 +99,13 @@ $url_readable = end($url_split);
 		<link rel="stylesheet" href="<?=FILEPATH?>static/css/style.css">
 		
 		<?php
-		// TODO - this is rather garbage. Better to redirect all number error codes in .htaccess to error.php or something
-		if($url_readable === '403' || $url_readable === '404' || $url_readable === '500') {
-			$file = 'error';
-		} else {
-			$file = $url_readable;
-		}
 		if (file_exists(PATH."static/css/".$file.".css")) :
 		?>
 		<link rel="stylesheet" href="<?=FILEPATH."static/css/".$file?>.css">
 		<?php endif ?>
 		
-		<?php if (file_exists(PATH."static/js/".$url_readable.".js")) : ?>
-		<script type="text/javascript" src="<?=FILEPATH."static/js/".$url_readable.".js"?>" defer></script>
+		<?php if (file_exists(PATH."static/js/".$file.".js")) : ?>
+		<script type="text/javascript" src="<?=FILEPATH."static/js/".$file.".js"?>" defer></script>
 		<?php endif ?>
 		
 		<!--<script type="text/javascript" src="<?=FILEPATH?>static/js/jquery-3.3.1.min.js" async></script>-->
@@ -174,8 +178,8 @@ $url_readable = end($url_split);
 						
 					<?php else : ?>
 					
-					<a class="site-nav__item" href="<?=FILEPATH?>login?action=login&return_to=<?=urlencode($_SERVER["REQUEST_URI"])?>">Login</a>
-					<a class="site-nav__item" href="<?=FILEPATH?>login?action=register">Register</a>
+					<a class="site-nav__item" href="<?=FILEPATH?>login?return_to=<?=urlencode($_SERVER["REQUEST_URI"])?>">Login</a>
+					<a class="site-nav__item" href="<?=FILEPATH?>register">Register</a>
 					
 					<?php endif ?>
 				</div>
