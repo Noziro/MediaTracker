@@ -2,6 +2,20 @@
 	color: var(--text-regular);
 }
 
+.c-about__opener {
+	display: inline-block;
+	padding: 3px 6px;
+	margin: 0;
+	border: 4px solid var(--backing-content);
+	box-shadow:
+		inset 1px .5px .5px rgba(0,0,0,0.35),
+		inset 2px 1px 3px rgba(0,0,0,0.35),
+		1px .5px .5px rgba(0,0,0,0.5),
+		2px 1px 3px rgba(0,0,0,0.5);
+	font-size: 30px;
+	font-weight: 600;
+}
+
 .c-about__title {
 	font-size: 24px;
 	font-weight: 600;
@@ -31,15 +45,32 @@
 }
 .c-about__section--stats {
 	background: rgb(204, 136, 58);
-	padding-bottom: 30px;
+	padding-bottom: 15px;
+}
+.c-about__section--generic-1 {
+	background: var(--backing-content);
+	padding-bottom: 15px;
+}
+.c-about__section--generic-2 {
+	background: var(--identity);
+	padding-bottom: 15px;
 }
 /* .c-about__section--signup {
 	
 } */
 
 .c-about__primary {
-	max-width: 795px;
-	margin: 0 auto;
+	text-align: center;
+}
+
+.c-about__split {
+	display: flex;
+}
+.c-about__split-primary {
+	width: 66.6667%;
+}
+.c-about__split-secondary {
+	width: 33.3334%;
 }
 
 .c-about__signup {

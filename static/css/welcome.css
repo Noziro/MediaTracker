@@ -1,0 +1,29 @@
+.c-welcome {
+	width: 100%;
+	min-height: 400px;
+	overflow: hidden;
+}
+
+.c-welcome__slider {
+	display: flex;
+	min-width: 100%;
+	height: 100%;
+}
+
+.c-welcome__slide {
+	width: 100%;
+	height: 100%;
+	flex: 0 0 auto;
+	margin-right: 20%;
+}
+
+#js-advance-slider {
+	--js-slide: 0;
+	transform: translateX(calc(-120% * var(--js-slide)));
+	transition: transform 0.6s cubic-bezier(.65,.05,.36,1);
+}
+
+.c-welcome__title {
+	font-size: 24px;
+	font-weight: 600;
+}

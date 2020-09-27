@@ -54,7 +54,7 @@ $user = array_merge($user, $user_extra['result'][0]);
 
 			<span class="settings__notice">Avatar & banner functionality will come in the future.</span>
 
-			<div class="settings__button button-list">
+			<div class="settings__button l-button-list">
 				<button form="form-settings" class="settings__button button" type="submit">
 					Apply
 				</button>
@@ -130,7 +130,7 @@ $user = array_merge($user, $user_extra['result'][0]);
 				spellcheck="false"
 				autocomplete="new-password">
 
-			<div class="settings__button button-list">
+			<div class="settings__button l-button-list">
 				<button form="form-settings" class="settings__button button" type="submit">
 					Apply
 				</button>
@@ -214,7 +214,7 @@ $user = array_merge($user, $user_extra['result'][0]);
 				Reset colour
 			</label>
 
-			<div class="settings__button button-list">
+			<div class="settings__button l-button-list">
 				<button form="form-settings" class="settings__button button button--spaced" type="submit">
 					Apply
 				</button>

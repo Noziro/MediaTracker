@@ -8,9 +8,9 @@
 			<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 			<input id="js-confirmation-data" type="hidden">
 		</form>
-		<div class="button-list">
-			<button form="form-confirmation" class="button-list__button button button--medium button--negative" type="submit">Confirm</a>
-			<button class="button-list__button button button--medium" onclick="toggleModal('modal--confirmation', false)">Cancel</a>
+		<div class="l-button-list">
+			<button form="form-confirmation" class="l-button-list__button button button--medium button--negative" type="submit">Confirm</a>
+			<button class="l-button-list__button button button--medium" onclick="toggleModal('modal--confirmation', false)">Cancel</a>
 		</div>
 	</div>
 </div>

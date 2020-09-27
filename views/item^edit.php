@@ -150,9 +150,9 @@ if(isset($_GET['id'])) {
 			</div>
 		</form>
 
-		<div class="button-list">
-			<button form="collection-item-edit" class="button-list__button button button--spaced" type="submit">Edit</button>
-			<button class="button-list__button button button--spaced" onclick="modalConfirmation('Are you sure you wish to delete this item?', 'collection_item_delete', 'item_id', <?=$item['id']?>)">Delete</button>
+		<div class="l-button-list">
+			<button form="collection-item-edit" class="l-button-list__button button button--spaced" type="submit">Edit</button>
+			<button class="l-button-list__button button button--spaced" onclick="modalConfirmation('Are you sure you wish to delete this item?', 'collection_item_delete', 'item_id', <?=$item['id']?>)">Delete</button>
 		</div>
 
 		<div class="dialog-box dialog-box--subcontent">

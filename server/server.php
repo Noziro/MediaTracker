@@ -755,12 +755,18 @@ $activity_types = [
 // DATABASE FUNCTIONS
 
 // Passes database a statement and returns result.
+// 
+// Example uses:
+// sql('SELECT * FROM forum');
+// sql('SELECT * FROM forum WHERE id=? AND title=?', ['is', $forum_id, $forum_title]);
+// sql('SELECT * FROM forum WHERE id=1 AND title="Hello world"', false, ['assoc' => false]);
+// 
 // Returns an array:
 //     result -> false if failed, null if no change, true or a result if successfull
 //     response_code -> string to describe outcome, used in notices
 //     response_type -> string to describe type of outcome, used in notices
 //     rows -> number of affected/returned rows
-function sql(string $stmt, $params = false) {
+function sql(string $stmt, $params = false, $options = false) {
 	global $db;
 	$dbfail = [
 			'result' => false,
@@ -780,6 +786,8 @@ function sql(string $stmt, $params = false) {
 		$rows = $res->num_rows;
 		if($rows < 1) {
 			$res = true;
+		} elseif($options['assoc'] === false) {
+			$res = $res->fetch_all();
 		} else {
 			$res = $res->fetch_all(MYSQLI_ASSOC);
 		}
