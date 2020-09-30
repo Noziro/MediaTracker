@@ -162,6 +162,9 @@ a {
 .l-button-list--right {
 	justify-content: right;
 }
+.l-button-list--center {
+	justify-content: center;
+}
 .l-button-list__button + .l-button-list__button {
 	margin-left: 5px;
 }
@@ -1053,60 +1056,6 @@ html {
 .c-forum__aside-description {
 	margin-top: 3px;
 	font-size: 12px;
-}
-
-
-.thread-reply {
-	display: flex;
-	padding: 10px;
-	background: var(--backing-content);
-	justify-content: left;
-} .thread-reply ~ .thread-reply {
-	border-top: 2px solid var(--border-light);
-}
-
-.thread-reply__deleted {
-	font-size: 12px;
-	font-style: italic;
-}
-
-.thread-reply__info {
-	width: 20%;
-	padding-right: 10px;
-	border-right: 2px solid var(--border-light);
-	flex: 0 0 auto;
-}
-.thread-reply__username {
-	display: block;
-	margin-bottom: 6px;
-	font-weight: 600;
-}
-.thread-reply__info-line:not(:last-of-type) {
-	display: block;
-	margin-bottom: 6px;
-}
-
-.thread-reply__content {
-	padding-left: 10px;
-	flex: 1 1 auto;
-}
-
-.thread-reply__text {
-	margin: 0;
-}
-
-.thread-reply__edit-body {
-	width: 66%;
-	resize: vertical;
-}
-
-.thread-reply__actions {
-	display: flex;
-	margin: 6px 0 0;
-}
-
-.thread-reply__action ~ .thread-reply__action {
-	margin-left: 8px;
 }
 
 .site-rank {

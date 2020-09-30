@@ -225,10 +225,20 @@ if(isset($_GET["page"])) {
 			
 			
 			<div class="thread-reply__content">
-				<p id="js-reply-body-<?=$reply['id']?>" class="thread-reply__text u-readable-line-height js-reply-body">
-					<?=format_user_text($reply['body'])?>
-				</p>
-				
+				<div id="js-truncate-<?=$reply['id']?>" class="c-truncate js-truncate" data-reply="<?=$reply['id']?>">
+					<p id="js-reply-body-<?=$reply['id']?>" class="thread-reply__text u-readable-line-height js-reply-body">
+						<?=format_user_text($reply['body'])?>
+					</p>
+					
+					<div id="js-truncate-overlay-<?=$reply['id']?>" class="c-truncate__overlay is-hidden">
+						<button class="button" onclick="untruncate_reply(<?=$reply['id']?>)">Show More</button>
+					</div>
+
+					<div id="js-truncate-close-<?=$reply['id']?>" class="l-button-list l-button-list--center is-hidden">
+						<button class="l-button-list__button button" onclick="truncate_reply(<?=$reply['id']?>)">Show Less</button>
+					</div>
+				</div>
+
 				<?php if($has_session && $reply['user_id'] === $user['id']) : ?>
 				
 				<div id="js-reply-edit-<?=$reply['id']?>" class="thread-reply__edit js-reply-edit" style="display:none">

@@ -18,3 +18,31 @@ function toggleEdit($reply_id, $mode) {
 		$edit_btn.classList.remove('button--disabled');
 	}
 }
+
+// Truncate and 'read more' long forum posts
+var $body_texts = document.getElementsByClassName(`js-truncate`);
+
+for ($trunc of $body_texts) {
+	if($trunc.clientHeight > 500) {
+		$id = $trunc.getAttribute('data-reply');
+		truncate_reply($id);
+	}
+}
+
+function truncate_reply($id) {
+	var $trunc = document.getElementById(`js-truncate-${$id}`),
+		$id = $trunc.getAttribute('data-reply');
+
+	$trunc.classList.add('is-truncated');
+	document.getElementById(`js-truncate-overlay-${$id}`).classList.remove('is-hidden');
+	document.getElementById(`js-truncate-close-${$id}`).classList.add('is-hidden');
+}
+
+function untruncate_reply($id) {
+	var $trunc = document.getElementById(`js-truncate-${$id}`),
+		$id = $trunc.getAttribute('data-reply');
+	
+	$trunc.classList.remove('is-truncated');
+	document.getElementById(`js-truncate-overlay-${$id}`).classList.add('is-hidden');
+	document.getElementById(`js-truncate-close-${$id}`).classList.remove('is-hidden');
+}
