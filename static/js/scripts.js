@@ -51,6 +51,11 @@ function toggleModal(id, mode = null) {
 		modal.classList.toggle('modal--hidden');
 	} else if(mode === true) {
 		modal.classList.remove('modal--hidden');
+		// set focus to point designated by HTML, if one exists
+		var $new_focus = modal.querySelector('.js-modal-focus');
+		if($new_focus) {
+			$new_focus.focus();
+		}
 	} else if(mode === false) {
 		modal.classList.add('modal--hidden');
 	}

@@ -227,7 +227,7 @@
 					<input type="hidden" name="collection_id" value="<?=$collection['id']?>">
 					
 					<label class="label">Name</label>
-					<input class="input js-autofill" type="text" name="name" data-autofill="<?=$collection['name']?>" required>
+					<input class="input js-autofill js-modal-focus" type="text" name="name" data-autofill="<?=$collection['name']?>" required>
 					
 					<label class="label">Type</label>
 					<select class="select" name="type">
@@ -304,7 +304,7 @@
 
 						<div class="item-fields__field">
 							<label class="label">Name <span class="label__desc">(required)</span></label>
-							<input class="input input--wide" type="text" name="name" required>
+							<input class="input input--wide js-modal-focus" type="text" name="name" required>
 						</div>
 
 						<div class="item-fields__field">
@@ -626,7 +626,7 @@
 					<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 					
 					<label class="label" for="collection-name">Name</label>
-					<input id="collection-name" class="input" type="text" name="name" required>
+					<input id="collection-name" class="input js-modal-focus" type="text" name="name" required>
 					
 					<label class="label" for="collection-type">Type</label>
 					<select id="collection-type" class="select" name="type">

@@ -216,7 +216,7 @@ if(isset($_GET["page"])) {
 					<input type="hidden" name="board_id" value="<?=$board['id']?>">
 					
 					<label class="label">Title</label>
-					<input class="input input--wide" type="text" name="title" required>
+					<input class="input input--wide js-modal-focus" type="text" name="title" required>
 					
 					<label class="label">Body</label>
 					<textarea class="text-input text-input--resizable-v" name="body" required></textarea>

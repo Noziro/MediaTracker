@@ -9,7 +9,7 @@
 			<input id="js-confirmation-data" type="hidden">
 		</form>
 		<div class="l-button-list">
-			<button form="form-confirmation" class="l-button-list__button button button--medium button--negative" type="submit">Confirm</a>
+			<button form="form-confirmation" class="l-button-list__button button button--medium button--negative js-modal-focus" type="submit">Confirm</a>
 			<button class="l-button-list__button button button--medium" onclick="toggleModal('modal--confirmation', false)">Cancel</a>
 		</div>
 	</div>

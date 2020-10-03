@@ -335,8 +335,7 @@ if(isset($_GET["page"])) {
 					<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 					<input type="hidden" name="thread_id" value="<?=$thread['id']?>">
 					
-					<label class="label">Body</label>
-					<textarea class="text-input text-input--resizable-v" name="body" required></textarea>
+					<textarea class="text-input text-input--resizable-v js-modal-focus" name="body" required></textarea>
 					
 					<input class="button button--spaced" type="submit" value="Reply">
 				</form>
