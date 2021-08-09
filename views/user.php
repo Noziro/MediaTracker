@@ -115,24 +115,26 @@ function ceil_decimal(float $float, int $precision = 1) {
 								ORDER BY day DESC
 							', ['i', $page_user['id']]);
 						$history_flattened = [];
-						foreach($history['result'] as $row) {
-							$history_flattened[$row['day']] = $row['count'];
+						if($history['rows'] > 0) {
+							foreach($history['result'] as $row) {
+								$history_flattened[$row['day']] = $row['count'];
+							}
+							$history_max_num = sql('
+									SELECT MAX(count) as max
+									FROM
+									(
+										SELECT
+											DATE(created_at) as day,
+											COUNT(user_id) as count
+										FROM activity
+										WHERE
+											user_id=?
+											AND DATE(created_at) BETWEEN DATE_SUB(CURDATE(), INTERVAL 90 DAY) AND CURDATE()
+										GROUP BY day
+										ORDER BY day DESC
+									) as sub
+								', ['i', $page_user['id']])['result'][0]['max'];
 						}
-						$history_max_num = sql('
-								SELECT MAX(count) as max
-								FROM
-								(
-									SELECT
-										DATE(created_at) as day,
-										COUNT(user_id) as count
-									FROM activity
-									WHERE
-										user_id=?
-										AND DATE(created_at) BETWEEN DATE_SUB(CURDATE(), INTERVAL 90 DAY) AND CURDATE()
-									GROUP BY day
-									ORDER BY day DESC
-								) as sub
-							', ['i', $page_user['id']])['result'][0]['max'];
 						
 						$last_month = [];
 						for($i = 0; $i < 90; $i++) {
