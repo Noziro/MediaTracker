@@ -41,6 +41,21 @@ if (gdpr) {
 	gdpr.onclick = acceptGDPR;
 }
 
+// Toggle Elements
+// Activated via buttons using onclick=""
+
+function toggleElement(id, mode = null) {
+	var ele = document.getElementById(id);
+
+	if(mode === null) {
+		ele.classList.toggle('u-hidden');
+	} else if(mode === true) {
+		ele1.classList.remove('u-hidden');
+	} else if(mode === false) {
+		ele.classList.add('u-hidden');
+	}
+}
+
 // Toggle Modals
 // Activated via buttons using onclick=""
 

@@ -39,23 +39,6 @@ if(isset($_GET['id'])) {
 					<input class="input input--thin js-autofill" name="episodes" type="number" min="0" <?php if(isset($item['episodes'])) { echo 'data-autofill="'.$item['episodes'].'"'; } ?>>
 				</div>
 
-				<!--<div class="item-fields__field item-fields__field--date">
-					<label class="label">Media Release Date</label>
-					<input class="input input--auto" name="release_date" type="date">
-				</div>-->
-
-				<div class="item-fields__field item-fields__field--date">
-					<label class="label">Media Started At</label>
-					<input id="js-set-today-3" class="input input--auto js-autofill" name="started_at" type="date" <?php if(isset($item['started_at'])) { echo 'data-autofill="'.$item['started_at'].'"'; } ?>>
-					<a class="subtext" onclick="setToday('js-set-today-3')">Today</a>
-				</div>
-
-				<div class="item-fields__field item-fields__field--date">
-					<label class="label">Media Finished At</label>
-					<input id="js-set-today-4" class="input input--auto js-autofill" name="finished_at" type="date" <?php if(isset($item['finished_at'])) { echo 'data-autofill="'.$item['finished_at'].'"'; } ?>>
-					<a class="subtext" onclick="setToday('js-set-today-4')">Today</a>
-				</div>
-
 				<div class="item-fields__field">
 					<label class="label">Flags</label>
 					<div class="checkbox-group">
@@ -63,12 +46,6 @@ if(isset($_GET['id'])) {
 							<input type="hidden" name="adult" value="0"> <!-- fallback value -->
 							<input class="checkbox" type="checkbox" name="adult" value="1" <?php if($item['adult'] === 1) { echo 'checked'; } ?>>
 							Adult
-						</label>
-
-						<label class="checkbox-group__item">
-							<input type="hidden" name="favourite" value="0"> <!-- fallback value -->
-							<input class="checkbox" type="checkbox" name="favourite" value="1" <?php if($item['favourite'] === 1) { echo 'checked'; } ?>>
-							Favourite
 						</label>
 					</div>
 				</div>
@@ -83,19 +60,35 @@ if(isset($_GET['id'])) {
 					<input class="input js-autofill" type="text" name="links[]" data-autofill="<?=$link?>">
 					<?php
 						endforeach;
-					else :
-					?>
-
-					<input class="input" type="text" name="links[]">
-					<input class="input" type="text" name="links[]">
-					<input class="input" type="text" name="links[]">
-
-					<?php
 					endif;
 					?>
+
+					<input class="input" type="text" name="links[]">
+					
+					<div class="l-button-list">
+						<button type="button" id="js-add-input" class="l-button-list__button button">+</button>
+						<button type="button" id="js-remove-input" class="l-button-list__button button button--disabled" disabled="disabled">-</button>
+					</div>
+				</div>
+			</div>
+
+			<button type="button" class="button" onclick="toggleElement('advanced-item-fields')">Show/hide advanced</button>
+
+			<div id="advanced-item-fields" class="item-fields u-hidden">
+				<div class="item-fields__field item-fields__field--date">
+					<label class="label">Media Started At</label>
+					<input id="js-set-today-3" class="input input--auto js-autofill" name="started_at" type="date" <?php if(isset($item['started_at'])) { echo 'data-autofill="'.$item['started_at'].'"'; } ?>>
+					<a class="subtext" onclick="setToday('js-set-today-3')">Today</a>
 				</div>
 
+				<div class="item-fields__field item-fields__field--date">
+					<label class="label">Media Finished At</label>
+					<input id="js-set-today-4" class="input input--auto js-autofill" name="finished_at" type="date" <?php if(isset($item['finished_at'])) { echo 'data-autofill="'.$item['finished_at'].'"'; } ?>>
+					<a class="subtext" onclick="setToday('js-set-today-4')">Today</a>
+				</div>
+			</div>
 
+			<div class="item-fields">
 				<div class="item-fields__divider">
 					<span class="item-fields__header">User Data</span>
 				</div>
@@ -138,6 +131,17 @@ if(isset($_GET['id'])) {
 					<input id="js-set-today-2" class="input input--auto js-autofill" name="user_finished_at" type="date" <?php if(isset($item['user_finished_at'])) { echo 'data-autofill="'.$item['user_finished_at'].'"'; } ?>>
 					<a class="subtext" onclick="setToday('js-set-today-2')">Today</a>
 				</div>
+
+				<div class="item-fields__field">
+					<label class="label">Flags</label>
+					<div class="checkbox-group">
+						<label class="checkbox-group__item">
+							<input type="hidden" name="favourite" value="0"> <!-- fallback value -->
+							<input class="checkbox" type="checkbox" name="favourite" value="1" <?php if($item['favourite'] === 1) { echo 'checked'; } ?>>
+							Favourite
+						</label>
+					</div>
+				</div>
 				
 				<div class="item-fields__divider"></div>
 
@@ -145,8 +149,6 @@ if(isset($_GET['id'])) {
 					<label class="label">Comments</label>
 					<textarea class="text-input js-autofill" name="comments" <?php if(isset($item['comments'])) { echo 'data-autofill="'.$item['comments'].'"'; } ?>></textarea>
 				</div>
-
-				<div class="item-fields__divider"></div>
 			</div>
 		</form>
 

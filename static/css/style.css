@@ -138,6 +138,10 @@ a {
 	text-align: center !important;
 }
 
+.u-hidden {
+	display: none !important;
+}
+
 .long-text {
 	margin: 0;
 	line-height: 1.35;

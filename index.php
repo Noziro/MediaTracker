@@ -73,7 +73,7 @@ if($url_readable === '403' || $url_readable === '404' || $url_readable === '500'
 } elseif($url_readable === 'register') {
 	$file = 'login';
 } else {
-	$file = $url_readable;
+	$file = $url;
 }
 
 ?>
@@ -98,9 +98,7 @@ if($url_readable === '403' || $url_readable === '404' || $url_readable === '500'
 		
 		<link rel="stylesheet" href="<?=FILEPATH?>static/css/style.css">
 		
-		<?php
-		if (file_exists(PATH."static/css/".$file.".css")) :
-		?>
+		<?php if (file_exists(PATH."static/css/".$file.".css")) : ?>
 		<link rel="stylesheet" href="<?=FILEPATH."static/css/".$file?>.css">
 		<?php endif ?>
 		
