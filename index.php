@@ -132,7 +132,7 @@ if($url_readable === '403' || $url_readable === '404' || $url_readable === '500'
 				</div>
 				
 				<div class="site-nav__section">
-					<a class="site-nav__item" href="<?=FILEPATH?>database">Database</a>
+					<a class="site-nav__item" href="<?=FILEPATH?>browse">Browse</a>
 					<a class="site-nav__item" href="<?=FILEPATH?>forum">Forum</a>
 					<a class="site-nav__item" href="<?=FILEPATH?>groups">Groups</a>
 				</div>

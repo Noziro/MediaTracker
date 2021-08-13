@@ -1,0 +1,41 @@
+.c-media-browse {
+	display: flex;
+	flex-flow: row wrap;
+	margin-bottom: 20px;
+}
+
+.c-media-list {
+	width: 250px;
+	background: var(--backing-content);
+	padding: 10px;
+	margin-right: 10px;
+}
+
+.c-media-list__media {
+	line-height: 1.35;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.c-media-list__heading {
+	margin: 0 0 15px 0;
+	font-size: 16px;
+	font-weight: bold;
+}
+
+.c-media {
+	margin: 0 10px 10px 0;
+	flex: 0 0 auto;
+	transition: transform 0.2s ease-out;
+}
+.c-media:hover {
+	transform: scale(1.05);
+}
+
+.c-media__inner {
+	width: 250px;
+	height: 70px;
+	padding: 5px;
+	background: var(--backing-content);
+}
