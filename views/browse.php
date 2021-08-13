@@ -19,7 +19,7 @@
 			foreach($random_media as $media) :
 			?>
 
-			<a class="c-media" href="/media/<?=$media['id']?>">
+			<a class="c-media" href="/item/<?=$media['id']?>">
 				<div class="c-media__inner" <?php if(strlen($media['image']) > 0) : ?> style="background-image: url(<?=$media['image']?>)" <?php endif; ?>>
 					<?=$media['name']?>
 				</div>
@@ -38,7 +38,7 @@
 			?>
 
 			<div class="c-media-list__media">
-				<a href="/media/<?=$media['id']?>"><?=$media['name']?></a>
+				<a href="/item/<?=$media['id']?>"><?=$media['name']?></a>
 			</div>
 
 			<?php endforeach; ?>
@@ -71,7 +71,7 @@
 			foreach($results as $media) :
 			?>
 
-			<a class="c-media" href="/media/<?=$media['id']?>">
+			<a class="c-media" href="/item/<?=$media['id']?>">
 				<div class="c-media__inner" <?php if(strlen($media['image']) > 0) : ?> style="background-image: url(<?=$media['image']?>)" <?php endif; ?>>
 					<?=$media['name']?>
 				</div>

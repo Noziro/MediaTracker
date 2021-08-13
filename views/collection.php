@@ -2,30 +2,25 @@
 	<div class="wrapper__inner">
 		<?php
 		if(isset($_GET['id'])) :
-			$collection = sql('SELECT id, user_id, name, type, display_image, display_score, display_progress, display_user_started, display_user_finished, display_days, rating_system, private, deleted FROM collections WHERE id=?', ['i', $_GET['id']]);
-			if($collection['rows'] < 1) {
-				finalize('/404');
-			}
-			$collection = $collection['result'][0];
+		$collection = sql('SELECT id, user_id, name, type, display_image, display_score, display_progress, display_user_started, display_user_finished, display_days, rating_system, private, deleted FROM collections WHERE id=?', ['i', $_GET['id']]);
+		if($collection['rows'] < 1) {
+			finalize('/404');
+		}
+		$collection = $collection['result'][0];
 
-			$items = sql('SELECT id, status, name, image, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments, favourite FROM media WHERE collection_id=? AND deleted=0 ORDER BY status ASC, name ASC', ['i', $collection['id']]);
+		$items = sql('SELECT id, status, name, image, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments, favourite FROM media WHERE collection_id=? AND deleted=0 ORDER BY status ASC, name ASC', ['i', $collection['id']]);
 
-			$page_user = sql('SELECT id, nickname FROM users WHERE id=?', ['i', $collection['user_id']])['result'][0];
-			
-			// $page_user_prefs = sql('SELECT rating_system FROM user_preferences WHERE user_id=?', 's', $page_user['id']);
-			// $page_user_prefs = $page_user_prefs->fetch_assoc();
+		$page_user = sql('SELECT id, nickname FROM users WHERE id=?', ['i', $collection['user_id']])['result'][0];
 
-			$columns = [
-				'display_image' => 'Image',
-				'display_score' => 'Score',
-				'display_progress' => 'Progress',
-				'display_user_started' => 'Started',
-				'display_user_finished' => 'Finished',
-				'display_days' => 'Days'
-			];
+		$columns = [
+			'display_image' => 'Image',
+			'display_score' => 'Score',
+			'display_progress' => 'Progress',
+			'display_user_started' => 'Started',
+			'display_user_finished' => 'Finished',
+			'display_days' => 'Days'
+		];
 		?>
-
-
 
 		<div class="content-header">
 			<div class="content-header__breadcrumb">

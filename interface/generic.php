@@ -509,7 +509,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 
 		function generate_random_characters($amount) {
 			$str = '';
-			$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+			$characters = '0123456789abcdefghijklmnopqrstuvwxyz';
 
 			$i = 0;
 			while($i < $amount) {
