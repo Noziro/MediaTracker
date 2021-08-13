@@ -109,3 +109,13 @@ function setToday($id) {
 		$todayFormatted = `${$y}-${$m}-${$d}`;
 	document.getElementById($id).value = $todayFormatted;
 }
+
+// Search Bar Function
+
+var searchBtn = document.getElementById('search-btn');
+
+searchBtn.onclick = function () {
+    var query = document.getElementById('search').value;
+	// Todo: add more query operators such as year:2018 etc
+    window.location.assign('/browse?name=' + query);
+}

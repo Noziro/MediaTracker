@@ -1,6 +1,7 @@
-<?php //header("Location: /404"); exit(); ?>
 <main id="content" class="wrapper wrapper--content">
 	<div class="wrapper__inner">
+		<?php if(count($_GET) === 0) : ?>
+
 		<div class="content-header">
 			<h2 class="content-header__title">Browse</h2>
 		</div>
@@ -42,5 +43,43 @@
 
 			<?php endforeach; ?>
 		</div>
+
+
+
+		<?php elseif($_GET['name']) : ?>
+
+		<div class="content-header">
+			<div class="content-header__breadcrumb">
+				<a href="<?=FILEPATH."browse"?>">Browse</a> >
+				<span>Search Results</span>
+			</div>
+			<h2 class="content-header__title">Search Results</h2>
+		</div>
+
+		<div class="c-media-browse">
+			<?php
+			$stmt = sql('SELECT id, name, image FROM media WHERE name LIKE ? AND private=0 AND deleted=0 LIMIT 20', ['s', '%'.$_GET['name'].'%']);
+			if(!$stmt['result']) { finalize('/browse', [$stmt['response_code'], $stmt['response_type']]); }
+			
+			if($stmt['rows'] < 1) :
+
+			echo 'No results.';
+
+			else:
+
+			$results = $stmt['result'];
+			foreach($results as $media) :
+			?>
+
+			<a class="c-media" href="/media/<?=$media['id']?>">
+				<div class="c-media__inner" <?php if(strlen($media['image']) > 0) : ?> style="background-image: url(<?=$media['image']?>)" <?php endif; ?>>
+					<?=$media['name']?>
+				</div>
+			</a>
+
+			<?php endforeach; endif; ?>
+		</div>
+
+		<?php endif; ?>
 	</div>
 </main>

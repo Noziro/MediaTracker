@@ -138,7 +138,8 @@ if($url_readable === '403' || $url_readable === '404' || $url_readable === '500'
 				</div>
 				
 				<div class="site-nav__section site-nav--search">
-					<input type="search" autocomplete="off" class="search-bar" placeholder="Search for Movies, Games, TV, Books, Anime, and more...">
+					<input id="search" type="search" autocomplete="off" class="search-bar" placeholder="Search for Movies, Games, TV, Books, Anime, and more...">
+					<button id="search-btn" type="button" class="button">Search</button>
 				</div>
 				
 				<div class="site-nav__section">
