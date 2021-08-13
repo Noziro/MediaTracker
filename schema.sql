@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 25, 2020 at 02:38 AM
+-- Generation Time: Aug 13, 2021 at 06:13 AM
 -- Server version: 10.3.16-MariaDB
 -- PHP Version: 7.3.6
 
@@ -63,6 +63,7 @@ CREATE TABLE `collections` (
   `user_id` int(11) NOT NULL,
   `name` varchar(50) NOT NULL,
   `type` varchar(50) NOT NULL,
+  `display_image` tinyint(1) NOT NULL DEFAULT 1,
   `display_score` tinyint(1) NOT NULL DEFAULT 1,
   `display_progress` tinyint(1) NOT NULL DEFAULT 1,
   `display_user_started` tinyint(1) NOT NULL DEFAULT 1,
@@ -319,14 +320,6 @@ ALTER TABLE `threads`
 --
 ALTER TABLE `users`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
-DELIMITER $$
---
--- Events
---
-CREATE DEFINER=`root`@`localhost` EVENT `clear_expired_sessions` ON SCHEDULE EVERY 1 DAY STARTS '2020-09-22 07:48:15' ON COMPLETION NOT PRESERVE ENABLE DO DELETE FROM sessions WHERE expiry < UNIX_TIMESTAMP()$$
-
-DELIMITER ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

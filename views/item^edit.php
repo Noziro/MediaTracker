@@ -1,12 +1,12 @@
 <?php
 if(isset($_GET['id'])) {
-    $item = sql('SELECT id, user_id, collection_id, status, name, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments, links, adult, favourite FROM media WHERE id=? LIMIT 1', ['s', $_GET['id']]);
+    $item = sql('SELECT id, user_id, collection_id, status, image, name, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments, links, adult, favourite FROM media WHERE id=? LIMIT 1', ['s', $_GET['id']]);
 	if($item['rows'] < 1) {
 		finalize('/404');
 	}
 	$item = $item['result'][0];
 
-	$collection = sql('SELECT id, user_id, name, type, display_score, display_progress, display_user_started, display_user_finished, display_days, rating_system, private FROM collections WHERE id=?', ['s', $item['collection_id']])['result'][0];
+	$collection = sql('SELECT id, user_id, name, type, display_image, display_score, display_progress, display_user_started, display_user_finished, display_days, rating_system, private FROM collections WHERE id=?', ['s', $item['collection_id']])['result'][0];
 
 	// User authority
 	if(!$has_session || $user['id'] !== $item['user_id']) {
@@ -19,7 +19,7 @@ if(isset($_GET['id'])) {
 
 <main id="content" class="wrapper wrapper--content">
 	<div class="wrapper__inner">
-		<form id="collection-item-edit" action="/interface/generic" method="POST">
+		<form id="collection-item-edit" action="/interface/generic" method="POST" enctype="multipart/form-data">
 			<input type="hidden" name="action" value="collection_item_edit">
 			<input type="hidden" name="return_to" value="/collection/<?=$item['collection_id'].'#item-'.$item['id']?>">
 			<input type="hidden" name="item_id" value="<?=$item['id']?>">
@@ -38,6 +38,7 @@ if(isset($_GET['id'])) {
 					<label class="label">Total Episodes</label>
 					<input class="input input--thin js-autofill" name="episodes" type="number" min="0" <?php if(isset($item['episodes'])) { echo 'data-autofill="'.$item['episodes'].'"'; } ?>>
 				</div>
+				
 
 				<div class="item-fields__field">
 					<label class="label">Flags</label>
@@ -69,6 +70,16 @@ if(isset($_GET['id'])) {
 						<button type="button" id="js-add-input" class="l-button-list__button button">+</button>
 						<button type="button" id="js-remove-input" class="l-button-list__button button button--disabled" disabled="disabled">-</button>
 					</div>
+				</div>
+
+				<div class="item-fields__field">
+					<label class="label">Image</label>
+					
+					<?php if(!empty($item['image'])) : ?>
+					<img src="<?=$item['image']?>" style="width: 30px; height: 30px; object-fit: cover;" />
+					<?php endif; ?>
+
+					<input class="file-upload" type="file" name="image">
 				</div>
 			</div>
 

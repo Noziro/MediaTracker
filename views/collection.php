@@ -2,13 +2,13 @@
 	<div class="wrapper__inner">
 		<?php
 		if(isset($_GET['id'])) :
-			$collection = sql('SELECT id, user_id, name, type, display_score, display_progress, display_user_started, display_user_finished, display_days, rating_system, private, deleted FROM collections WHERE id=?', ['i', $_GET['id']]);
+			$collection = sql('SELECT id, user_id, name, type, display_image, display_score, display_progress, display_user_started, display_user_finished, display_days, rating_system, private, deleted FROM collections WHERE id=?', ['i', $_GET['id']]);
 			if($collection['rows'] < 1) {
 				finalize('/404');
 			}
 			$collection = $collection['result'][0];
 
-			$items = sql('SELECT id, status, name, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments, favourite FROM media WHERE collection_id=? AND deleted=0 ORDER BY status ASC, name ASC', ['i', $collection['id']]);
+			$items = sql('SELECT id, status, name, image, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments, favourite FROM media WHERE collection_id=? AND deleted=0 ORDER BY status ASC, name ASC', ['i', $collection['id']]);
 
 			$page_user = sql('SELECT id, nickname FROM users WHERE id=?', ['i', $collection['user_id']])['result'][0];
 			
@@ -16,6 +16,7 @@
 			// $page_user_prefs = $page_user_prefs->fetch_assoc();
 
 			$columns = [
+				'display_image' => 'Image',
 				'display_score' => 'Score',
 				'display_progress' => 'Progress',
 				'display_user_started' => 'Started',
@@ -81,6 +82,9 @@
 		<table class="table">
 			<thead>
 				<tr>
+					<?php if($collection['display_image'] === 1) : ?>
+					<th class="table__cell"><b class="table__heading">Image</b></span></th>
+					<?php endif; ?>
 					<th class="table__cell table__cell--one-half"><b class="table__heading">Name</b></th>
 					<?php if($collection['display_score'] === 1) : ?>
 					<th class="table__cell"><b class="table__heading">Score</b><br /><span class="table__subheading">of <?=$collection['rating_system']?></span></th>
@@ -100,6 +104,17 @@
 				<?php foreach($items['result'] as $item) : ?>
 
 				<tr id="item-<?=$item['id']?>" class="table__body-row">
+
+					<?php if($collection['display_image'] === 1) : ?>
+
+					<td class="table__cell">
+						<?php if(!empty($item['image'])) : ?>
+						<img src="<?=$item['image']?>" style="width: 40px; height: 60px; object-fit: cover;" />
+						<?php endif; ?>
+					</td>
+
+					<?php endif; ?>
+
 					<td class="table__cell">
 						<?php if($collection['user_id'] === $user['id']) : ?>
 						<a class="js-item-edit" href="item/edit/<?=$item['id']?>&frame=1" onclick="editItem(<?=$item['id']?>)">

@@ -8,7 +8,7 @@ RewriteCond %{REQUEST_FILENAME} !-d
 ## Only matches if valid file
 RewriteCond %{REQUEST_FILENAME} -f
 ## Allows access
-RewriteRule ^static - [L,NC]
+RewriteRule ^(static|upload) - [L,NC]
 
 # Provides access to files in interface folder (but not directories)
 ## Only matches if NOT directory
@@ -25,6 +25,6 @@ RewriteRule ^account/settings/([^/]+) ?section=$1 [NC]
 RewriteRule ^collection/user/([^/]+) ?user=$1 [NC]
 RewriteRule ^collection/([^/]+) ?id=$1 [NC]
 ## Directing to index
-RewriteRule ^(?!static|interface).* index.php [L]
+RewriteRule ^(?!upload|static|interface).* index.php [L]
 RewriteCond %{REQUEST_FILENAME} -d
 RewriteRule . index.php [L]

@@ -320,6 +320,7 @@ elseif($action === "collection_edit") {
 	}
 
 	$columns = [
+		'display_image' => 1,
 		'display_score' => 1,
 		'display_progress' => 1,
 		'display_user_started' => 1,
@@ -350,6 +351,7 @@ elseif($action === "collection_edit") {
 	$stmt = sql('UPDATE collections SET
 		name=?,
 		type=?,
+		display_image=?,
 		display_score=?,
 		display_progress=?,
 		display_user_started=?,
@@ -359,9 +361,10 @@ elseif($action === "collection_edit") {
 		private=?
 		WHERE id=?
 	', [
-		'sssssssisi',
+		'ssiiiiiiiii',
 		$name,
 		$type,
+		$columns['display_image'],
 		$columns['display_score'],
 		$columns['display_progress'],
 		$columns['display_user_started'],
@@ -433,7 +436,13 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 			finalize($r2, ['disallowed_action', 'error']);
 		}
 
-		// Get info
+		// Get item info
+		$stmt = sql('SELECT image FROM media WHERE id=?', ['i', $_POST['item_id']]);
+		if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
+		if($stmt['rows'] < 1) { finalize($r2, ['disallowed_action', 'error']); }
+		$item = $stmt['result'][0];
+
+		// Get collection info
 		$stmt = sql('SELECT collections.id, collections.user_id, collections.rating_system FROM collections INNER JOIN media ON collections.id = media.collection_id WHERE media.id=?', ['i', $_POST['item_id']]);
 		if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
 		if($stmt['rows'] < 1) { finalize($r2, ['disallowed_action', 'error']); }
@@ -453,6 +462,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 
 	// Define base variables
 	$status = 'planned';
+	$image_location = isset($item['image']) ? $item['image'] : '';
 	$name = trim($_POST['name']);
 	$score = 0;
 	$episodes = 0;
@@ -467,6 +477,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 	$links = '';
 	$adult = 0;
 	$favourite = 0;
+
 
 	// Validate status
 	if(array_key_exists('status', $_POST)) {
@@ -486,10 +497,49 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 		$score = score_normalize($score, $collection['rating_system']);
 	}
 
+	// Validate image
+	if(array_key_exists('image', $_FILES) && $_FILES['image']['name'] !== '') {
+		$image = $_FILES['image'];
+		if($image['size'] < 1) {
+			finalize($r2, ['generic', 'error', 'Uploaded file is invalid.']);
+		}
+		$ext = '.'.explode('.', $image['name'])[1];
+
+		$dir = 'upload/cover/';
+
+		function generate_random_characters($amount) {
+			$str = '';
+			$characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+			$i = 0;
+			while($i < $amount) {
+				$str = $str.$characters[mt_rand(0, strlen($characters) - 1)];
+				$i++;
+			}
+			return $str;
+		}
+
+		while(true) {
+			$filename = generate_random_characters(64);
+			$internal_image_location = PATH.$dir.$filename.$ext;
+			if(file_exists($internal_image_location)) {
+				continue;
+			}
+			break;
+		}
+
+		$image_location = '/'.$dir.$filename.$ext;
+
+		$uploaded = move_uploaded_file($image['tmp_name'], $internal_image_location);
+		if(!$uploaded) {
+			finalize($r2, ['blank', 'error', 'Something went wrong while uploading your image.']);
+		}
+	}
+
 
 	// Validate Episodes
 	if(array_key_exists('progress', $_POST)) {
-		$progress= (int)$_POST['progress'];
+		$progress = (int)$_POST['progress'];
 		if($progress < 0) {
 			finalize($r2, ['invalid_value', 'error']);
 		}
@@ -623,6 +673,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 				user_id,
 				collection_id,
 				status,
+				image,
 				name,
 				score,
 				episodes,
@@ -638,12 +689,13 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 				adult,
 				favourite
 			)
-			VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+			VALUES (?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 		', [
-			'iissiiiisssssssii',
+			'iisssiiiisssssssii',
 			$user['id'],
 			$collection['id'],
 			$status,
+			$image_location,
 			$name,
 			$score,
 			$episodes,
@@ -663,6 +715,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 		$stmt = sql('
 			UPDATE media SET
 				status=?,
+				image=?,
 				name=?,
 				score=?,
 				episodes=?,
@@ -679,8 +732,9 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 				favourite=?
 			WHERE id=?
 		', [
-			'ssiiiisssssssiii',
+			'sssiiiisssssssiii',
 			$status,
+			$image_location,
 			$name,
 			$score,
 			$episodes,
