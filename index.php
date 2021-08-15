@@ -41,6 +41,7 @@ $param_pages = [
 	'user',
 	'collection',
 	'account/settings',
+	'item/edit',
 	'item'
 ];
 foreach($param_pages as $pg) {
