@@ -111,12 +111,12 @@
 					<?php endif; ?>
 
 					<td class="table__cell">
+						<a href="/item/<?=$item['id']?>"><?=$item['name']?></a>
+
 						<?php if($collection['user_id'] === $user['id']) : ?>
-						<a class="js-item-edit" href="item/edit/<?=$item['id']?>&frame=1" onclick="editItem(<?=$item['id']?>)">
-							<?=$item['name']?>
+						<a class="js-item-edit" href="/item/edit/<?=$item['id']?>&frame=1" onclick="editItem(<?=$item['id']?>)" style="float:right;">
+							Edit
 						</a>
-						<?php else : ?>
-						<span><?=$item['name']?></span>
 						<?php endif; ?>
 					</td>
 
@@ -302,7 +302,7 @@
 				<h3 class="modal__header">
 					Add Item
 				</h3>
-				<form action="/interface/generic" method="POST">
+				<form id="collection-item-add" action="/interface/generic" method="POST" enctype="multipart/form-data">
 					<input type="hidden" name="action" value="collection_item_create">
 					<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 					<input type="hidden" name="collection_id" value="<?=$collection['id']?>">
@@ -318,15 +318,43 @@
 						</div>
 
 						<div class="item-fields__field">
-							<label class="label">Episodes</label>
+							<label class="label">Total Episodes</label>
 							<input class="input input--thin" name="episodes" type="number" min="0">
 						</div>
+						
 
-						<!--<div class="item-fields__field item-fields__field--date">
-							<label class="label">Media Release Date</label>
-							<input class="input input--auto" name="release_date" type="date">
-						</div>-->
+						<div class="item-fields__field">
+							<label class="label">Flags</label>
+							<div class="checkbox-group">
+								<label class="checkbox-group__item">
+									<input type="hidden" name="adult" value="0"> <!-- fallback value -->
+									<input class="checkbox" type="checkbox" name="adult" value="1">
+									Adult
+								</label>
+							</div>
+						</div>
 
+						<div class="item-fields__field">
+							<label class="label">Links</label>
+							
+							<input class="input" type="text" name="links[]">
+							
+							<div class="l-button-list">
+								<button type="button" id="js-add-input" class="l-button-list__button button">+</button>
+								<button type="button" id="js-remove-input" class="l-button-list__button button button--disabled" disabled="disabled">-</button>
+							</div>
+						</div>
+
+						<div class="item-fields__field">
+							<label class="label">Image</label>
+
+							<input class="file-upload" type="file" name="image">
+						</div>
+					</div>
+
+					<button type="button" class="button" onclick="toggleElement('advanced-item-fields')">Show/hide advanced</button>
+
+					<div id="advanced-item-fields" class="item-fields u-hidden">
 						<div class="item-fields__field item-fields__field--date">
 							<label class="label">Media Started At</label>
 							<input id="js-set-today-3" class="input input--auto" name="started_at" type="date">
@@ -338,42 +366,9 @@
 							<input id="js-set-today-4" class="input input--auto" name="finished_at" type="date">
 							<a class="subtext" onclick="setToday('js-set-today-4')">Today</a>
 						</div>
+					</div>
 
-						<!--<div class="item-fields__field">
-							<label class="label">Credits</label>
-							<input class="input" type="text" name="credits" required>
-						</div>-->
-
-						<!--<div class="item-fields__field">
-							<label class="label">Image</label>
-							<input type="file" name="image">
-						</div>--->
-
-						<div class="item-fields__field">
-							<label class="label">Flags</label>
-							<div class="checkbox-group">
-								<label class="checkbox-group__item">
-									<input type="hidden" name="adult" value="0"> <!-- fallback value -->
-									<input class="checkbox" type="checkbox" name="adult" value="1">
-									Adult
-								</label>
-
-								<label class="checkbox-group__item">
-									<input type="hidden" name="favourite" value="0"> <!-- fallback value -->
-									<input class="checkbox" type="checkbox" name="favourite" value="1">
-									Favourite
-								</label>
-							</div>
-						</div>
-
-						<div class="item-fields__field">
-							<label class="label">Links</label>
-							<input class="input" type="text" name="links[]">
-							<input class="input" type="text" name="links[]">
-							<input class="input" type="text" name="links[]">
-						</div>
-
-
+					<div class="item-fields">
 						<div class="item-fields__divider">
 							<span class="item-fields__header">User Data</span>
 						</div>
@@ -407,7 +402,7 @@
 
 						<div class="item-fields__field item-fields__field--date">
 							<label class="label">User Started At</label>
-							<input id="js-set-today-1" class="input input--auto" name="user_started_at" type="date">
+							<input id="js-set-today-1" class="input input--auto" name="user_started_at" type="date" max="">
 							<a class="subtext" onclick="setToday('js-set-today-1')">Today</a>
 						</div>
 
@@ -417,23 +412,38 @@
 							<a class="subtext" onclick="setToday('js-set-today-2')">Today</a>
 						</div>
 
+						<div class="item-fields__field">
+							<label class="label">Flags</label>
+							<div class="checkbox-group">
+								<label class="checkbox-group__item">
+									<input type="hidden" name="favourite" value="0"> <!-- fallback value -->
+									<input class="checkbox" type="checkbox" name="favourite" value="1">
+									Favourite
+								</label>
+								
+								<label class="checkbox-group__item">
+									<input type="hidden" name="private" value="0"> <!-- fallback value -->
+									<input class="checkbox" type="checkbox" name="private" value="1">
+									Private
+								</label>
+							</div>
+						</div>
+						
 						<div class="item-fields__divider"></div>
 
 						<div class="item-fields__field">
 							<label class="label">Comments</label>
-							<textarea class="text-input" name="comments"></textarea>
-						</div>
-
-						<div class="item-fields__divider"></div>
-
-						<div class="item-fields__field">
-							<input class="button button--spaced" type="submit" value="Add">
+							<textarea class="text-input js-autofill" name="comments" <?php if(isset($item['comments'])) { echo 'data-autofill="'.$item['comments'].'"'; } ?>></textarea>
 						</div>
 					</div>
 				</form>
 
-				<div>
-					Not implemented yet - search for other users' items to add
+				<div class="l-button-list">
+					<button form="collection-item-add" class="l-button-list__button button button--spaced" type="submit">Add</button>
+				</div>
+
+				<div class="dialog-box dialog-box--subcontent">
+					Not implemented yet - search for other users' items to take data from
 				</div>
 			</div>
 		</div>

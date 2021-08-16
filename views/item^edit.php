@@ -1,6 +1,6 @@
 <?php
 if(isset($_GET['id'])) {
-    $item = sql('SELECT id, user_id, collection_id, status, image, name, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments, links, adult, favourite FROM media WHERE id=? LIMIT 1', ['s', $_GET['id']]);
+    $item = sql('SELECT id, user_id, collection_id, status, image, name, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments, links, adult, favourite, private FROM media WHERE id=? LIMIT 1', ['s', $_GET['id']]);
 	if($item['rows'] < 1) {
 		finalize('/404');
 	}
@@ -150,6 +150,12 @@ if(isset($_GET['id'])) {
 							<input type="hidden" name="favourite" value="0"> <!-- fallback value -->
 							<input class="checkbox" type="checkbox" name="favourite" value="1" <?php if($item['favourite'] === 1) { echo 'checked'; } ?>>
 							Favourite
+						</label>
+						
+						<label class="checkbox-group__item">
+							<input type="hidden" name="private" value="0"> <!-- fallback value -->
+							<input class="checkbox" type="checkbox" name="private" value="1" <?php if($item['private'] === 1) { echo 'checked'; } ?>>
+							Private
 						</label>
 					</div>
 				</div>

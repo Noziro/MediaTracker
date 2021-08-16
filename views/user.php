@@ -37,7 +37,7 @@ if($user['id'] === $page_user['id']) {
 	$friendship = 0;
 }
 
-$activity = sql('SELECT user_id, type, media_id, body, created_at, updated_at FROM activity WHERE user_id=? ORDER BY created_at DESC', ['i', $page_user['id']]);
+$activity = sql('SELECT user_id, type, media_id, body, created_at, updated_at FROM activity WHERE user_id=? ORDER BY created_at DESC LIMIT 10', ['i', $page_user['id']]);
 
 function ceil_decimal(float $float, int $precision = 1) {
 	if($precision === 0) {
@@ -229,7 +229,7 @@ function ceil_decimal(float $float, int $precision = 1) {
 									break;
 							}
 						?>
-						<?=$item['name']?>
+						<a href="/item/<?=$item['id']?>"><?=$item['name']?></a>
 					</div>
 
 					<?php
@@ -392,7 +392,7 @@ function ceil_decimal(float $float, int $precision = 1) {
 					foreach($favs['result'] as $fav) :
 				?>
 
-				<div><?=$fav['name']?></div>
+				<div><a href="/item/<?=$fav['id']?>"><?=$fav['name']?></a></div>
 
 				<?php
 					endforeach;

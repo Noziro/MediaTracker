@@ -477,6 +477,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 	$links = '';
 	$adult = 0;
 	$favourite = 0;
+	$private = 0;
 
 
 	// Validate status
@@ -665,6 +666,13 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 		}
 	}
 
+	if(array_key_exists('private', $_POST)) {
+		$private = $_POST['private'];
+		if($private < 0 || $private > 1) {
+			finalize($r2, ['invalid_value', 'error']);
+		}
+	}
+
 
 	// Execute DB
 	if($action === "collection_item_create") {
@@ -687,11 +695,12 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 				comments,
 				links,
 				adult,
-				favourite
+				favourite,
+				private
 			)
-			VALUES (?, ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+			VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 		', [
-			'iisssiiiisssssssii',
+			'iisssiiiisssssssiii',
 			$user['id'],
 			$collection['id'],
 			$status,
@@ -709,7 +718,8 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 			$comments,
 			$links,
 			$adult,
-			$favourite
+			$favourite,
+			$private
 		]);
 	} elseif($action === "collection_item_edit") {
 		$stmt = sql('
@@ -729,10 +739,11 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 				comments=?,
 				links=?,
 				adult=?,
-				favourite=?
+				favourite=?,
+				private=?
 			WHERE id=?
 		', [
-			'sssiiiisssssssiii',
+			'sssiiiisssssssiiii',
 			$status,
 			$image_location,
 			$name,
@@ -749,6 +760,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 			$links,
 			$adult,
 			$favourite,
+			$private,
 			$_POST['item_id']
 		]);
 	}

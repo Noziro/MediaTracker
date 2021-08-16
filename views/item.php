@@ -10,15 +10,20 @@ if(!$stmt['result'] || $stmt['rows'] === 0) {
 }
 $item = $stmt['result'][0];
 
+if($item['deleted'] === 1) {
+	finalize('/404');
+}
+
+if($item['private'] === 1 && !$has_session ||
+   $item['private'] === 1 && $user['id'] !== $item['user_id']) {
+	finalize('/403');
+}
+
 $stmt = sql('SELECT id, user_id, name, type, private FROM collections WHERE id=?', ['s', $item['collection_id']]);
 if(!$stmt['result'] || $stmt['rows'] === 0) {
 	finalize('/404');
 }
 $collection = $stmt['result'][0];
-
-if($item['deleted'] === 1) {
-	finalize('/404');
-}
 ?>
 
 <main id="content" class="wrapper wrapper--content">
