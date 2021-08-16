@@ -1,6 +1,6 @@
 var addEle = document.getElementById('js-add-input');
 addEle.onclick = function(){
-	var inputs = document.querySelectorAll('input[name="links[]"]'),
+	var inputs = this.parentNode.parentNode.querySelectorAll('input[name="links[]"]'),
 		input = document.createElement('input');
 	input.type = 'text';
 	input.className = 'input';
@@ -17,7 +17,7 @@ addEle.onclick = function(){
 
 var removeEle = document.getElementById('js-remove-input');
 removeEle.onclick = function(){
-	var inputs = document.querySelectorAll('input[name="links[]"]'),
+	var inputs = this.parentNode.parentNode.querySelectorAll('input[name="links[]"]'),
 		lastInput = inputs.item(inputs.length - 1);
 	
 	if(inputs.length === 2) {
