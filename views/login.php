@@ -42,7 +42,7 @@
 		</div>
 		
 		<div class="login-flow__prompt">
-			Don't have an account? <a href="<?=FILEPATH?>register">Register here.</a>
+			Don't have an account? <a href="/register">Register here.</a>
 		</div>
 	</div>
 </main>

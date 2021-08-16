@@ -6,7 +6,6 @@ $pl_timer_start = hrtime(True);
 
 date_default_timezone_set('UTC');
 
-define("FILEPATH", "/");
 include "keyring.php";
 // keys.php contains potentially sensitive information such as the MYSQL_HOST/USER/PASS/DB/PORT variables.
 

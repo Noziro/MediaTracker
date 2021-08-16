@@ -33,24 +33,6 @@ else {
 	$url = substr($url, 1);
 }
 
-// Check for URLs with GET params
-$param_pages = [
-	'forum/board',
-	'forum/thread',
-	'user/social',
-	'user',
-	'collection',
-	'account/settings',
-	'item/edit',
-	'item'
-];
-foreach($param_pages as $pg) {
-	if(strpos($url, $pg) === 0) {
-		$url = $pg;
-		break;
-	}
-}
-
 // replaces all slashes with ^. This matches the file names in "views" folder
 $url = str_replace('/', '^', $url);
 
@@ -93,22 +75,22 @@ if($url_readable === '403' || $url_readable === '404' || $url_readable === '500'
 		<meta charset="utf-8">
 		<meta name="description" content="Placeholder">
 		<meta name="keywords" content="Placeholder">
-		<link rel="icon" type="image/png" href="<?=FILEPATH?>static/img/favicon.png">
-		<link rel="icon" type="image/png" href="<?=FILEPATH?>static/img/favicon-32.png" sizes="32x32">
-		<link rel="icon" type="image/png" href="<?=FILEPATH?>static/img/favicon-256.png" sizes="256x256">
+		<link rel="icon" type="image/png" href="/static/img/favicon.png">
+		<link rel="icon" type="image/png" href="/static/img/favicon-32.png" sizes="32x32">
+		<link rel="icon" type="image/png" href="/static/img/favicon-256.png" sizes="256x256">
 		
-		<link rel="stylesheet" href="<?=FILEPATH?>static/css/style.css">
+		<link rel="stylesheet" href="/static/css/style.css">
 		
 		<?php if (file_exists(PATH."static/css/".$file.".css")) : ?>
-		<link rel="stylesheet" href="<?=FILEPATH."static/css/".$file?>.css">
+		<link rel="stylesheet" href="<?="/static/css/".$file?>.css">
 		<?php endif ?>
 		
 		<?php if (file_exists(PATH."static/js/".$file.".js")) : ?>
-		<script type="text/javascript" src="<?=FILEPATH."static/js/".$file.".js"?>" defer></script>
+		<script type="text/javascript" src="<?="/static/js/".$file.".js"?>" defer></script>
 		<?php endif ?>
 		
-		<!--<script type="text/javascript" src="<?=FILEPATH?>static/js/jquery-3.3.1.min.js" async></script>-->
-		<script type="text/javascript" src="<?=FILEPATH?>static/js/scripts.js" defer></script>
+		<!--<script type="text/javascript" src="/static/js/jquery-3.3.1.min.js" async></script>-->
+		<script type="text/javascript" src="/static/js/scripts.js" defer></script>
 		
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,400i,600,600i|Roboto+Mono">
 		
@@ -127,15 +109,15 @@ if($url_readable === '403' || $url_readable === '404' || $url_readable === '500'
 		<nav id="nav" class="wrapper wrapper--site-nav">
 			<div class="wrapper__inner site-nav">
 				<div class="site-nav__section">
-					<a class="site-nav__identity" href="<?=FILEPATH?>">
+					<a class="site-nav__identity" href="/">
 						<?=$website?>
 					</a>
 				</div>
 				
 				<div class="site-nav__section">
-					<a class="site-nav__item" href="<?=FILEPATH?>browse">Browse</a>
-					<a class="site-nav__item" href="<?=FILEPATH?>forum">Forum</a>
-					<a class="site-nav__item" href="<?=FILEPATH?>groups">Groups</a>
+					<a class="site-nav__item" href="/browse">Browse</a>
+					<a class="site-nav__item" href="/forum">Forum</a>
+					<a class="site-nav__item" href="/groups">Groups</a>
 				</div>
 				
 				<div class="site-nav__section site-nav--search">
@@ -146,10 +128,10 @@ if($url_readable === '403' || $url_readable === '404' || $url_readable === '500'
 				<div class="site-nav__section">
 					<?php if($has_session) : ?>
 					
-					<a class="site-nav__item" href="<?=FILEPATH?>collection">Collection</a>
+					<a class="site-nav__item" href="/collection">Collection</a>
 					
 					<div class="dropdown notifications" style="display: none;">
-						<a class="site-nav__item" href="<?=FILEPATH?>collection">!</a>
+						<a class="site-nav__item" href="/collection">!</a>
 						
 						<div class="dropdown-menu list vertical">
 							Notifications -TODO-
@@ -157,11 +139,11 @@ if($url_readable === '403' || $url_readable === '404' || $url_readable === '500'
 					</div>
 					
 					<div class="dropdown profile">
-						<a class="site-nav__item" href="<?=FILEPATH."user/".$user["id"]?>"><?=$user["nickname"]?></a>
+						<a class="site-nav__item" href="<?="/user?u=".$user["id"]?>"><?=$user["nickname"]?></a>
 						
 						<div class="dropdown-menu list vertical">
-							<a class="site-nav__item" href="<?=FILEPATH."user/".$user["id"]?>">Profile</a>
-							<a class="site-nav__item" href="<?=FILEPATH?>account/settings">Settings</a>
+							<a class="site-nav__item" href="<?="/user?u=".$user["id"]?>">Profile</a>
+							<a class="site-nav__item" href="/account/settings">Settings</a>
 							
 							<form id="form-logout"style="display:none" action="/interface/session" method="POST">
 								<input type="hidden" name="action" value="logout">
@@ -178,8 +160,8 @@ if($url_readable === '403' || $url_readable === '404' || $url_readable === '500'
 						
 					<?php else : ?>
 					
-					<a class="site-nav__item" href="<?=FILEPATH?>login?return_to=<?=urlencode($_SERVER["REQUEST_URI"])?>">Login</a>
-					<a class="site-nav__item" href="<?=FILEPATH?>register">Register</a>
+					<a class="site-nav__item" href="/login?return_to=<?=urlencode($_SERVER["REQUEST_URI"])?>">Login</a>
+					<a class="site-nav__item" href="/register">Register</a>
 					
 					<?php endif ?>
 				</div>
@@ -292,7 +274,7 @@ if($url_readable === '403' || $url_readable === '404' || $url_readable === '500'
 				<div class="footer__section links">
 					<span class="footer__section-head"><?=$website.$domain?></span>
 					<!-- <span class="footer__item">A project by Noziro Red</span> -->
-					<a class="footer__item" href="<?=FILEPATH?>about">About</a>
+					<a class="footer__item" href="/about">About</a>
 					<a class="footer__item" href="mailto:nozirored@gmail.com?subject=<?=urlencode('Contacting about '.$website.$domain)?>">Contact</a>
 					<a class="footer__item" href="https://github.com/Noziro/MediaTracker">Source</a>
 				</div>

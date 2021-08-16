@@ -1,23 +1,24 @@
 <?php
+echo $url;
 // Check if user is set
 
-/*if(!isset($_GET["id"]) && !isset($_GET["name"]) {
+/*if(!isset($_GET["u"]) && !isset($_GET["n"]) {
 	header('Location: /404');
-} elseif(isset($_GET["id"]) && sql($db, "SELECT id FROM users WHERE id=?", "s", $_GET["id"])->num_rows < 1) {
+} elseif(isset($_GET["u"]) && sql($db, "SELECT id FROM users WHERE id=?", "s", $_GET["u"])->num_rows < 1) {
 	header('Location: /404');
-} elseif(isset($_GET["name"]) && sql($db, "SELECT username FROM users WHERE id=?", "s", $_GET["id"])->num_rows < 1) {
+} elseif(isset($_GET["name"]) && sql($db, "SELECT username FROM users WHERE id=?", "s", $_GET["u"])->num_rows < 1) {
 	header('Location: /404');
 }
-sql($db, "SELECT id, username FROM users WHERE id=?", "s", $_GET["id"])->num_rows < 1*/
+sql($db, "SELECT id, username FROM users WHERE id=?", "s", $_GET["u"])->num_rows < 1*/
 
-if(!isset($_GET["id"])) {
+if(!isset($_GET["u"])) {
 	if($has_session) {
 		$page_user__id = $user['id'];
 	} else {
 		finalize('/404');
 	}
 } else {
-	$page_user__id = $_GET["id"];
+	$page_user__id = $_GET["u"];
 }
 
 $page_user = sql('SELECT id, username, nickname, created_at, permission_level, about FROM users WHERE id=?', ['i', $page_user__id]);
@@ -79,12 +80,12 @@ function ceil_decimal(float $float, int $precision = 1) {
 			<div class="profile__section">
 				<span class="profile__section-header">Links</span>
 
-				<a class="profile__user-link profile__user-link--primary" href="<?=FILEPATH?>collection/user/<?=$page_user['id']?>">Collection</a>
-				<a class="profile__user-link profile__user-link--primary" href="<?=FILEPATH?>user/social?user=<?=$page_user['id']?>">Social</a>
+				<a class="profile__user-link profile__user-link--primary" href="/collection?u=<?=$page_user['id']?>">Collection</a>
+				<a class="profile__user-link profile__user-link--primary" href="/user/social?u=<?=$page_user['id']?>">Social</a>
 				<?php if($has_session && $user['id'] !== $page_user['id']) : ?>
 				<div class="c-divider"></div>
 				<a class="profile__user-link">Add Friend</a>
-				<a class="profile__user-link" href="<?=FILEPATH?>report?user=<?=$page_user['id']?>">Report</a>
+				<a class="profile__user-link" href="/report?user=<?=$page_user['id']?>">Report</a>
 				<?php endif ?>
 			</div>
 
@@ -229,7 +230,7 @@ function ceil_decimal(float $float, int $precision = 1) {
 									break;
 							}
 						?>
-						<a href="/item/<?=$item['id']?>"><?=$item['name']?></a>
+						<a href="/item?id=<?=$item['id']?>"><?=$item['name']?></a>
 					</div>
 
 					<?php
@@ -392,7 +393,7 @@ function ceil_decimal(float $float, int $precision = 1) {
 					foreach($favs['result'] as $fav) :
 				?>
 
-				<div><a href="/item/<?=$fav['id']?>"><?=$fav['name']?></a></div>
+				<div><a href="/item?id=<?=$fav['id']?>"><?=$fav['name']?></a></div>
 
 				<?php
 					endforeach;

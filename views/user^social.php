@@ -11,6 +11,8 @@ list forum posts etc here
 // 
 // 
 var_dump($_GET);
+var_dump($_SERVER['REQUEST_URI']);
+echo $url;
 ?>
 
 maybe friends too

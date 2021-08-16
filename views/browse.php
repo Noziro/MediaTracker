@@ -19,7 +19,7 @@
 			foreach($random_media as $media) :
 			?>
 
-			<a class="c-media" href="/item/<?=$media['id']?>">
+			<a class="c-media" href="/item?id=<?=$media['id']?>">
 				<div class="c-media__inner" <?php if(strlen($media['image']) > 0) : ?> style="background-image: url(<?=$media['image']?>)" <?php endif; ?>>
 					<?=$media['name']?>
 				</div>
@@ -38,7 +38,7 @@
 			?>
 
 			<div class="c-media-list__media">
-				<a href="/item/<?=$media['id']?>"><?=$media['name']?></a>
+				<a href="/item?id=<?=$media['id']?>"><?=$media['name']?></a>
 			</div>
 
 			<?php endforeach; ?>
@@ -50,7 +50,7 @@
 
 		<div class="content-header">
 			<div class="content-header__breadcrumb">
-				<a href="<?=FILEPATH."browse"?>">Browse</a> >
+				<a href="/browse">Browse</a> >
 				<span>Search Results</span>
 			</div>
 			<h2 class="content-header__title">Search Results</h2>
@@ -71,7 +71,7 @@
 			foreach($results as $media) :
 			?>
 
-			<a class="c-media" href="/item/<?=$media['id']?>">
+			<a class="c-media" href="/item?id=<?=$media['id']?>">
 				<div class="c-media__inner" <?php if(strlen($media['image']) > 0) : ?> style="background-image: url(<?=$media['image']?>)" <?php endif; ?>>
 					<?=$media['name']?>
 				</div>

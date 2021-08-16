@@ -410,7 +410,7 @@ elseif($action === 'collection_delete' || $action === 'collection_undelete') {
 	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
 
 	if($action === 'forum_thread_delete') {
-		$r2 = '/collection/user/'.$user['id'];
+		$r2 = '/collection/'.$user['id'];
 	}
 
 	finalize($r2, ['success']);

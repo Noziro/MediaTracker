@@ -76,7 +76,7 @@
 		</div>
 		
 		<div class="login-flow__prompt">
-			Already registered? <a href="<?=FILEPATH?>login">Login here.</a>
+			Already registered? <a href="/login">Login here.</a>
 		</div>
 	</div>
 </main>

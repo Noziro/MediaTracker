@@ -36,7 +36,7 @@ $boards = $sql['result'];
 				<?php foreach($boards as $board): ?>
 				<tr class="table__body-row table__body-row--spacious">
 					<td class="table__cell table__cell--extra-spacious">
-						<a href="<?=FILEPATH?>forum/board/<?=$board['id']?>">
+						<a href="/forum/board?id=<?=$board['id']?>">
 							<b class="forum-boards__board-title"><?=$board['name']?></b>
 						</a>
 						<p class="c-forum__board-description"><?=$board['description']?></p>
@@ -53,7 +53,7 @@ $boards = $sql['result'];
 						
 						<div class="c-forum__aside-item">
 							<b class="u-bold">
-								<a href="<?=FILEPATH."forum/thread/".$thread['id']?>"><?=htmlspecialchars($thread['title'])?></a>
+								<a href="<?="/forum/thread?id=".$thread['id']?>"><?=htmlspecialchars($thread['title'])?></a>
 							</b>
 							<br />
 							

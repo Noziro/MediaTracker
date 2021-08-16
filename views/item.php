@@ -87,7 +87,7 @@ $collection = $stmt['result'][0];
 		?>
 		<div>Added by an anonymous user</div>
 		<?php else : ?>
-		<div>Added by <a href="/user/<?=$item['user_id']?>"><?=$stmt['result'][0]['nickname']?></a></div>
+		<div>Added by <a href="/user?u=<?=$item['user_id']?>"><?=$stmt['result'][0]['nickname']?></a></div>
 		<?php endif; ?>
 	</div>
 </main>

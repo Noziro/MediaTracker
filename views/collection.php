@@ -1,8 +1,8 @@
 <main id="content" class="wrapper wrapper--content">
 	<div class="wrapper__inner">
 		<?php
-		if(isset($_GET['id'])) :
-		$collection = sql('SELECT id, user_id, name, type, display_image, display_score, display_progress, display_user_started, display_user_finished, display_days, rating_system, private, deleted FROM collections WHERE id=?', ['i', $_GET['id']]);
+		if(isset($_GET['c'])) :
+		$collection = sql('SELECT id, user_id, name, type, display_image, display_score, display_progress, display_user_started, display_user_finished, display_days, rating_system, private, deleted FROM collections WHERE id=?', ['i', $_GET['c']]);
 		if($collection['rows'] < 1) {
 			finalize('/404');
 		}
@@ -24,8 +24,8 @@
 
 		<div class="content-header">
 			<div class="content-header__breadcrumb">
-				<a href="<?=FILEPATH."user/".$page_user['id']?>"><?=$page_user['nickname']?></a> >
-				<a href="<?=FILEPATH."collection/user/".$page_user['id']?>">Collection</a> >
+				<a href="<?="/user?u=".$page_user['id']?>"><?=$page_user['nickname']?></a> >
+				<a href="<?="/collection?u=".$page_user['id']?>">Collection</a> >
 				<span><?=$collection['name']?></span>
 			</div>
 			
@@ -111,10 +111,10 @@
 					<?php endif; ?>
 
 					<td class="table__cell">
-						<a href="/item/<?=$item['id']?>"><?=$item['name']?></a>
+						<a href="/item?id=<?=$item['id']?>"><?=$item['name']?></a>
 
 						<?php if($collection['user_id'] === $user['id']) : ?>
-						<a class="js-item-edit" href="/item/edit/<?=$item['id']?>&frame=1" onclick="editItem(<?=$item['id']?>)" style="float:right;">
+						<a class="js-item-edit" href="/item?id=edit?id=<?=$item['id']?>&frame=1" onclick="editItem(<?=$item['id']?>)" style="float:right;">
 							Edit
 						</a>
 						<?php endif; ?>
@@ -467,11 +467,11 @@
 
 		<?php
 		// If user is not specified, redirect to own page.
-		elseif(!isset($_GET['user']) && $has_session || isset($_GET['user'])) :
-			if(!isset($_GET['user'])) {
+		elseif(!isset($_GET['u']) && $has_session || isset($_GET['u'])) :
+			if(!isset($_GET['u'])) {
 				$page_user__id = $user['id'];
 			} else {
-				$page_user__id = $_GET['user'];
+				$page_user__id = $_GET['u'];
 			}
 
 			$stmt = sql('SELECT id, nickname FROM users WHERE id=?', ['i', $page_user__id]);
@@ -494,7 +494,7 @@
 
 		<div class="content-header">
 			<div class="content-header__breadcrumb">
-				<a href="<?=FILEPATH."user/".$page_user['id']?>"><?=$page_user['nickname']?></a> >
+				<a href="<?="/user?u=".$page_user['id']?>"><?=$page_user['nickname']?></a> >
 				<span>Collection</span>
 			</div>
 			
@@ -553,7 +553,7 @@
 
 				<tr class="table__body-row">
 					<td class="table__cell">
-						<a class="u-bold" href="/collection/<?=$collection['id']?>">
+						<a class="u-bold" href="/collection?c=<?=$collection['id']?>">
 							<?=$collection['name']?>
 						</a>
 					</td>
@@ -602,7 +602,7 @@
 
 				<tr class="table__body-row">
 					<td class="table__cell">
-						<a class="u-bold" href="/collection/<?=$collection['id']?>">
+						<a class="u-bold" href="/collection?c=<?=$collection['id']?>">
 							<?=$collection['name']?>
 						</a>
 					</td>

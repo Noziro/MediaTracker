@@ -35,7 +35,7 @@ if(isset($_GET["page"])) {
 	<div class="wrapper__inner">
 		<div class="content-header">
 			<div class="content-header__breadcrumb">
-				<a href="<?=FILEPATH."forum"?>">Forum</a> >
+				<a href="/forum">Forum</a> >
 				<span><?=$board['name']?></span>
 			</div>
 			
@@ -136,7 +136,7 @@ if(isset($_GET["page"])) {
 				<?php foreach($threads['result'] as $thread): ?>
 				<tr class="table__body-row">
 					<td class="table__cell">
-						<a href="<?=FILEPATH?>forum/thread/<?=$thread['id']?>">
+						<a href="/forum/thread?id=<?=$thread['id']?>">
 							<b class="table__body-row-title"><?=htmlspecialchars($thread['title'])?></b>
 						</a>
 						<p class="c-forum__thread-description">
@@ -150,7 +150,7 @@ if(isset($_GET["page"])) {
 							$thread_user = sql("SELECT id, nickname FROM users WHERE id=?", ["s", $thread['user_id']])['result'][0];
 							?>
 
-							<a href="<?=FILEPATH."user/".$thread_user['id']?>">
+							<a href="<?="/user?u=".$thread_user['id']?>">
 								<?=$thread_user['nickname']?>
 							</a>
 
@@ -182,10 +182,10 @@ if(isset($_GET["page"])) {
 								<?=readable_date($thread['updated_at'])?>
 							</span>
 							by
-							<a class="user" href="<?=FILEPATH."user/".$post_user['id']?>">
+							<a class="user" href="<?="/user?u=".$post_user['id']?>">
 								<?=$post_user['nickname']?>
 							</a>
-							<a class="goto-reply" href="<?=FILEPATH."forum/thread/".$thread['id']."#reply-".$reply['id']?>">
+							<a class="goto-reply" href="<?="/forum/thread?id=".$thread['id']."#reply-".$reply['id']?>">
 								>>
 							</a>
 						</div>
