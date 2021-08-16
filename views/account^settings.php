@@ -15,11 +15,11 @@ $user = array_merge($user, $user_extra['result'][0]);
 		<div class="split__section split__section--sidebar">
 			<span class="split__sidebar-header">Settings</span>
 
-			<a class="split__sidebar-item" href="/accounts/settings?section=profile">Profile</a>
-			<a class="split__sidebar-item" href="/accounts/settings?section=security">Security</a>
-			<a class="split__sidebar-item" href="/accounts/settings?section=privacy">Privacy</a>
-			<a class="split__sidebar-item" href="/accounts/settings?section=preferences">Preferences</a>
-			<a class="split__sidebar-item" href="/accounts/settings?section=data">Data</a>
+			<a class="split__sidebar-item" href="/account/settings?section=profile">Profile</a>
+			<a class="split__sidebar-item" href="/account/settings?section=security">Security</a>
+			<a class="split__sidebar-item" href="/account/settings?section=privacy">Privacy</a>
+			<a class="split__sidebar-item" href="/account/settings?section=preferences">Preferences</a>
+			<a class="split__sidebar-item" href="/account/settings?section=data">Data</a>
 		</div>
 		
 

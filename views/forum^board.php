@@ -21,14 +21,10 @@ if(isset($_GET["id"])) {
 
 $total_threads = reset(sql('SELECT COUNT(id) FROM threads WHERE board_id=? AND deleted=0', ['i', $board['id']])['result'][0]);
 
-$pagination_offset = 15;
+$pg = new Pagination();
+$pg->Setup(15, $total_threads);
 
-if(isset($_GET["page"])) {
-	$pagination_offset_current = ($_GET['page'] - 1) * $pagination_offset;
-	$threads = sql("SELECT id, user_id, title, created_at, updated_at, anonymous FROM threads WHERE board_id=? AND deleted=0 ORDER BY updated_at DESC LIMIT ?, ?", ["iii", $board['id'], $pagination_offset_current, $pagination_offset]);
-} else {
-	$threads = sql("SELECT id, user_id, title, created_at, updated_at, anonymous FROM threads WHERE board_id=? AND deleted=0 ORDER BY updated_at DESC LIMIT 20", ["i", $board['id']]);
-}
+$threads = sql("SELECT id, user_id, title, created_at, updated_at, anonymous FROM threads WHERE board_id=? AND deleted=0 ORDER BY updated_at DESC LIMIT ?, ?", ["iii", $board['id'], $pg->offset, $pg->increment]);
 ?>
 
 <main id="content" class="wrapper wrapper--content">
@@ -46,7 +42,7 @@ if(isset($_GET["page"])) {
 
 		
 		
-		<?php if($has_session || $total_threads > $pagination_offset) : ?>
+		<?php if($has_session || $pg->total > $pg->increment) : ?>
 		<div class="page-actions">
 			<?php if($has_session) : ?>
 			<div class="page-actions__button-list">
@@ -55,48 +51,10 @@ if(isset($_GET["page"])) {
 				</button>
 			</div>
 			<?php endif ?>
-			
-			<?php if($total_threads > $pagination_offset) : ?>
-			<div class="page-actions__pagination">
-				Page: 
-				
-				<?php
-				$pagination_pages = ceil($total_threads / $pagination_offset);
-				
-				// Replaces all "page=#" from URL query 
-				$normalized_query = preg_replace("/\&page\=.+?(?=(\&|$))/", "", $_SERVER['QUERY_STRING']);
-				
-				if($pagination_pages < 8) :
-				
-				$i = 0;
-				while($i < $pagination_pages) :
-				$i++;
-				?>
-				
-				<a class="page-actions__pagination-link" href="?<?=$normalized_query.'&page='.$i?>">
-					<?=$i?>
-				</a>
-				
-				<?php endwhile; elseif($pagination_pages >= 8) :
-				
-				$pages = [1, 2, 3, 4, $pagination_pages-2, $pagination_pages-1, $pagination_pages];
-				
-				foreach($pages as $p) :
-				
-				if($p === 4) { echo ' … '; }
-				else {
-				?>
-				
-				<a class="page-actions__pagination-link" href="?<?=$normalized_query.'&page='.$p?>">
-					<?=$p?>
-				</a>
-				
-				<?php } endforeach; endif ?>
-			</div>
-			<?php endif ?>
+
+			<?php $pg->Generate(); ?>
 		</div>
-		<?php endif ?>
-		
+		<?php endif; ?>
 
 
 		<?php

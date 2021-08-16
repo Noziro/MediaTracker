@@ -23,14 +23,10 @@ if(isset($_GET["id"])) {
 
 $total_replies = reset(sql('SELECT COUNT(id) FROM replies WHERE thread_id=? AND deleted=0', ['i', $thread['id']])['result'][0]);
 
-$pagination_offset = 20;
+$pg = new Pagination();
+$pg->Setup(15, $total_replies);
 
-if(isset($_GET["page"])) {
-	$pagination_offset_current = ($_GET['page'] - 1) * $pagination_offset;
-	$replies = sql('SELECT id, user_id, body, created_at, updated_at, deleted FROM replies WHERE thread_id=? ORDER BY created_at ASC LIMIT ?, ?', ['iii', $thread['id'], $pagination_offset_current, $pagination_offset]);
-} else {
-	$replies = sql('SELECT id, user_id, body, created_at, updated_at, deleted FROM replies WHERE thread_id=? ORDER BY created_at ASC LIMIT 20', ['i', $thread['id']]);
-}
+$replies = sql('SELECT id, user_id, body, created_at, updated_at, deleted FROM replies WHERE thread_id=? ORDER BY created_at ASC LIMIT ?, ?', ['iii', $thread['id'], $pg->offset, $pg->increment]);
 ?>
 
 
@@ -52,7 +48,7 @@ if(isset($_GET["page"])) {
 		
 		
 		
-		<?php if($has_session && $permission_level >= $permission_levels['Moderator'] || $thread['locked'] === 0 || $total_replies > $pagination_offset) : ?>
+		<?php if($has_session && $permission_level >= $permission_levels['Moderator'] || $thread['locked'] === 0 || $pg->total > $pg->increment) : ?>
 		<div class="page-actions">
 			<?php if($permission_levels['Moderator'] || $thread['locked'] === 0) : ?>
 			<div class="page-actions__button-list">
@@ -113,44 +109,7 @@ if(isset($_GET["page"])) {
 			</div>
 			<?php endif; ?>
 
-			<?php if($total_replies > $pagination_offset) : ?>
-			<div class="page-actions__pagination">
-				Page: 
-				
-				<?php
-				$pagination_pages = ceil($total_replies / $pagination_offset);
-				
-				// Replaces all "page=#" from URL query 
-				$normalized_query = preg_replace("/\&page\=.+?(?=(\&|$))/", "", $_SERVER['QUERY_STRING']);
-				
-				if($pagination_pages < 8) :
-				
-				$i = 0;
-				while($i < $pagination_pages) :
-				$i++;
-				?>
-				
-				<a class="page-actions__pagination-link" href="board?<?=$normalized_query.'&page='.$i?>">
-					<?=$i?>
-				</a>
-				
-				<?php endwhile; elseif($pagination_pages >= 8) :
-				
-				$pages = [1, 2, 3, 4, $pagination_pages-2, $pagination_pages-1, $pagination_pages];
-				
-				foreach($pages as $p) :
-				
-				if($p === 4) { echo ' … '; }
-				else {
-				?>
-				
-				<a class="page-actions__pagination-link" href="board?<?=$normalized_query.'&page='.$p?>">
-					<?=$p?>
-				</a>
-				
-				<?php } endforeach; endif ?>
-			</div>
-			<?php endif ?>
+			<?php $pg->Generate(); ?>
 		</div>
 		<?php endif ?>
 		

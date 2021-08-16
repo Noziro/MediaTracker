@@ -1,5 +1,4 @@
 <?php
-echo $url;
 // Check if user is set
 
 /*if(!isset($_GET["u"]) && !isset($_GET["n"]) {
@@ -38,7 +37,27 @@ if($user['id'] === $page_user['id']) {
 	$friendship = 0;
 }
 
-$activity = sql('SELECT user_id, type, media_id, body, created_at, updated_at FROM activity WHERE user_id=? ORDER BY created_at DESC LIMIT 10', ['i', $page_user['id']]);
+// This is a clusterfuck but for now it has to do
+$total_activity = reset(sql('
+	SELECT COUNT(activity.user_id)
+	FROM activity
+	INNER JOIN media ON activity.media_id = media.id
+	INNER JOIN collections ON media.collection_id = collections.id
+	WHERE activity.user_id=? AND media.private <= ? AND collections.private <= ?',
+	['iii', $page_user['id'], $friendship, $friendship])['result'][0]);
+
+$pg = new Pagination();
+$pg->Setup(10, $total_activity);
+$activity = sql('
+	SELECT activity.user_id, activity.user_id, activity.type, activity.media_id, activity.body, activity.created_at, activity.updated_at, media.private AS media_private, collections.private AS collection_private
+	FROM activity
+	INNER JOIN media ON activity.media_id = media.id
+	INNER JOIN collections ON media.collection_id = collections.id
+	WHERE activity.user_id=? AND media.private <= ? AND collections.private <= ?
+	ORDER BY created_at DESC
+	LIMIT ?, ?',
+	['iiiii', $page_user['id'], $friendship, $friendship, $pg->offset, $pg->increment]);
+
 
 function ceil_decimal(float $float, int $precision = 1) {
 	if($precision === 0) {
@@ -187,18 +206,21 @@ function ceil_decimal(float $float, int $precision = 1) {
 			<?php endif; ?>
 
 			<div class="profile__section">
+				<?php $pg->Generate() ?>
+				
 				<span class="profile__section-header">Activity</span>
-
-				<!-- TODO - need pagination here -->
 
 				<?php
 				$i = 0;
 				if($activity['rows'] > 0) :
 					foreach($activity['result'] as $activity) :
+						if($activity['media_private'] > $friendship || $activity['collection_private'] > $friendship) {
+							continue;
+						}
 						if(isset($activity['media_id'])) :
-							$stmt = sql('SELECT media.id, media.collection_id, media.name, media.progress, collections.private FROM media INNER JOIN collections ON media.collection_id = collections.id WHERE media.id=?', ['i', $activity['media_id']]);
+							$stmt = sql('SELECT media.id, media.collection_id, media.name, media.progress FROM media WHERE media.id=?', ['i', $activity['media_id']]);
 							$item = $stmt['result'][0];
-							if(!$stmt['result'] || $item['private'] > $friendship) {
+							if(!$stmt['result']) {
 								continue;
 							}
 
@@ -253,7 +275,7 @@ function ceil_decimal(float $float, int $precision = 1) {
 					endif;
 					?>
 
-					<?php if($item['private'] > 0) : ?>
+					<?php if($activity['media_private'] > 0 || $activity['collection_private'] > 0) : ?>
 					<div class="c-activity__actions">
 						<span class="c-activity__tag">
 							Private
@@ -328,15 +350,6 @@ function ceil_decimal(float $float, int $precision = 1) {
 					', ['i', $page_user['id']], ['assoc' => false]);
 				$stat_avg_score = round($stmt['result'][0][0] ?? 0, 2);
 
-				$stmt = sql('
-						SELECT AVG(score)
-						FROM media
-						WHERE user_id = ?
-						AND status = "completed"
-						AND score != 0
-					', ['i', $page_user['id']], ['assoc' => false]);
-				$stat_avg_cmpl_score = round($stmt['result'][0][0] ?? 0, 2);
-
 				?>
 
 				<div class="c-stats">
@@ -372,13 +385,6 @@ function ceil_decimal(float $float, int $precision = 1) {
 						<span class="c-stats__title">Avg. Score</span>
 						<span class="c-stats__number">
 							<?=$stat_avg_score?>
-						</span>
-					</div>
-
-					<div class="c-stats__stat">
-						<span class="c-stats__title">Avg. CMPL Score</span>
-						<span class="c-stats__number">
-							<?=$stat_avg_cmpl_score?>
 						</span>
 					</div>
 				</div>

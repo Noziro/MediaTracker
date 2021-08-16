@@ -46,7 +46,19 @@
 
 
 
-		<?php elseif($_GET['name']) : ?>
+		<?php elseif(isset($_GET['name'])) :
+
+		$stmt = sql('SELECT COUNT(id) FROM media WHERE name LIKE ? AND private=0 AND deleted=0', ['s', '%'.$_GET['name'].'%']);
+		if(!$stmt['result']) { finalize('/browse', [$stmt['response_code'], $stmt['response_type']]); }
+		$total = reset($stmt['result'][0]);
+
+		$pg = new Pagination();
+		$pg->Setup(30, $total);
+
+		$stmt = sql('SELECT id, name, image FROM media WHERE name LIKE ? AND private=0 AND deleted=0 LIMIT ?, ?', ['sii', '%'.$_GET['name'].'%', $pg->offset, $pg->increment]);
+		if(!$stmt['result']) { finalize('/browse', [$stmt['response_code'], $stmt['response_type']]); }
+		$search = $stmt;
+		?>
 
 		<div class="content-header">
 			<div class="content-header__breadcrumb">
@@ -56,18 +68,21 @@
 			<h2 class="content-header__title">Search Results</h2>
 		</div>
 
+		<?php if($pg->total > $pg->increment) : ?>
+		<div class="page-actions">
+			<?php $pg->Generate() ?>
+		</div>
+		<?php endif; ?>
+
 		<div class="c-media-browse">
 			<?php
-			$stmt = sql('SELECT id, name, image FROM media WHERE name LIKE ? AND private=0 AND deleted=0 LIMIT 20', ['s', '%'.$_GET['name'].'%']);
-			if(!$stmt['result']) { finalize('/browse', [$stmt['response_code'], $stmt['response_type']]); }
-			
-			if($stmt['rows'] < 1) :
+			if($search['rows'] < 1) :
 
 			echo 'No results.';
 
 			else:
 
-			$results = $stmt['result'];
+			$results = $search['result'];
 			foreach($results as $media) :
 			?>
 
@@ -80,6 +95,12 @@
 			<?php endforeach; endif; ?>
 		</div>
 
-		<?php endif; ?>
+		<?php
+		else :
+
+		//finalize('/browse', ['invalid_value']);
+
+		endif;
+		?>
 	</div>
 </main>
