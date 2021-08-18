@@ -26,6 +26,69 @@ if(isset($_POST['return_to'])) {
 
 
 
+// FUNCTIONS
+
+function generate_random_characters($amount, $characters = '0123456789abcdefghijklmnopqrstuvwxyz') {
+	$str = '';
+
+	$i = 0;
+	while($i < $amount) {
+		$str = $str.$characters[mt_rand(0, strlen($characters) - 1)];
+		$i++;
+	}
+	return $str;
+}
+
+// Stores an image uploaded via POST that was fetched from $_FILES
+// Returns a dictionary with the results
+// [
+//     "outcome" => true/false
+//     "url" => 'url string'
+//     "error" => [response_code, response_type, details]
+// ]
+function upload_image($image, $subdir = '') {
+	$returnval = [
+		'outcome' => false,
+		'url' => '',
+		'error' => []
+	];
+	
+	if(!empty($subdir)) {
+		$dir = 'upload/'.$subdir.'/';
+	} else {
+		$dir = 'upload/';
+	}
+
+	if($image['size'] < 1) {
+		$returnval['error'] = ['blank', 'error', 'Uploaded file is invalid.'];
+	}
+	$ext = '.'.explode('.', $image['name'])[1];
+
+	while(true) {
+		$filename = generate_random_characters(64);
+		$internal_image_location = PATH.$dir.$filename.$ext;
+		if(file_exists($internal_image_location)) {
+			continue;
+		}
+		break;
+	}
+
+	$image_location = '/'.$dir.$filename.$ext;
+	
+	$uploaded = move_uploaded_file($image['tmp_name'], $internal_image_location);
+	if(!$uploaded) {
+		$returnval['error'] = ['blank', 'error', 'Something went wrong while uploading your image.'];
+	} else {
+		$returnval['outcome'] = true;
+		$returnval['url'] = $image_location;
+	}
+
+	return $returnval;
+}
+
+
+
+
 // ACTIONS
 
 if($action === "forum_thread_create") {
@@ -498,45 +561,15 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 		$score = score_normalize($score, $collection['rating_system']);
 	}
 
-	// Validate image
+	// Validate and upload image
 	if(array_key_exists('image', $_FILES) && $_FILES['image']['name'] !== '') {
-		$image = $_FILES['image'];
-		if($image['size'] < 1) {
-			finalize($r2, ['generic', 'error', 'Uploaded file is invalid.']);
-		}
-		$ext = '.'.explode('.', $image['name'])[1];
-
-		$dir = 'upload/cover/';
-
-		function generate_random_characters($amount) {
-			$str = '';
-			$characters = '0123456789abcdefghijklmnopqrstuvwxyz';
-
-			$i = 0;
-			while($i < $amount) {
-				$str = $str.$characters[mt_rand(0, strlen($characters) - 1)];
-				$i++;
-			}
-			return $str;
-		}
-
-		while(true) {
-			$filename = generate_random_characters(64);
-			$internal_image_location = PATH.$dir.$filename.$ext;
-			if(file_exists($internal_image_location)) {
-				continue;
-			}
-			break;
-		}
-
-		$image_location = '/'.$dir.$filename.$ext;
-
-		$uploaded = move_uploaded_file($image['tmp_name'], $internal_image_location);
-		if(!$uploaded) {
-			finalize($r2, ['blank', 'error', 'Something went wrong while uploading your image.']);
+		$uploaded = upload_image($_FILES['image'], 'cover');
+		if(!$uploaded['outcome']) {
+			finalize($r2, $uploaded['error']);
+		} else {
+			$image_location = $uploaded['url'];
 		}
 	}
-
 
 	// Validate Episodes
 	if(array_key_exists('progress', $_POST)) {
@@ -895,12 +928,40 @@ elseif($action === 'change_settings') {
 		$about = $_POST['about'];
 
 		// If value not the same as before
-		if($about !== $user_extra['about']) {
+		if($about !== $user_extra['result'][0]['about']) {
 			// If valid, continue
 			$to_update['users'][] = [
 				'column' => 'about',
 				'type' => 's',
 				'value' => $about
+			];
+		}
+	}
+
+	// PROFILE IMAGE
+	if(array_key_exists('profile_image', $_FILES) && $_FILES['profile_image']['name'] !== '') {
+		$uploaded = upload_image($_FILES['profile_image'], 'profile');
+		if(!$uploaded['outcome']) {
+			$error_list[] = $uploaded['error'];
+		} else {
+			$to_update['users'][] = [
+				'column' => 'profile_image',
+				'type' => 's',
+				'value' => $uploaded['url']
+			];
+		}
+	}
+
+	// BANNER IMAGE
+	if(array_key_exists('banner_image', $_FILES) && $_FILES['banner_image']['name'] !== '') {
+		$uploaded = upload_image($_FILES['banner_image'], 'profile_banner');
+		if(!$uploaded['outcome']) {
+			$error_list[] = $uploaded['error'];
+		} else {
+			$to_update['users'][] = [
+				'column' => 'banner_image',
+				'type' => 's',
+				'value' => $uploaded['url']
 			];
 		}
 	}

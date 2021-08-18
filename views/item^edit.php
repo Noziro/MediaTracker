@@ -74,12 +74,12 @@ if(isset($_GET['id'])) {
 
 				<div class="item-fields__field">
 					<label class="label">Image</label>
-					
+
 					<?php if(!empty($item['image'])) : ?>
 					<img src="<?=$item['image']?>" style="width: 30px; height: 30px; object-fit: cover;" />
 					<?php endif; ?>
 
-					<input class="file-upload" type="file" name="image">
+					<input class="file-upload" type="file" name="image" accept=".jpg,.png">
 				</div>
 			</div>
 

@@ -20,7 +20,7 @@ if(!isset($_GET["u"])) {
 	$page_user__id = $_GET["u"];
 }
 
-$page_user = sql('SELECT id, username, nickname, created_at, permission_level, about FROM users WHERE id=?', ['i', $page_user__id]);
+$page_user = sql('SELECT id, username, nickname, created_at, permission_level, profile_image, banner_image, about FROM users WHERE id=?', ['i', $page_user__id]);
 
 if($page_user['rows'] < 1) {
 	header('Location: /404');
@@ -72,6 +72,7 @@ function ceil_decimal(float $float, int $precision = 1) {
 
 <!-- TODO: Fix classes. Having two BEM blocks layered on top of each other is disgusting -->
 <div class="wrapper banner <?php
+if(empty($page_user['banner_image'])) {
 	$patterns = ['plaid', 'stripes-left', 'stripes-right', 'diamonds', 'half-square'];
 	echo "banner--pattern-".$patterns[rand(1,count($patterns)) - 1];
 	
@@ -79,8 +80,20 @@ function ceil_decimal(float $float, int $precision = 1) {
 
 	$palettes = 5;
 	echo "banner--palette-".rand(1,$palettes);
-?>">
+	echo '"';
+} else {
+	echo '" style="background-image:url(';
+
+	echo $page_user['banner_image'];
+
+	echo ');"';
+}
+?>>
 	<div class="wrapper__inner banner__contents">
+		<?php if(!empty($page_user['profile_image'])) : ?>
+		<img class="profile-image" src="<?=$page_user['profile_image']?>">
+		<?php endif; ?>
+
 		<div class="content-header">
 			<h2 class="content-header__title">
 				<?php $rank = sql('SELECT title FROM permission_levels WHERE permission_level <= ? ORDER BY permission_level DESC LIMIT 1', ['i', $page_user['permission_level']])['result'][0]['title']; ?>

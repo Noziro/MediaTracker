@@ -7,6 +7,14 @@
 	--profile-colour: var(--accent-1);
 }
 
+.profile-image {
+	position: relative;
+	top: -8px;
+	left: 8px;
+	width: 100px;
+	height: 100px;
+}
+
 .profile__column {
 	display: flex;
 	width: 25%;

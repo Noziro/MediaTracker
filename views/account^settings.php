@@ -25,7 +25,7 @@ $user = array_merge($user, $user_extra['result'][0]);
 
 
 		<div class="split__section split__section--primary">
-			<form id="form-settings" style="display:none" action="/interface/generic" method="POST">
+			<form id="form-settings" style="display:none" action="/interface/generic" method="POST" enctype="multipart/form-data">
 				<input type="hidden" name="action" value="change_settings">
 				<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 			</form>
@@ -52,7 +52,21 @@ $user = array_merge($user, $user_extra['result'][0]);
 				spellcheck="true"
 				data-autofill="<?=$user['about']?>"></textarea>
 
-			<span class="settings__notice">Avatar & banner functionality will come in the future.</span>
+			<label class="settings__label label">Change profile image</label>
+			
+			<?php if(!empty($user['profile_image'])) : ?>
+			<img src="<?=$user['profile_image']?>" style="width: 30px; height: 30px; object-fit: cover;" />
+			<?php endif; ?>
+			<input class="file-upload" type="file" name="profile_image" accept=".jpg,.png" form="form-settings">
+
+			<label class="settings__label label">Change banner image</label>
+			
+			<?php if(!empty($user['banner_image'])) : ?>
+			<img src="<?=$user['banner_image']?>" style="width: 30px; height: 30px; object-fit: cover;" />
+			<?php endif; ?>
+			<input class="file-upload" type="file" name="banner_image" accept=".jpg,.png" form="form-settings">
+
+			<br /><br />
 
 			<div class="settings__button l-button-list">
 				<button form="form-settings" class="settings__button button" type="submit">
