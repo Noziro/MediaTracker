@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 13, 2021 at 06:13 AM
+-- Generation Time: Aug 18, 2021 at 03:26 AM
 -- Server version: 10.3.16-MariaDB
 -- PHP Version: 7.3.6
 
@@ -86,7 +86,7 @@ CREATE TABLE `media` (
   `collection_id` int(11) NOT NULL,
   `status` tinytext NOT NULL,
   `name` tinytext NOT NULL,
-  `image` varchar(2048) NOT NULL,
+  `image` tinytext NOT NULL,
   `score` int(3) DEFAULT 0,
   `episodes` smallint(6) DEFAULT 0,
   `progress` smallint(6) NOT NULL DEFAULT 0,
@@ -96,14 +96,15 @@ CREATE TABLE `media` (
   `release_date` date DEFAULT NULL,
   `started_at` date DEFAULT NULL,
   `finished_at` date DEFAULT NULL,
+  `description` text NOT NULL,
   `comments` text NOT NULL,
   `credits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `storage` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `links` longtext CHARACTER SET armscii8 COLLATE armscii8_bin NOT NULL,
   `adult` tinyint(1) NOT NULL DEFAULT 0,
   `favourite` tinyint(1) NOT NULL,
   `private` tinyint(1) NOT NULL,
-  `deleted` tinyint(1) NOT NULL
+  `deleted` tinyint(1) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
@@ -113,6 +114,19 @@ DELIMITER $$
 CREATE TRIGGER `new_media` BEFORE INSERT ON `media` FOR EACH ROW SET NEW.`status` = CASE WHEN NEW.status = '' THEN 'planned' ELSE NEW.status END
 $$
 DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `media_name`
+--
+
+CREATE TABLE `media_name` (
+  `media_id` int(15) NOT NULL,
+  `type` tinytext NOT NULL,
+  `name` tinytext NOT NULL,
+  `is_default` tinyint(1) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -188,6 +202,8 @@ CREATE TABLE `users` (
   `password` varchar(255) NOT NULL,
   `permission_level` int(2) NOT NULL DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `profile_image` tinytext NOT NULL,
+  `banner_image` tinytext NOT NULL,
   `about` text NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
