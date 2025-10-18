@@ -20,7 +20,6 @@ CREATE TABLE `activity` (
   `user_id` int(11) NOT NULL,
   `type` tinyint NOT NULL DEFAULT 0,
   `media_id` int(15) DEFAULT NULL,
-  `body` text NOT NULL DEFAULT '',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;

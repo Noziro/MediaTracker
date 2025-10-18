@@ -55,7 +55,7 @@ $total_activity = reset(sql('
 $pg = new Pagination();
 $pg->Setup(10, $total_activity);
 $activity = sql('
-	SELECT activity.user_id, activity.user_id, activity.type, activity.media_id, activity.body, activity.created_at, activity.updated_at, media.private AS media_private, collections.private AS collection_private
+	SELECT activity.user_id, activity.user_id, activity.type, activity.media_id, activity.created_at, activity.updated_at, media.private AS media_private, collections.private AS collection_private
 	FROM activity
 	INNER JOIN media ON activity.media_id = media.id
 	INNER JOIN collections ON media.collection_id = collections.id
@@ -287,18 +287,6 @@ if(empty($page_user['banner_image'])) {
 					<div class="c-activity__date">
 						<?=readable_date($activity['created_at'])?>
 					</div>
-
-					<?php
-					if($activity['body'] !== '') :
-					?>
-					
-					<div class="c-activity__body">
-						<?=$activity['body']?>
-					</div>
-
-					<?php
-					endif;
-					?>
 
 					<?php if($activity['media_private'] > 0 || $activity['collection_private'] > 0) : ?>
 					<div class="c-activity__actions">
