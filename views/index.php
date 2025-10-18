@@ -6,14 +6,5 @@
 			<span class="split__sidebar-header">(Friend) Activity Feed</span>
 			<br /><br />
 		</div>
-
-
-
-		<div class="split__section split__section--sidebar">
-			<span class="split__sidebar-header">Announcements</span>
-			<br /><br />
-			<span class="split__sidebar-header">Recent Threads</span>
-			<br /><br />
-		</div>
 	</div>
 </main>

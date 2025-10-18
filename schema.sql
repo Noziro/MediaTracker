@@ -28,21 +28,6 @@ CREATE TABLE `activity` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `boards`
---
-
-CREATE TABLE `boards` (
-  `id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `description` tinytext NOT NULL,
-  `display_order` int(2) NOT NULL,
-  `permission_level` int(2) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `collections`
 --
 
@@ -123,22 +108,6 @@ CREATE TABLE `permission_levels` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `replies`
---
-
-CREATE TABLE `replies` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `thread_id` int(11) NOT NULL,
-  `body` text NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `deleted` tinyint NOT NULL DEFAULT 0
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
 -- Table structure for table `sessions`
 --
 
@@ -151,22 +120,6 @@ CREATE TABLE `sessions` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
-
---
--- Table structure for table `threads`
---
-
-CREATE TABLE `threads` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `board_id` int(11) NOT NULL,
-  `title` tinytext NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `locked` tinyint NOT NULL DEFAULT 0,
-  `deleted` tinyint NOT NULL DEFAULT 0,
-  `anonymous` tinyint NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
@@ -210,13 +163,6 @@ ALTER TABLE `activity`
   ADD KEY `user_id` (`user_id`);
 
 --
--- Indexes for table `boards`
---
-ALTER TABLE `boards`
-  ADD UNIQUE KEY `id` (`id`),
-  ADD UNIQUE KEY `display_order` (`display_order`);
-
---
 -- Indexes for table `collections`
 --
 ALTER TABLE `collections`
@@ -237,24 +183,10 @@ ALTER TABLE `permission_levels`
   ADD UNIQUE KEY `permission_level` (`permission_level`);
 
 --
--- Indexes for table `replies`
---
-ALTER TABLE `replies`
-  ADD UNIQUE KEY `id` (`id`),
-  ADD KEY `deleted` (`deleted`);
-
---
 -- Indexes for table `sessions`
 --
 ALTER TABLE `sessions`
   ADD UNIQUE KEY `id` (`id`);
-
---
--- Indexes for table `threads`
---
-ALTER TABLE `threads`
-  ADD UNIQUE KEY `id` (`id`),
-  ADD KEY `deleted` (`deleted`);
 
 --
 -- Indexes for table `users`
@@ -274,12 +206,6 @@ ALTER TABLE `user_preferences`
 --
 
 --
--- AUTO_INCREMENT for table `boards`
---
-ALTER TABLE `boards`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT for table `collections`
 --
 ALTER TABLE `collections`
@@ -290,18 +216,6 @@ ALTER TABLE `collections`
 --
 ALTER TABLE `media`
   MODIFY `id` int(15) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `replies`
---
-ALTER TABLE `replies`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT for table `threads`
---
-ALTER TABLE `threads`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`

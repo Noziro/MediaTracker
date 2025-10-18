@@ -1036,31 +1036,6 @@ html {
 	margin: 20px 0;
 }
 
-/* FORUM */
-
-
-
-.forum-boards__board-title {
-	font-size: 18px;
-	font-weight: 600;
-}
-
-.c-forum__thread-description {
-	margin: 6px 0 0;
-}
-
-.c-forum__board-description {
-	margin: 8px 0 0;
-}
-
-.c-forum__aside-item ~ .c-forum__aside-item {
-	margin-top: 8px;
-}
-
-.c-forum__aside-description {
-	margin-top: 3px;
-	font-size: 12px;
-}
 
 .site-rank {
 	display: inline-block;

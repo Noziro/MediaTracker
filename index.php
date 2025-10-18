@@ -1,7 +1,5 @@
 <?php
-# Temp until site name is decided
-$website = "Collections";
-$domain = ".com";
+define("SITE_NAME", "MediaTracker");
 
 
 
@@ -55,9 +53,6 @@ if( $has_session && $url_readable === 'login'
 	) {
 	finalize('/');
 }
-if( $url_readable === 'groups' ) {
-	finalize('/404');
-}
 
 // TODO - this is rather garbage. Better to redirect all number error codes in .htaccess to error.php or something
 if($url_readable === '403' || $url_readable === '404' || $url_readable === '500') {
@@ -74,7 +69,7 @@ if($url_readable === '403' || $url_readable === '404' || $url_readable === '500'
 <html lang="en" class="t-light">
 	<head>
 		<title><?php
-			echo $website . " - ";
+			echo SITE_NAME . " - ";
 			if($url == "index") {
 				echo "Track Your Collections!";
 			} else {
@@ -119,14 +114,12 @@ if($url_readable === '403' || $url_readable === '404' || $url_readable === '500'
 			<div class="wrapper__inner site-nav">
 				<div class="site-nav__section">
 					<a class="site-nav__identity" href="/">
-						<?=$website?>
+						<?=SITE_NAME?>
 					</a>
 				</div>
 				
 				<div class="site-nav__section">
 					<a class="site-nav__item" href="/browse">Browse</a>
-					<a class="site-nav__item" href="/forum">Forum</a>
-					<a class="site-nav__item" href="/groups">Groups</a>
 				</div>
 				
 				<div class="site-nav__section site-nav--search">
@@ -281,10 +274,9 @@ if($url_readable === '403' || $url_readable === '404' || $url_readable === '500'
 		<footer id="footer" class="wrapper wrapper--footer">
 			<div class="wrapper__inner footer">
 				<div class="footer__section links">
-					<span class="footer__section-head"><?=$website.$domain?></span>
+					<span class="footer__section-head"><?=SITE_NAME?></span>
 					<!-- <span class="footer__item">A project by Noziro Red</span> -->
 					<a class="footer__item" href="/about">About</a>
-					<a class="footer__item" href="mailto:nozirored@gmail.com?subject=<?=urlencode('Contacting about '.$website.$domain)?>">Contact</a>
 					<a class="footer__item" href="https://github.com/Noziro/MediaTracker">Source</a>
 				</div>
 				

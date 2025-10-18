@@ -269,7 +269,7 @@ $user = array_merge($user, $user_extra['result'][0]);
 
 				<label for="parser-in-house" class="checkbox">
 					<input id="parser-in-house" type="radio" name="parser" value="in_house">
-					<?=$website.$domain?>
+					<?=SITE_NAME?>
 				</label>
 
 				<label for="parser-mal" class="checkbox">

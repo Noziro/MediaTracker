@@ -17,21 +17,6 @@ SET time_zone = "+00:00";
 /*!40101 SET NAMES utf8mb4 */;
 
 --
--- Database: `collections`
---
-
---
--- Dumping data for table `boards`
---
-
-INSERT INTO `boards` (`id`, `name`, `description`, `display_order`, `permission_level`) VALUES
-(1, 'General', 'For all your discussion needs.', 2, 0),
-(2, 'Site Feedback', 'Give a suggestion or tell us how we\'re doing.', 3, 0),
-(3, 'Support', 'Gain help with issues and report bugs.', 4, 0),
-(4, 'Announcements', 'Official announcements from the staff.', 1, 0),
-(5, 'Admin Discussion', 'A place to regroup.', 5, 95);
-
---
 -- Dumping data for table `permission_levels`
 --
 

@@ -125,7 +125,7 @@ if(empty($page_user['banner_image'])) {
 				<span class="profile__section-header">Links</span>
 
 				<a class="profile__user-link profile__user-link--primary" href="/collection?u=<?=$page_user['id']?>">Collection</a>
-				<a class="profile__user-link profile__user-link--primary" href="/user/social?u=<?=$page_user['id']?>">Social</a>
+				<!-- TODO: List friends here -->
 				<?php if($has_session && $user['id'] !== $page_user['id']) : ?>
 				<div class="c-divider"></div>
 				<a class="profile__user-link">Add Friend</a>
