@@ -4,7 +4,7 @@ var $navObj = document.getElementById('nav');
 var $navLimit = 18;
 
 document.body.onscroll = function() {
-	if(window.scrollY >= $navLimit) {
+	if( window.scrollY >= $navLimit ){
 		$navObj.classList.add('js-fixed');
 	} else {
 		$navObj.classList.remove('js-fixed');
@@ -37,7 +37,7 @@ function acceptGDPR() {
 }
 
 var gdpr = document.getElementById('gdpr-accept')
-if (gdpr) {
+if( gdpr ){
 	gdpr.onclick = acceptGDPR;
 }
 
@@ -47,11 +47,11 @@ if (gdpr) {
 function toggleElement(id, mode = null) {
 	var ele = document.getElementById(id);
 
-	if(mode === null) {
+	if( mode === null ){
 		ele.classList.toggle('u-hidden');
-	} else if(mode === true) {
+	} else if( mode === true ){
 		ele1.classList.remove('u-hidden');
-	} else if(mode === false) {
+	} else if( mode === false ){
 		ele.classList.add('u-hidden');
 	}
 }
@@ -62,16 +62,16 @@ function toggleElement(id, mode = null) {
 function toggleModal(id, mode = null) {
 	var modal = document.getElementById(id);
 
-	if(mode === null) {
+	if( mode === null ){
 		modal.classList.toggle('modal--hidden');
-	} else if(mode === true) {
+	} else if( mode === true ){
 		modal.classList.remove('modal--hidden');
 		// set focus to point designated by HTML, if one exists
 		var $new_focus = modal.querySelector('.js-modal-focus');
-		if($new_focus) {
+		if( $new_focus ){
 			$new_focus.focus();
 		}
-	} else if(mode === false) {
+	} else if( mode === false ){
 		modal.classList.add('modal--hidden');
 	}
 }
@@ -91,11 +91,11 @@ function modalConfirmation($msg, $action, $data = '', $value = '', $post = '/int
 // Autofill Forms
 
 var fills = document.getElementsByClassName('js-autofill');
-for(var i = 0; i < fills.length; i++) {
+for( var i = 0; i < fills.length; i++ ){
 	var fillEle = fills.item(i),
 		fillValue = fillEle.getAttribute('data-autofill');
 
-	if(fillValue !== null) {
+	if( fillValue !== null ){
 		fillEle.value = fillValue;
 		fillEle.removeAttribute('data-autofill');
 	}

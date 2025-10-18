@@ -3,7 +3,7 @@ var items = document.getElementsByClassName('js-item-edit'),
 	modalName = 'modal--item-edit',
 	modalInsert = document.querySelector(`#${modalName} .modal__inner`);
 
-for(var i = 0; i < items.length; i++) {
+for( var i = 0; i < items.length; i++ ){
 	var item = items.item(i);
 
 	item.removeAttribute('href');
@@ -11,7 +11,7 @@ for(var i = 0; i < items.length; i++) {
 
 function editItem(id) {
 	var frame = document.getElementById('js-editframe');
-	if(frame) {
+	if( frame ){
 		frame.remove();
 	}
 
@@ -35,7 +35,7 @@ addEle.onclick = function(){
 	var lastInput = inputs.item(inputs.length - 1);
 	lastInput.insertAdjacentElement('afterend', input);
 
-	if(inputs.length === 1) {
+	if( inputs.length === 1 ){
 		removeEle.removeAttribute('disabled');
 		removeEle.classList.remove('button--disabled');
 	}
@@ -46,7 +46,7 @@ removeEle.onclick = function(){
 	var inputs = this.parentNode.parentNode.querySelectorAll('input[name="links[]"]'),
 		lastInput = inputs.item(inputs.length - 1);
 	
-	if(inputs.length === 2) {
+	if( inputs.length === 2 ){
 		lastInput.remove();
 		removeEle.disabled = 'disabled';
 		removeEle.classList.add('button--disabled');

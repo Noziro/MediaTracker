@@ -9,7 +9,7 @@ addEle.onclick = function(){
 	var lastInput = inputs.item(inputs.length - 1);
 	lastInput.insertAdjacentElement('afterend', input);
 
-	if(inputs.length === 1) {
+	if( inputs.length === 1 ){
 		removeEle.removeAttribute('disabled');
 		removeEle.classList.remove('button--disabled');
 	}
@@ -20,7 +20,7 @@ removeEle.onclick = function(){
 	var inputs = this.parentNode.parentNode.querySelectorAll('input[name="links[]"]'),
 		lastInput = inputs.item(inputs.length - 1);
 	
-	if(inputs.length === 2) {
+	if( inputs.length === 2 ){
 		lastInput.remove();
 		removeEle.disabled = 'disabled';
 		removeEle.classList.add('button--disabled');

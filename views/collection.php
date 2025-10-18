@@ -3,14 +3,14 @@
 		<?php
 		if(isset($_GET['c'])) :
 		$collection = sql('SELECT id, user_id, name, type, display_image, display_score, display_progress, display_user_started, display_user_finished, display_days, rating_system, private, deleted FROM collections WHERE id=?', ['i', $_GET['c']]);
-		if($collection['rows'] < 1) {
+		if( $collection->row_count < 1 ){
 			finalize('/404');
 		}
-		$collection = $collection['result'][0];
+		$collection = $collection->rows[0];
 
 		$items = sql('SELECT id, status, name, image, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments, favourite FROM media WHERE collection_id=? AND deleted=0 ORDER BY status ASC, name ASC', ['i', $collection['id']]);
 
-		$page_user = sql('SELECT id, nickname FROM users WHERE id=?', ['i', $collection['user_id']])['result'][0];
+		$page_user = sql('SELECT id, nickname FROM users WHERE id=?', ['i', $collection['user_id']])->rows[0];
 
 		$columns = [
 			'display_image' => 'Image',
@@ -59,7 +59,7 @@
 
 
 		<?php
-		if($items['rows'] < 1) :
+		if($items->row_count < 1) :
 		?>
 
 		<div class="dialog-box dialog-box--fullsize">No items yet. Add one?</div>
@@ -96,7 +96,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				<?php foreach($items['result'] as $item) : ?>
+				<?php foreach($items->rows as $item) : ?>
 
 				<tr id="item-<?=$item['id']?>" class="table__body-row">
 
@@ -124,13 +124,13 @@
 
 					<td class="table__cell">
 						<?php
-						if($item['score'] !== 0) {
+						if( $item['score'] !== 0 ){
 							echo score_extrapolate($item['score'], $collection['rating_system']);
 						} else {
 							echo "-";
 						}
 
-						if($item['favourite'] === 1) {
+						if( $item['favourite'] === 1 ){
 							echo " ♥";
 						}
 						?>
@@ -144,13 +144,13 @@
 						$t = $item['episodes'];
 						$r = $item['rewatched'];
 
-						if($w === $t) {
+						if( $w === $t ){
 							echo $t;
 						} else {
 							echo $w.' / '.$t;
 						}
 
-						if($r > 0) {
+						if( $r > 0 ){
 							echo '<br />Rewatched: '.$r / $t.'x ('.$r.'eps)';
 						}
 						?>
@@ -175,18 +175,18 @@
 						$started = $item['user_started_at'];
 						$ended = $item['user_finished_at'];
 
-						if(isset($started) && isset($ended)) {
+						if( isset($started) && isset($ended) ){
 							$days = date_diff(date_create($started),date_create($ended))->format('%a');
-							if($days < 1) {
+							if( $days < 1 ){
 								$days = 1;
 							}
 							echo $days;
-						} elseif(isset($started)) {
+						} elseif( isset($started) ){
 							$days = date_diff(date_create($started),date_create())->format('%a');
-							if(date_create($started) > date_create()) {
+							if( date_create($started) > date_create() ){
 								echo 'N/A';
 							} else {
-								if($days < 1) {
+								if( $days < 1 ){
 									$days = 1;
 								}
 								echo '>'.$days;
@@ -239,14 +239,14 @@
 					<label class="label">Type</label>
 					<select class="select" name="type">
 						<?php foreach($valid_coll_types as $type) : ?>
-						<option <?php if($type === $collection['type']) { echo "selected"; } ?>><?=$type?></option>
+						<option <?php if( $type === $collection['type'] ){ echo "selected"; } ?>><?=$type?></option>
 						<?php endforeach; ?>
 					</select>
 
 					<label class="label">Privacy</label>
 					<select class="select" name="private">
-						<option value="0" <?php if($collection['private'] === 0) { echo "selected"; } ?>>Public</option>
-						<option value="9" <?php if($collection['private'] === 9) { echo "selected"; } ?>>Only Me</option>
+						<option value="0" <?php if( $collection['private'] === 0 ){ echo "selected"; } ?>>Public</option>
+						<option value="9" <?php if( $collection['private'] === 9 ){ echo "selected"; } ?>>Only Me</option>
 					</select>
 
 					<label class="label">Display Columns</label>
@@ -256,7 +256,7 @@
 						?>
 						<label class="checkbox-group__item">
 							<input type="hidden" name="<?=$col?>" value="0">
-							<input class="checkbox" type="checkbox" name="<?=$col?>" value="1" <?php if($collection[$col] === 1) { echo "checked"; } ?>>
+							<input class="checkbox" type="checkbox" name="<?=$col?>" value="1" <?php if( $collection[$col] === 1 ){ echo "checked"; } ?>>
 							<?=$label?>
 						</label>
 						<?php endforeach; ?>
@@ -273,10 +273,10 @@
 							100 => '100 Point'
 						];
 
-						foreach($rating_systems as $value => $label) {
+						foreach( $rating_systems as $value => $label ){
 							echo '<option value="'.$value.'"';
 							
-							if($value === $collection['rating_system']) {
+							if( $value === $collection['rating_system'] ){
 								echo 'selected';
 							}
 
@@ -374,7 +374,7 @@
 							<label class="label">Status</label>
 							<select class="select" type="text" name="status" required>
 								<?php foreach($valid_status as $status) : ?>
-								<option <?php if($status === 'completed') { echo "selected"; }?>><?=$status?></option>
+								<option <?php if( $status === 'completed' ){ echo "selected"; }?>><?=$status?></option>
 								<?php endforeach; ?>
 							</select>
 						</div>
@@ -430,7 +430,7 @@
 
 						<div class="item-fields__field">
 							<label class="label">Comments</label>
-							<textarea class="text-input js-autofill" name="comments" <?php if(isset($item['comments'])) { echo 'data-autofill="'.$item['comments'].'"'; } ?>></textarea>
+							<textarea class="text-input js-autofill" name="comments" <?php if( isset($item['comments']) ){ echo 'data-autofill="'.$item['comments'].'"'; } ?>></textarea>
 						</div>
 					</div>
 				</form>
@@ -465,17 +465,17 @@
 		<?php
 		// If user is not specified, redirect to own page.
 		elseif(!isset($_GET['u']) && $has_session || isset($_GET['u'])) :
-			if(!isset($_GET['u'])) {
+			if( !isset($_GET['u']) ){
 				$page_user__id = $user['id'];
 			} else {
 				$page_user__id = $_GET['u'];
 			}
 
 			$stmt = sql('SELECT id, nickname FROM users WHERE id=?', ['i', $page_user__id]);
-			if(!$stmt['result'] || $stmt['rows'] < 1) { finalize('/404'); }
-			$page_user = $stmt['result'][0];
+			if( !$stmt->ok || $stmt->row_count < 1 ){ finalize('/404'); }
+			$page_user = $stmt->rows[0];
 
-			if($user['id'] === $page_user['id']) {
+			if( $user['id'] === $page_user['id'] ){
 				// TODO - once friend system implemented, move this to a function
 				// such as evaluate_friendship($user1, $user2) and have more nuance to levels
 				$friendship = 9;
@@ -527,7 +527,7 @@
 
 
 		<?php
-		if($collections['rows'] < 1) :
+		if($collections->row_count < 1) :
 		?>
 
 		<div class="dialog-box dialog-box--fullsize">No collections yet. Create one?</div>
@@ -546,7 +546,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				<?php foreach($collections['result'] as $collection) : ?>
+				<?php foreach($collections->rows as $collection) : ?>
 
 				<tr class="table__body-row">
 					<td class="table__cell">
@@ -556,7 +556,7 @@
 					</td>
 					<td class="table__cell">
 						<?php
-						echo reset(sql('SELECT COUNT(id) FROM media WHERE collection_id=?', ['i', $collection['id']])['result'][0]);
+						echo reset(sql('SELECT COUNT(id) FROM media WHERE collection_id=?', ['i', $collection['id']])->rows[0]);
 						?>
 					</td>
 					<td class="table__cell">
@@ -580,7 +580,7 @@
 
 
 		<?php
-		if($deleted_collections['rows'] > 0 && $user['id'] === $page_user['id']) :
+		if($deleted_collections->row_count > 0 && $user['id'] === $page_user['id']) :
 		?>
 
 		<h2 class="c-heading">Deleted Collections</h2>
@@ -595,7 +595,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				<?php foreach($deleted_collections['result'] as $collection) : ?>
+				<?php foreach($deleted_collections->rows as $collection) : ?>
 
 				<tr class="table__body-row">
 					<td class="table__cell">
@@ -605,7 +605,7 @@
 					</td>
 					<td class="table__cell">
 						<?php
-						echo reset(sql('SELECT COUNT(id) FROM media WHERE collection_id=?', ['i', $collection['id']])['result'][0]);
+						echo reset(sql('SELECT COUNT(id) FROM media WHERE collection_id=?', ['i', $collection['id']])->rows[0]);
 						?>
 					</td>
 					<td class="table__cell">
@@ -680,7 +680,7 @@
 
 
 
-		<?php if($has_session && $user['id'] === $page_user['id']) {
+		<?php if( $has_session && $user['id'] === $page_user['id'] ){
 			include PATH.'server/includes/modal-confirmation.inc';
 		} ?>
 	</div>

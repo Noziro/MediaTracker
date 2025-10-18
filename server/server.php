@@ -1,21 +1,24 @@
 <?php
 
+define("SITE_NAME", "MediaTracker");
+define("SQL_CREDENTIALS", [
+	'host' => getenv('DB_HOST') ?: 'localhost',
+	'user' => getenv('DB_USER') ?: 'mediatracker',
+	'pass' => getenv('DB_PASSWORD') ?: 'change_me',
+	'dbname' => getenv('DB_DATABASE') ?: 'mediatracker',
+	'port' => getenv('DB_PORT') ? intval(getenv('DB_PORT')) : 3306
+]);
+
 $pl_timer_start = hrtime(True);
 
 // GLOBAL VARIABLES
 
 date_default_timezone_set('UTC');
 
-$host = getenv('DB_HOST') ?: 'localhost';
-$user = getenv('DB_USER') ?: 'mediatracker';
-$pass = getenv('DB_PASSWORD') ?: 'change_me';
-$dbname = getenv('DB_DATABASE') ?: 'mediatracker';
-$port = getenv('DB_PORT') ? intval(getenv('DB_PORT')) : 3306;
-
-$db = new mysqli($host, $user, $pass, $dbname, $port);
+$db = new mysqli(...array_values(SQL_CREDENTIALS));
 
 $result = $db->query("SHOW TABLES LIKE 'collections'");
-if (!$result || !$result->fetch_assoc()) {
+if( !$result || !$result->fetch_assoc() ){
 	include_once(__DIR__.'/schema.php');
 }
 
@@ -35,14 +38,14 @@ session_start();
 // GENERIC FUNCTIONS
 
 function pretty_print($var) {
-	if( gettype($var) === 'array' || gettype($var) === 'object' ) {
+	if( gettype($var) === 'array' || gettype($var) === 'object' ){
 		echo '<pre>'.print_r($var, True).'</pre>';
 	}
-	elseif( gettype($var) === 'boolean' ) {
+	elseif( gettype($var) === 'boolean' ){
 		echo $var ? 'true' : 'false';
 	}
-	elseif( gettype($var) === 'integer' ) {
-		echo $var ? 'true' : 'false';
+	elseif( gettype($var) === 'integer' ){
+		echo $var;
 	}
 	else {
 		echo $var;
@@ -77,15 +80,15 @@ class Authentication {
 
 		// Check user exists & get info
 		$stmt = sql('SELECT id, username, password FROM users WHERE username=?', ['s', $post_name_normalized]);
-		if(!$stmt['result'] || $stmt['rows'] < 1) {
+		if( !$stmt->ok || $stmt->row_count < 1 ){
 			return false;
 		}
 		
-		$user = $stmt['result'][0];
+		$user_data = $stmt->rows[0];
 		
 		// Validate password
-		$valid = password_verify($post_pass, $user['password']);
-		if (!$valid) {
+		$valid = password_verify($post_pass, $user_data['password']);
+		if( !$valid ){
 			return false;
 		}
 
@@ -98,8 +101,8 @@ class Authentication {
 		$user_ip = $_SERVER['REMOTE_ADDR'];
 
 		// Create new user session
-		$stmt = sql('INSERT INTO sessions (id, user_id, expiry, user_ip) VALUES (?, ?, ?, ?)', ['siis', $session, $user['id'], $expiry, $user_ip]);
-		if(!$stmt['result']) {
+		$stmt = sql('INSERT INTO sessions (id, user_id, expiry, user_ip) VALUES (?, ?, ?, ?)', ['siis', $session, $user_data['id'], $expiry, $user_ip]);
+		if( !$stmt->ok ){
 			return false;
 		}
 		
@@ -113,7 +116,7 @@ class Authentication {
 
 		// Check for existence & get info
 		$stmt = sql('SELECT id FROM users WHERE username=?', ['s', $post_name_normalized]);
-		if( $stmt['result'] === false || $stmt['rows'] > 0 ){
+		if( !$stmt->ok || $stmt->row_count > 0 ){
 			return false;
 		}
 		
@@ -132,12 +135,12 @@ class Authentication {
 	
 	// Function used internally to check if visitor has an active user session. Returns BOOL.
 	public function is_logged_in() {
-		if (!array_key_exists('session', $_COOKIE)) {
+		if( !array_key_exists('session', $_COOKIE) ){
 			return false;
 		}
 		$session = sql('SELECT expiry FROM sessions WHERE id=?', ['s', $_COOKIE['session']]);
-		if($session['rows'] > 0) {
-			if($session['result'][0]['expiry'] < time()) {
+		if( $session->row_count > 0 ){
+			if( $session->rows[0]['expiry'] < time() ){
 				sql('DELETE FROM sessions WHERE id=?', ['s', $_COOKIE['session']]);
 				setcookie('session', '', time() - 3600);
 				return false;
@@ -150,39 +153,40 @@ class Authentication {
 	
 	// Gets info about current user. Used after checking if they are logged in with is_logged_in(). Returns SQL_ASSOC or FALSE
 	public function get_current_user() {
+		# TODO: double check that this is not abusable with an expired session token
 		$stmt = sql('SELECT users.id, users.username, users.nickname, users.email, users.permission_level FROM users INNER JOIN sessions ON sessions.user_id = users.id WHERE sessions.id=?', ['s', $_COOKIE['session']]);
 
-		if (!$stmt['result'] || $stmt['rows'] < 1) {
+		if( !$stmt->ok || $stmt->row_count < 1 ){
 			return false;
 		} else {
-			return $stmt['result'][0];
+			return $stmt->rows[0];
 		}
 	}
 
-	public function get_current_user_prefs() {
+	public function get_current_user_prefs(): array {
 		$stmt = sql('SELECT * FROM user_preferences INNER JOIN sessions ON sessions.user_id = user_preferences.user_id WHERE sessions.id=?', ['s', $_COOKIE['session']]);
 		
-		if (!$stmt['result'] || $stmt['rows'] < 1) {
-			return false;
+		if( !$stmt->ok || $stmt->row_count < 1 ){
+			return [];
 		} else {
-			return $stmt['result'][0];
+			return $stmt->rows[0];
 		}
 	}
 	
 	// Logs out user via wiping their session. Provies option for wiping only your session or all sessions. Returns BOOL on success/failure.
 	public function logout($logout_all = false) {
-		if (!array_key_exists('session', $_COOKIE)) {
+		if( !array_key_exists('session', $_COOKIE) ){
 			return false;
 		}
 		
 		// Remove session from the database
-		if($logout_all) {
+		if( $logout_all ){
 			$user = $this->get_current_user();
 			$stmt = sql('DELETE FROM sessions WHERE user_id=?', ['s', $user['id']]);
 		} else {
 			$stmt = sql('DELETE FROM sessions WHERE id=?', ['s', $_COOKIE['session']]);
 		}
-		if(!$stmt['result']) {
+		if( !$stmt->ok ){
 			return false;
 		}
 		
@@ -197,7 +201,7 @@ class Authentication {
 		$id = bin2hex(random_bytes(16));
 		
 		// If ID exists, get new one
-		if (sql('SELECT id FROM sessions WHERE id=?', ['s', $id])['rows'] > 0) {
+		if( sql('SELECT id FROM sessions WHERE id=?', ['s', $id])->row_count > 0 ){
 			$id = generate_session_id();
 		}
 		
@@ -224,7 +228,7 @@ class Pagination {
 	}
 
 	public function Generate() {
-		if($this->total <= $this->increment) {
+		if( $this->total <= $this->increment ){
 			return false;
 		}
 
@@ -236,7 +240,7 @@ class Pagination {
 		// Begin HTML
 		echo '<div class="page-actions__pagination">Page:';
 				
-		if($pages < 8) {
+		if( $pages < 8 ){
 			$i = 0;
 			while($i < $pages) {
 				$o = $i * $this->increment;
@@ -249,8 +253,8 @@ class Pagination {
 			$current_page = ceil($this->offset / $this->increment) + 1;
 			$pages_to_display = [1, $current_page, $pages];
 			$nearby_pages = [$current_page - 2, $current_page - 1, $current_page + 1, $current_page + 2];
-			foreach($nearby_pages as $p) {
-				if($p > 1 && $p < $pages) {
+			foreach( $nearby_pages as $p ){
+				if( $p > 1 && $p < $pages ){
 					array_push($pages_to_display, $p);
 				}
 			}
@@ -260,10 +264,10 @@ class Pagination {
 			
 			$previous_page = 0;
 			
-			foreach($pages_to_display as $page) {
+			foreach( $pages_to_display as $page ){
 				$offset = ($page - 1) * $this->increment;
 
-				if($page - 1 != $previous_page) {
+				if( $page - 1 != $previous_page ){
 					echo ' … ';
 				}
 				
@@ -283,8 +287,8 @@ class Pagination {
 function valid_name(string $str) {
 	$okay = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_";
 
-	foreach(str_split($str) as $c) {
-		if(strpos($okay, $c) === False) {
+	foreach( str_split($str) as $c ){
+		if( strpos($okay, $c) === False ){
 			return False;
 		}
 	}
@@ -296,26 +300,26 @@ function valid_name(string $str) {
 
 $auth = new Authentication();
 $has_session = $auth->is_logged_in();
-
-if($has_session) {
+if( $has_session ){
 	$user = $auth->get_current_user();
 	$prefs = $auth->get_current_user_prefs();
 	$permission_level = $user['permission_level'];
 } else {
-	$user = False;
+	$user = [];
+	$prefs = [];
 	$permission_level = 0;
-	$prefs = [
-		'timezone' => 'UTC'
-	];
+}
+if( !isset($prefs['timezone']) ){
+	$prefs['timezone'] = 'UTC';
 }
 
 // ACCESS LEVEL
 
-$permission_levels_temp = sql('SELECT title, permission_level FROM permission_levels ORDER BY permission_level ASC')['result'];
+$stmt = sql('SELECT title, permission_level FROM permission_levels ORDER BY permission_level ASC');
 $permission_levels = [];
 
-if( gettype($permission_levels_temp) === 'array' && count($permission_levels_temp) > 0 ){	
-	foreach($permission_levels_temp as $perm_pair) {
+if( $stmt->row_count > 0 ){	
+	foreach( $stmt->rows as $perm_pair ){
 		$title = $perm_pair['title'];
 		$level = $perm_pair['permission_level'];
 		
@@ -783,11 +787,12 @@ $valid_timezones = [
 // Get user timezone
 function utc_date_to_user($utc, $hour = true) {
 	global $prefs;
+	$preferred_timezone = isset($prefs['timezone']) ? $prefs['timezone'] : 'UTC';
 	$timezone_utc = new DateTimeZone('UTC');
-	$timezone = new DateTimeZone($prefs['timezone']);
+	$timezone = new DateTimeZone($preferred_timezone);
 	$date = new DateTime($utc, $timezone_utc);
 	$date->setTimezone($timezone);
-	if($hour) {
+	if( $hour ){
 		$format = 'Y-m-d H:i:s O';
 	} else {
 		$format = 'Y-m-d O';
@@ -815,9 +820,9 @@ function readable_date($date, $suffix = true, $verbose = false) {
         's' => 'second',
     ];
 	
-	foreach ($string as $k => &$v) {
+	foreach( $string as $k => &$v ){
 		$value = $k === 'w' ? $weeks : $diff->$k;
-		if ($value) {
+		if( $value ){
 			$v = $value . ' ' . $v . ($value > 1 ? 's' : '');
 		} else {
 			unset($string[$k]);
@@ -825,7 +830,7 @@ function readable_date($date, $suffix = true, $verbose = false) {
 	}
 	
     if(!$verbose) $string = array_slice($string, 0, 1);
-	if(!$suffix) {
+	if( !$suffix ){
 		return $string ? implode(', ', $string) : 'just now';
 	}
     return $string ? implode(', ', $string) . ' ago' : 'just now';
@@ -849,78 +854,206 @@ $activity_types = [
 
 // DATABASE FUNCTIONS
 
+class SqlResult {
+	public bool $ok;
+	public array $rows;
+	public string $response_code;
+	public string $response_type;
+	public int $row_count;
+	private array $valid_response_codes = [
+		'database_failure' => 'error',
+		'database_null_commit' => 'error',
+		'success' => 'generic'
+	];
+
+	public function __construct(bool $ok, string $response_code, array $rows = [], int $row_count = -999) {
+		$this->ok = $ok;
+		if( array_key_exists($response_code, $this->valid_response_codes) ){
+			$this->response_code = $response_code;
+			$this->response_type = $this->valid_response_codes[$response_code];
+		} else {
+			throw new ValueError("Invalid response code: $response_code");
+		}
+		$this->rows = $rows;
+		$this->row_count =
+			$row_count === -999 ?
+				$this->ok ?
+					count($result)
+					: -1
+				: $row_count;
+	}
+}
+
 // Passes database a statement and returns result.
 // 
 // Example uses:
 // sql('SELECT * FROM forum');
 // sql('SELECT * FROM forum WHERE id=? AND title=?', ['is', $forum_id, $forum_title]);
-// sql('SELECT * FROM forum WHERE id=1 AND title="Hello world"', false, ['assoc' => false]);
+// sql('SELECT * FROM forum WHERE id=1 AND title="Hello world"', false, false);
 // 
 // Returns an array:
 //     result -> false if failed, null if no change, true or a result if successfull
 //     response_code -> string to describe outcome, used in notices
 //     response_type -> string to describe type of outcome, used in notices
 //     rows -> number of affected/returned rows
-function sql( string $stmt, array $params = [], array $options = [] ){
+function sql( string $stmt, array $params = [], bool $associate_names = true ){
 	global $db;
-	# TODO: if keeping this function, make a class for this return value and keep types consistent ffs
-	$dbfail = [
-			'result' => false,
-			'response_code' => 'database_failure',
-			'response_type' => 'error',
-			'rows' => -1
-		];
+	$rows = [];
+	$row_count = -999;
 	
 	// Execute statement
-	if(!$q = $db->prepare($stmt)) { return $dbfail; }
-	if(count($params) > 0) { $q->bind_param(...$params); }
-	if(!$q->execute()) { return $dbfail; }
+	if( !$q = $db->prepare($stmt) ){
+		return new SqlResult(false, 'database_failure');
+	}
+	if( count($params) > 0 ){
+		$q->bind_param(...$params);
+	}
+	if( !$q->execute() ){
+		return new SqlResult(false, 'database_failure');
+	}
 
 	// SELECT
-	if(strpos(trim($stmt), 'SELECT') === 0) {
+	if( strpos(trim($stmt), 'SELECT') === 0 ){
 		$res = $q->get_result();
-		$rows = $res->num_rows;
-		if($rows < 1) {
-			$res = true; # TODO: make this return an empty array instead of bool, wtf were you thinking
-		} elseif(isset($options['assoc']) && $options['assoc'] === false) {
-			$res = $res->fetch_all();
-		} else {
-			$res = $res->fetch_all(MYSQLI_ASSOC);
-		}
+		$row_count = $res->num_rows;
+		$rows = $associate_names === true ? $res->fetch_all(MYSQLI_ASSOC) : $res->fetch_all();
 	}
 	
 	// UPDATE && DELETE
-	elseif(strpos(trim($stmt), 'UPDATE') === 0 || strpos(trim($stmt), 'DELETE') === 0) {
-		$rows = $q->affected_rows;
-		if($rows < 1) {
-			return [
-					'result' => null,
-					'response_code' => 'database_null_commit',
-					'response_type' => 'error',
-					'rows' => $rows
-				];
-		} else {
-			$res = true;
+	elseif( strpos(trim($stmt), 'UPDATE') === 0 || strpos(trim($stmt), 'DELETE') === 0 ){
+		$row_count = $q->affected_rows;
+		if( $row_count < 1 ){
+			return new SqlResult(false, 'database_null_commit');
 		}
 	}
 
 	// INSERT
 	else {
-		$rows = $q->affected_rows;
-		$res = true;
+		$row_count = $q->affected_rows;
 	}
 
 	$q->close();
 
 	// Return result
-	return [
-			'result' => $res,
-			'response_code' => 'success',
-			'response_type' => 'generic',
-			'rows' => $rows
-		];
+	return new SqlResult(true, 'success', $rows, $row_count);
 }
 
+
+// User Notices
+
+class Notice {
+	private array $valid_codes = [
+		// Successes
+		'login_success' => [
+			'type' => 'success',
+			'message' => 'Successfully logged into your account. Welcome back!'
+		],
+		'login_success' => [
+			'type' => 'success',
+			'message' => "Successfully logged into your account. Welcome back!"
+		],
+		'register_success' => [
+			'type' => 'success',
+			'message' => "Successfully created your account. Have fun!"
+		],
+		'logout_success' => [
+			'type' => 'success',
+			'message' => "Successfully logged out of your account. Thanks for visiting."
+		],
+		'success' => [
+			'type' => 'success',
+			'message' => "Action performed successfully."
+		],
+		'partial_success' => [
+			'type' => 'success',
+			'message' => "Action partially succeeded - some updates failed. See below for details."
+		],
+		
+		// Errors
+		'required_field' => [
+			'type' => 'error',
+			'message' => "Please fill out the required fields."
+		],
+		'login_bad' => [
+			'type' => 'error',
+			'message' => "Incorrect login credentials. Please try again."
+		],
+		'register_exists' => [
+			'type' => 'error',
+			'message' => "User already exists."
+		],
+		'register_match' => [
+			'type' => 'error',
+			'message' => "Passwords do not match."
+		],
+		'invalid_name' => [
+			'type' => 'error',
+			'message' => "Name contains invalid characters."
+		],
+		'invalid_pass' => [
+			'type' => 'error',
+			'message' => "Password does not meet requirements."
+		],
+		'logout_failure' => [
+			'type' => 'error',
+			'message' => "Failed to log you out. Please try again or report the error to the admins."
+		],
+		'require_sign_in' => [
+			'type' => 'error',
+			'message' => "Please sign in before attempting this action."
+		],
+		'database_failure' => [
+			'type' => 'error',
+			'message' => "An error occured in the server database while performing your request."
+		],
+		'database_null_commit' => [
+			'type' => 'error',
+			'message' => "An attempted database commit did not result in an action."
+		],
+		'disallowed_action' => [
+			'type' => 'error',
+			'message' => "Attempted to perform an invalid or unrecognized action."
+		],
+		'unauthorized' => [
+			'type' => 'error',
+			'message' => "Attempted operation outside of user authority."
+		],
+		'invalid_value' => [
+			'type' => 'error',
+			'message' => "A value you entered was invalid or out of expected bounds. Please try again."
+		],
+
+		// Neutral
+		'no_change_detected' => [
+			'type' => 'generic',
+			'message' => "No changes were applied, as none were detected."
+		],
+		'blank' => [
+			'type' => 'generic',
+			'message' => ''
+		],
+		'default' => [
+			'type' => 'generic',
+			'message' => "This was meant to say something, but it doesn't!"
+		]
+	];
+
+	public string $code;
+	public string $type;
+	public string $message;
+	public string $details;
+
+	public function __construct( string $code = 'default', string $details = '' ){
+		$this->details = $details;
+		if( array_key_exists($code, $this->valid_codes) ){
+			$this->code = $code;
+			$this->type = $this->valid_codes[$code]['type'];
+			$this->message = $this->valid_codes[$code]['message'];
+		} else {
+			throw new ValueError("Invalid notice code: $response_code");
+		}
+	}
+}
 
 
 // For use on user POST pages. Closes relevant pieces and redirects user to a page.
@@ -928,25 +1061,12 @@ function finalize(string $page = '/', ...$input_notices) {
 	global $db;
 	$db->close();
 
-	if(isset($input_notices)) {
+	if( isset($input_notices) ){
 		$output_notices = [];
 
-		$i = 0;
-		foreach($input_notices as $n) {
-			$output_notices[$i]['case'] = $n[0];
-
-			if(!isset($n[1])) {
-				$output_notices[$i]['type'] = 'generic';
-			} else {
-				$output_notices[$i]['type'] = $n[1];
-			}
-
-			if(!isset($n[2])) {
-				$output_notices[$i]['details'] = '';
-			} else {
-				$output_notices[$i]['details'] = $n[2];
-			}
-			$i++;
+		for( $i = 0; $i < count($input_notices); $i++ ){
+			$notice = new Notice($input_notices[$i][0], $input_notices[$i][2] ?? '');
+			$output_notices[$i] = $notice;
 		}
 
 		$_SESSION['notice'] = $output_notices;

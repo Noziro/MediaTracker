@@ -9,7 +9,7 @@ include PATH.'server/server.php';
 
 // AUTH
 
-if(!$has_session)  {
+if( !$has_session ){
 	finalize('/', ['require_sign_in', 'error']); 
 }
 
@@ -17,7 +17,7 @@ $action = $_POST['action'];
 
 // RETURN TO
 
-if(isset($_POST['return_to'])) {
+if( isset($_POST['return_to']) ){
 	$r2 = $_POST['return_to'];
 } else {
 	$r2 = '/';
@@ -53,13 +53,13 @@ function upload_image($image, $subdir = '') {
 		'error' => []
 	];
 	
-	if(!empty($subdir)) {
+	if( !empty($subdir) ){
 		$dir = 'upload/'.$subdir.'/';
 	} else {
 		$dir = 'upload/';
 	}
 
-	if($image['size'] < 1) {
+	if( $image['size'] < 1 ){
 		$returnval['error'] = ['blank', 'error', 'Uploaded file is invalid.'];
 	}
 	$ext = '.'.explode('.', $image['name'])[1];
@@ -67,7 +67,7 @@ function upload_image($image, $subdir = '') {
 	while(true) {
 		$filename = generate_random_characters(64);
 		$internal_image_location = PATH.$dir.$filename.$ext;
-		if(file_exists($internal_image_location)) {
+		if( file_exists($internal_image_location) ){
 			continue;
 		}
 		break;
@@ -76,7 +76,7 @@ function upload_image($image, $subdir = '') {
 	$image_location = '/'.$dir.$filename.$ext;
 	
 	$uploaded = move_uploaded_file($image['tmp_name'], $internal_image_location);
-	if(!$uploaded) {
+	if( !$uploaded ){
 		$returnval['error'] = ['blank', 'error', 'Something went wrong while uploading your image.'];
 	} else {
 		$returnval['outcome'] = true;
@@ -91,9 +91,9 @@ function upload_image($image, $subdir = '') {
 
 // ACTIONS
 
-if($action === "collection_create") {
+if( $action === "collection_create" ){
 	// Required fields
-	if(!isset($_POST['name']) || !isset($_POST['type'])) {
+	if( !isset($_POST['name']) || !isset($_POST['type']) ){
 		finalize($r2, ['required_field', 'error']);
 	}
 
@@ -101,11 +101,11 @@ if($action === "collection_create") {
 	$name = trim($_POST['name']);
 
 	$type = trim($_POST['type']);
-	if(!in_array((string)$type, $valid_coll_types, True)) {
+	if( !in_array((string)$type, $valid_coll_types, True) ){
 		finalize($r2, ['invalid_value', 'error']);
 	}
 
-	if(!isset($_POST['private']) || !in_array((int)$_POST['private'], [0,9], True)) {
+	if( !isset($_POST['private']) || !in_array((int)$_POST['private'], [0,9], True) ){
 		$private = 0;
 	} else {
 		$private = $_POST['private'];
@@ -113,7 +113,7 @@ if($action === "collection_create") {
 
 	// Execute DB
 	$stmt = sql('INSERT INTO collections (user_id, name, type, private) VALUES (?, ?, ?, ?)', ['issi', $user['id'], $name, $type, $private]);
-	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
+	if( !$stmt->ok ){ finalize($r2, [$stmt->response_code, $stmt->response_type]); }
 	
 	finalize($r2, ['success']);
 }
@@ -122,24 +122,24 @@ if($action === "collection_create") {
 
 
 
-elseif($action === "collection_edit") {
-	if(!isset($_POST['collection_id'])) {
+elseif( $action === "collection_edit" ){
+	if( !isset($_POST['collection_id']) ){
 		finalize($r2, ['disallowed_action', 'error']);
 	}
 
 	// Required Fields
-	if(!isset($_POST['name']) || !isset($_POST['type'])) {
+	if( !isset($_POST['name']) || !isset($_POST['type']) ){
 		finalize($r2, ['required_field', 'error']);
 	}
 	
 	// Check existence
 	$stmt = sql('SELECT id, user_id, rating_system FROM collections WHERE id=?', ['i', $_POST['collection_id']]);
-	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
-	if($stmt['rows'] < 1) { finalize($r2, ['disallowed_action', 'error']); }
-	$collection = $stmt['result'][0];
+	if( !$stmt->ok ){ finalize($r2, [$stmt->response_code, $stmt->response_type]); }
+	if( $stmt->row_count < 1 ){ finalize($r2, ['disallowed_action', 'error']); }
+	$collection = $stmt->rows[0];
 
 	// Check user authority
-	if($user['id'] !== $collection['user_id']) {
+	if( $user['id'] !== $collection['user_id'] ){
 		finalize($r2, ['unauthorized', 'error']);
 	}
 
@@ -147,11 +147,11 @@ elseif($action === "collection_edit") {
 	$name = trim($_POST['name']);
 
 	$type = trim($_POST['type']);
-	if(!in_array((string)$type, $valid_coll_types, True)) {
+	if( !in_array((string)$type, $valid_coll_types, True) ){
 		finalize($r2, ['invalid_value', 'error']);
 	}
 
-	if(!isset($_POST['private']) || !in_array((int)$_POST['private'], [0,9], True)) {
+	if( !isset($_POST['private']) || !in_array((int)$_POST['private'], [0,9], True) ){
 		$private = 0;
 	} else {
 		$private = $_POST['private'];
@@ -166,19 +166,19 @@ elseif($action === "collection_edit") {
 		'display_days' => 1
 	];
 
-	foreach($columns as $col => $val) {
-		if(!isset($_POST[$col])) {
+	foreach( $columns as $col => $val ){
+		if( !isset($_POST[$col]) ){
 			finalize($r2, ['invalid_value', 'error']);
 		} else {
 			$columns[$col] = $_POST[$col];
 		}
 	}
 
-	if(isset($_POST['rating_system'])) {
+	if( isset($_POST['rating_system']) ){
 		$rating_system = $_POST['rating_system'];
 
 		// If not valid input
-		if(!in_array((int)$rating_system, [3,5,10,20,100], True)) {
+		if( !in_array((int)$rating_system, [3,5,10,20,100], True) ){
 			finalize($r2, ['invalid_value', 'error']);
 		}
 	} else {
@@ -212,7 +212,7 @@ elseif($action === "collection_edit") {
 		$private,
 		$collection['id']
 	]);
-	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
+	if( !$stmt->ok ){ finalize($r2, [$stmt->response_code, $stmt->response_type]); }
 
 	finalize($r2, ['success']);
 }
@@ -221,33 +221,33 @@ elseif($action === "collection_edit") {
 
 
 
-elseif($action === 'collection_delete' || $action === 'collection_undelete') {
-	if(!isset($_POST['collection_id'])) {
+elseif( $action === 'collection_delete' || $action === 'collection_undelete' ){
+	if( !isset($_POST['collection_id']) ){
 		finalize($r2, ['disallowed_action', 'error']);
 	}
 
-	if($action === 'collection_delete') {
+	if( $action === 'collection_delete' ){
 		$delete = 1;
-	} elseif($action === 'collection_undelete') {
+	} elseif( $action === 'collection_undelete' ){
 		$delete = 0;
 	}
 
 	// Check existence
 	$stmt = sql('SELECT id, user_id FROM collections WHERE id=?', ['i', $_POST['collection_id']]);
-	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
-	if($stmt['rows'] < 1) { finalize($r2, ['disallowed_action', 'error']); }
-	$collection = $stmt['result'][0];
+	if( !$stmt->ok ){ finalize($r2, [$stmt->response_code, $stmt->response_type]); }
+	if( $stmt->row_count < 1 ){ finalize($r2, ['disallowed_action', 'error']); }
+	$collection = $stmt->rows[0];
 
 	// Check user authority
-	if($user['id'] !== $collection['user_id']) {
+	if( $user['id'] !== $collection['user_id'] ){
 		finalize($r2, ['unauthorized', 'error']);
 	}
 
 	// Execute DB
 	$stmt = sql('UPDATE collections SET deleted=? WHERE id=?', ['ii', $delete, $collection['id']]);
-	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
+	if( !$stmt->ok ){ finalize($r2, [$stmt->response_code, $stmt->response_type]); }
 
-	if($action === 'collection_delete') {
+	if( $action === 'collection_delete' ){
 		$r2 = '/collection/'.$user['id'];
 	}
 
@@ -258,42 +258,42 @@ elseif($action === 'collection_delete' || $action === 'collection_undelete') {
 
 
 
-elseif($action === "collection_item_create" || $action === "collection_item_edit") {
-	if($action === "collection_item_create") {
-		if(!isset($_POST['collection_id'])) {
+elseif( $action === "collection_item_create" || $action === "collection_item_edit" ){
+	if( $action === "collection_item_create" ){
+		if( !isset($_POST['collection_id']) ){
 			finalize($r2, ['disallowed_action', 'error']);
 		}
 
 		// Get info
 		$stmt = sql('SELECT id, user_id, rating_system FROM collections WHERE id=?', ['i', $_POST['collection_id']]);
-		if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
-		if($stmt['rows'] < 1) { finalize($r2, ['disallowed_action', 'error']); }
-		$collection = $stmt['result'][0];
-	} elseif($action === "collection_item_edit") {
-		if(!isset($_POST['item_id'])) {
+		if( !$stmt->ok ){ finalize($r2, [$stmt->response_code, $stmt->response_type]); }
+		if( $stmt->row_count < 1 ){ finalize($r2, ['disallowed_action', 'error']); }
+		$collection = $stmt->rows[0];
+	} elseif( $action === "collection_item_edit" ){
+		if( !isset($_POST['item_id']) ){
 			finalize($r2, ['disallowed_action', 'error']);
 		}
 
 		// Get item info
 		$stmt = sql('SELECT image FROM media WHERE id=?', ['i', $_POST['item_id']]);
-		if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
-		if($stmt['rows'] < 1) { finalize($r2, ['disallowed_action', 'error']); }
-		$item = $stmt['result'][0];
+		if( !$stmt->ok ){ finalize($r2, [$stmt->response_code, $stmt->response_type]); }
+		if( $stmt->row_count < 1 ){ finalize($r2, ['disallowed_action', 'error']); }
+		$item = $stmt->rows[0];
 
 		// Get collection info
 		$stmt = sql('SELECT collections.id, collections.user_id, collections.rating_system FROM collections INNER JOIN media ON collections.id = media.collection_id WHERE media.id=?', ['i', $_POST['item_id']]);
-		if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
-		if($stmt['rows'] < 1) { finalize($r2, ['disallowed_action', 'error']); }
-		$collection = $stmt['result'][0];
+		if( !$stmt->ok ){ finalize($r2, [$stmt->response_code, $stmt->response_type]); }
+		if( $stmt->row_count < 1 ){ finalize($r2, ['disallowed_action', 'error']); }
+		$collection = $stmt->rows[0];
 	}
 
 	// Check user authority
-	if($user['id'] !== $collection['user_id']) {
+	if( $user['id'] !== $collection['user_id'] ){
 		finalize('/collection', ['unauthorized', 'error']);
 	}
 	
 	// Required fields
-	if(!isset($_POST['name']) || !isset($_POST['status'])) {
+	if( !isset($_POST['name']) || !isset($_POST['status']) ){
 		finalize($r2, ['required_field', 'error']);
 	}
 
@@ -319,27 +319,27 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 
 
 	// Validate status
-	if(array_key_exists('status', $_POST)) {
+	if( array_key_exists('status', $_POST) ){
 		$status = (string)$_POST['status'];
 
-		if(!in_array($status, $valid_status, True)) {
+		if( !in_array($status, $valid_status, True) ){
 			finalize($r2, ['invalid_value', 'error']);
 		}
 	}
 
 	// Validate Score
-	if(array_key_exists('score', $_POST)) {
+	if( array_key_exists('score', $_POST) ){
 		$score = (int)$_POST['score'];
-		if($score < 0 || $score > $collection['rating_system']) {
+		if( $score < 0 || $score > $collection['rating_system'] ){
 			finalize($r2, ['invalid_value', 'error']);
 		}
 		$score = score_normalize($score, $collection['rating_system']);
 	}
 
 	// Validate and upload image
-	if(array_key_exists('image', $_FILES) && $_FILES['image']['name'] !== '') {
+	if( array_key_exists('image', $_FILES) && $_FILES['image']['name'] !== '' ){
 		$uploaded = upload_image($_FILES['image'], 'cover');
-		if(!$uploaded['outcome']) {
+		if( !$uploaded['outcome'] ){
 			finalize($r2, $uploaded['error']);
 		} else {
 			$image_location = $uploaded['url'];
@@ -347,33 +347,33 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 	}
 
 	// Validate Episodes
-	if(array_key_exists('progress', $_POST)) {
+	if( array_key_exists('progress', $_POST) ){
 		$progress = (int)$_POST['progress'];
-		if($progress < 0) {
+		if( $progress < 0 ){
 			finalize($r2, ['invalid_value', 'error']);
 		}
 	}
 
-	if(array_key_exists('episodes', $_POST)) {
+	if( array_key_exists('episodes', $_POST) ){
 		$episodes = (int)$_POST['episodes'];
-		if($episodes < 0) {
+		if( $episodes < 0 ){
 			finalize($r2, ['invalid_value', 'error']);
 		}
 		// Increase total episodes to match watched episodes if needed
-		if($episodes < $progress) {
+		if( $episodes < $progress ){
 			$episodes = $progress;
 		}
 	}
 
-	if(array_key_exists('rewatched', $_POST)) {
+	if( array_key_exists('rewatched', $_POST) ){
 		$rewatched = (int)$_POST['rewatched'];
-		if($rewatched < 0) {
+		if( $rewatched < 0 ){
 			finalize($r2, ['invalid_value', 'error']);
 		}
 	}
 
 	// Modify episodes to make sense if item completed.
-	if($status === 'completed' && $episodes >= $progress) {
+	if( $status === 'completed' && $episodes >= $progress ){
 		$progress = $episodes;
 	}
 
@@ -416,39 +416,39 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 		return $date;
 	}
 
-	if(array_key_exists('user_started_at', $_POST) && $_POST['user_started_at'] !== '') {
+	if( array_key_exists('user_started_at', $_POST) && $_POST['user_started_at'] !== '' ){
 		$user_started_at = validate_date($_POST['user_started_at']);
 	}
 
-	if(array_key_exists('user_finished_at', $_POST) && $_POST['user_finished_at'] !== '') {
+	if( array_key_exists('user_finished_at', $_POST) && $_POST['user_finished_at'] !== '' ){
 		$user_finished_at = validate_date($_POST['user_finished_at']);
 	}
 
-	if(array_key_exists('release_date', $_POST) && $_POST['release_date'] !== '') {
+	if( array_key_exists('release_date', $_POST) && $_POST['release_date'] !== '' ){
 		$release_date = validate_date($_POST['release_date']);
 	}
 
-	if(array_key_exists('started_at', $_POST) && $_POST['started_at'] !== '') {
+	if( array_key_exists('started_at', $_POST) && $_POST['started_at'] !== '' ){
 		$started_at = validate_date($_POST['started_at']);
 	}
 
-	if(array_key_exists('finished_at', $_POST) && $_POST['finished_at'] !== '') {
+	if( array_key_exists('finished_at', $_POST) && $_POST['finished_at'] !== '' ){
 		$finished_at = validate_date($_POST['finished_at']);
 	}
 
 	// Validate comments
-	if(array_key_exists('comments', $_POST)) {
+	if( array_key_exists('comments', $_POST) ){
 		$comments = $_POST['comments'];
 		$maxlen = pow(2,16) - 1;
-		if(strlen($comments) > $maxlen) {
+		if( strlen($comments) > $maxlen ){
 			finalize($r2, ['invalid_value', 'error']);
 		}
 	}
 
 	// Links
-	if(array_key_exists('links', $_POST) && is_array($_POST['links'])) {
+	if( array_key_exists('links', $_POST) && is_array($_POST['links']) ){
 		$validatedLinks = [];
-		foreach($_POST['links'] as $link) {
+		foreach( $_POST['links'] as $link ){
 			$link = trim($link);
 			if($link !== ""
 			&& filter_var($url, FILTER_VALIDATE_URL) === False
@@ -460,30 +460,30 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 	}
 
 	// Flags
-	if(array_key_exists('adult', $_POST)) {
+	if( array_key_exists('adult', $_POST) ){
 		$adult = $_POST['adult'];
-		if($adult < 0 || $adult > 1) {
+		if( $adult < 0 || $adult > 1 ){
 			finalize($r2, ['invalid_value', 'error']);
 		}
 	}
 
-	if(array_key_exists('favourite', $_POST)) {
+	if( array_key_exists('favourite', $_POST) ){
 		$favourite = $_POST['favourite'];
-		if($favourite < 0 || $favourite > 1) {
+		if( $favourite < 0 || $favourite > 1 ){
 			finalize($r2, ['invalid_value', 'error']);
 		}
 	}
 
-	if(array_key_exists('private', $_POST)) {
+	if( array_key_exists('private', $_POST) ){
 		$private = $_POST['private'];
-		if($private < 0 || $private > 1) {
+		if( $private < 0 || $private > 1 ){
 			finalize($r2, ['invalid_value', 'error']);
 		}
 	}
 
 
 	// Execute DB
-	if($action === "collection_item_create") {
+	if( $action === "collection_item_create" ){
 		$stmt = sql('
 			INSERT INTO media (
 				user_id,
@@ -529,7 +529,7 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 			$favourite,
 			$private
 		]);
-	} elseif($action === "collection_item_edit") {
+	} elseif( $action === "collection_item_edit" ){
 		$stmt = sql('
 			UPDATE media SET
 				status=?,
@@ -572,24 +572,24 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 			$_POST['item_id']
 		]);
 	}
-	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
+	if( !$stmt->ok ){ finalize($r2, [$stmt->response_code, $stmt->response_type]); }
 
-	if($action === 'collection_item_create') {
+	if( $action === 'collection_item_create' ){
 		// Get newly added ID
 		$stmt = sql('SELECT LAST_INSERT_ID()');
-		if($stmt['result'] !== false) {
-			$new_item_id = reset($stmt['result'][0]);
+		if( $stmt->rows !== false ){
+			$new_item_id = reset($stmt->rows[0]);
 			$r2 = $r2.'#item-'.$new_item_id;
 		}
 		
 		// Create activity
 		$stmt = sql('INSERT INTO activity (user_id, type, media_id) VALUES (?, ?, ?)', ['iii', $user['id'], $activity_types[$status], $new_item_id]);
-		if(!$stmt['result']) {
+		if( !$stmt->ok ){
 			$details = 'Primary action performed successfully. Secondary action of creating activity post failed.';
 		}
 	}
 	
-	if(isset($details)) {
+	if( isset($details) ){
 		finalize($r2, ['blank', 'generic', $details]);
 	}
 	finalize($r2, ['success', 'generic']);
@@ -599,31 +599,31 @@ elseif($action === "collection_item_create" || $action === "collection_item_edit
 
 
 
-if($action === 'collection_item_delete' || $action === 'collection_item_undelete') {
-	if(!isset($_POST['item_id'])) {
+if( $action === 'collection_item_delete' || $action === 'collection_item_undelete' ){
+	if( !isset($_POST['item_id']) ){
 		finalize($r2, ['disallowed_action', 'error']);
 	}
 
-	if($action === 'collection_item_delete') {
+	if( $action === 'collection_item_delete' ){
 		$delete = 1;
-	} elseif($action === 'collection_item_undelete') {
+	} elseif( $action === 'collection_item_undelete' ){
 		$delete = 0;
 	}
 
 	// Get info & check existence
 	$stmt = sql('SELECT id, user_id, collection_id FROM media WHERE id=?', ['i', $_POST['item']]);
-	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
-	if($stmt['rows'] < 1) { finalize($r2, ['disallowed_action', 'error']); }
-	$item = $stmt['result'][0];
+	if( !$stmt->ok ){ finalize($r2, [$stmt->response_code, $stmt->response_type]); }
+	if( $stmt->row_count < 1 ){ finalize($r2, ['disallowed_action', 'error']); }
+	$item = $stmt->rows[0];
 
 	// Check user authority
-	if($user['id'] !== $item['user_id']) {
+	if( $user['id'] !== $item['user_id'] ){
 		finalize($r2, ['unauthorized', 'error']);
 	}
 
 	// Execute DB
 	$stmt = sql('UPDATE media SET deleted=? WHERE id=?', ['ii', $delete, $item['id']]);
-	if(!$stmt['result']) { finalize($r2, [$stmt['response_code'], $stmt['response_type']]); }
+	if( !$stmt->ok ){ finalize($r2, [$stmt->response_code, $stmt->response_type]); }
 
 	finalize($r2, ['success']);
 }
@@ -632,9 +632,9 @@ if($action === 'collection_item_delete' || $action === 'collection_item_undelete
 
 
 
-elseif($action === 'change_settings') {
+elseif( $action === 'change_settings' ){
 	// ALL SETTINGS
-	if(!$has_session) {
+	if( !$has_session ){
 		finalize($r2, ['require_sign_in', 'error']);
 	}
 
@@ -681,15 +681,15 @@ elseif($action === 'change_settings') {
 	$user_extra = sql('SELECT about FROM users WHERE id=?', ['i', $user['id']]);
 
 	// NICKNAME
-	if(isset($_POST['nickname'])) {
+	if( isset($_POST['nickname']) ){
 		$nick = trim($_POST['nickname']);
 
 		// If not valid input
-		if(!valid_name($nick) || $nick === '') {
+		if( !valid_name($nick) || $nick === '' ){
 			$error_list[] = ['invalid_name', 'error'];
 		}
 		// If value valid and not the same as before 
-		elseif($nick !== $user['nickname']) {
+		elseif( $nick !== $user['nickname'] ){
 			$to_update['users'][] = [
 				'column' => 'nickname',
 				'type' => 's',
@@ -699,11 +699,11 @@ elseif($action === 'change_settings') {
 	}
 
 	// ABOUT
-	if(isset($_POST['about'])) {
+	if( isset($_POST['about']) ){
 		$about = $_POST['about'];
 
 		// If value not the same as before
-		if($about !== $user_extra['result'][0]['about']) {
+		if( $about !== $user_extra->rows[0]['about'] ){
 			// If valid, continue
 			$to_update['users'][] = [
 				'column' => 'about',
@@ -714,9 +714,9 @@ elseif($action === 'change_settings') {
 	}
 
 	// PROFILE IMAGE
-	if(array_key_exists('profile_image', $_FILES) && $_FILES['profile_image']['name'] !== '') {
+	if( array_key_exists('profile_image', $_FILES) && $_FILES['profile_image']['name'] !== '' ){
 		$uploaded = upload_image($_FILES['profile_image'], 'profile');
-		if(!$uploaded['outcome']) {
+		if( !$uploaded['outcome'] ){
 			$error_list[] = $uploaded['error'];
 		} else {
 			$to_update['users'][] = [
@@ -728,9 +728,9 @@ elseif($action === 'change_settings') {
 	}
 
 	// BANNER IMAGE
-	if(array_key_exists('banner_image', $_FILES) && $_FILES['banner_image']['name'] !== '') {
+	if( array_key_exists('banner_image', $_FILES) && $_FILES['banner_image']['name'] !== '' ){
 		$uploaded = upload_image($_FILES['banner_image'], 'profile_banner');
-		if(!$uploaded['outcome']) {
+		if( !$uploaded['outcome'] ){
 			$error_list[] = $uploaded['error'];
 		} else {
 			$to_update['users'][] = [
@@ -742,14 +742,14 @@ elseif($action === 'change_settings') {
 	}
 
 	// EMAIL
-	//if(isset($_POST['email'])) {
+	//if( isset($_POST['email']) ){
 	//	
 	//}
 
 	// PASSWORD
 	// TODO - a lot of this password validation should be done in a single place instead of repeatedly, to avoid future problems.
 	// Currently, the password validation can be found here, in session.php, and in the Authentication class of server.php 
-	if(isset($_POST['previous_password'])) {
+	if( isset($_POST['previous_password']) ){
 		if(
 			!array_key_exists('new_password', $_POST)
 			|| !array_key_exists('new_password_confirm', $_POST)
@@ -764,16 +764,16 @@ elseif($action === 'change_settings') {
 			$conf = $_POST['new_password_confirm'];
 
 			$stmt = sql('SELECT password FROM users WHERE id=?', ['i', $user['id']]);
-			if(!$stmt['result'] || $stmt['rows'] < 1) {
+			if( !$stmt->ok || $stmt->row_count < 1 ){
 				$error_list[] = [$stmt['error_code'], $stmt['error_type']]; 
 			}
-			elseif(!password_verify($prev, $stmt['result'][0]['password'])) {
+			elseif( !password_verify($prev, $stmt->rows[0]['password']) ){
 				$error_list[] = ['blank', 'error', 'Current password was incorrect.'];
 			}
-			elseif($new !== $conf) {
+			elseif( $new !== $conf ){
 				$error_list[] = ['register_match', 'error'];
 			}
-			elseif(strlen($new) < 6 || strlen($new) > 72) {
+			elseif( strlen($new) < 6 || strlen($new) > 72 ){
 				$error_list[] = ['invalid_pass', 'error'];
 			}
 			else {
@@ -790,21 +790,21 @@ elseif($action === 'change_settings') {
 	}
 
 	// TIMEZONE
-	if(isset($_POST['timezone'])) {
+	if( isset($_POST['timezone']) ){
 		$tz = $_POST['timezone'];
 
 		// If value not the same as before
-		if($tz !== $prefs['timezone']) {
+		if( $tz !== $prefs['timezone'] ){
 			// If not valid input
 			$needle = false;
-			foreach($valid_timezones as $zone_group) {
-				if(in_array($tz, $zone_group, True)) {
+			foreach( $valid_timezones as $zone_group ){
+				if( in_array($tz, $zone_group, True) ){
 					$needle = true;
 					break;
 				}
 			}
 
-			if($needle === false) {
+			if( $needle === false ){
 				$error_list[] = ['invalid_value', 'error', 'Please choose a valid timezone'];
 			}
 
@@ -818,19 +818,19 @@ elseif($action === 'change_settings') {
 	}
 
 	// PROFILE COLOUR
-	if(array_key_exists('reset_profile_colour', $_POST) && $_POST['reset_profile_colour'] == 1) {
+	if( array_key_exists('reset_profile_colour', $_POST) && $_POST['reset_profile_colour'] == 1 ){
 		$to_update['user_preferences'][] = [
 			'column' => 'profile_colour',
 			'type' => 's',
 			'value' => null
 		];
 	}
-	elseif(isset($_POST['profile_colour'])) {
+	elseif( isset($_POST['profile_colour']) ){
 		$col = $_POST['profile_colour'];
 
 		// If value not the same as before and not default
 		// TODO - hardcoding the default colour like this and preventing users from permanently setting it is unwanted behaviour. Improve this later.
-		if($col !== $prefs['profile_colour'] && $col !== '#ff3333') {
+		if( $col !== $prefs['profile_colour'] && $col !== '#ff3333' ){
 			// If not valid input
 			if(
 				strlen($col) !== 7
@@ -849,14 +849,14 @@ elseif($action === 'change_settings') {
 	}
 
 	// Start updating database
-	if(count($to_update) > 0) {
+	if( count($to_update) > 0 ){
 		// Setup basic variables
 		$columns = [];
 		$types = '';
 		$values = [];
 		
-		foreach($to_update as $table => $updates) {
-			if($table === 'users') {
+		foreach( $to_update as $table => $updates ){
+			if( $table === 'users' ){
 				$query = "UPDATE {$table} SET %columns% WHERE id=?";
 			} else {
 				$query = "UPDATE {$table} SET %columns% WHERE user_id=?";
@@ -864,7 +864,7 @@ elseif($action === 'change_settings') {
 
 			$query = str_replace('%table%', $table, $query);
 
-			foreach($updates as $upd) {
+			foreach( $updates as $upd ){
 				$columns[] = $upd['column'].'=?';
 				$types .= $upd['type'];
 				$values[] = $upd['value'];
@@ -882,8 +882,8 @@ elseif($action === 'change_settings') {
 
 		// Execute statement
 		$stmt = sql($query, $params);
-		if($stmt['result'] === false) {
-			$error_list[] = [$stmt['response_code'], $stmt['response_type'], $query.var_export($params, true)];
+		if( !$stmt->ok ){
+			$error_list[] = [$stmt->response_code, $stmt->response_type, $query.var_export($params, true)];
 		} else {
 			$changed = true;
 		}
@@ -892,9 +892,9 @@ elseif($action === 'change_settings') {
 	}
 
 	// Finalize
-	if($changed && count($error_list) > 0) {
+	if( $changed && count($error_list) > 0 ){
 		finalize($r2, ['partial_success'], ...$error_list);
-	} elseif($changed) {
+	} elseif( $changed ){
 		finalize($r2, ['success']);
 	} else {
 		finalize($r2, ['no_change_detected'], ...$error_list);
@@ -905,8 +905,8 @@ elseif($action === 'change_settings') {
 
 
 
-elseif($action === 'import-list') {
-	if(!array_key_exists('file', $_POST)) {
+elseif( $action === 'import-list' ){
+	if( !array_key_exists('file', $_POST) ){
 		finalize($r2, ['required_field', 'error']);
 	}
 

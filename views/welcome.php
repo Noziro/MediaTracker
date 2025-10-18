@@ -1,7 +1,7 @@
 <!-- if USER SETUP == completed -->
 
 <?php
-if(!$has_session) {
+if( !$has_session ){
 	finalize('/');
 }
 ?>

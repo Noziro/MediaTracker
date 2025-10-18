@@ -1,7 +1,7 @@
 function incrementSlider() {
 	var slider = document.getElementById('js-advance-slider');
 
-	if(slider.getAttribute('style') === null || slider.getAttribute('style') === '') {
+	if( slider.getAttribute('style') === null || slider.getAttribute('style') === '' ){
 		slider.style.setProperty('--js-slide', 0);
 	}
 

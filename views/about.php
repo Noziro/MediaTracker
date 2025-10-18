@@ -31,11 +31,11 @@
 	<div class="c-about__section c-about__section--stats">
 		<div class="wrapper__inner">
 			<?php
-			$stmt = sql('SELECT COUNT(id) FROM users', [], ['assoc' => false]);
-			$stat_users = $stmt['result'][0][0] ?? 0;
+			$stmt = sql('SELECT COUNT(id) FROM users', [], false);
+			$stat_users = $stmt->rows[0][0] ?? 0;
 
-			$stmt = sql('SELECT COUNT(id) FROM media', [], ['assoc' => false]);
-			$stat_items = $stmt['result'][0][0] ?? 0;
+			$stmt = sql('SELECT COUNT(id) FROM media', [], false);
+			$stat_items = $stmt->rows[0][0] ?? 0;
 			
 			$stmt = sql('
 					SELECT SUM(media.progress)
@@ -45,8 +45,8 @@
 					WHERE collections.type = "video"
 					AND collections.deleted = 0
 					AND media.deleted = 0
-				', [], ['assoc' => false]);
-			$stat_episodes = $stmt['result'][0][0] ?? 0;
+				', [], false);
+			$stat_episodes = $stmt->rows[0][0] ?? 0;
 			
 			$stmt = sql('
 					SELECT SUM(media.progress)
@@ -56,8 +56,8 @@
 					WHERE collections.type = "literature"
 					AND collections.deleted = 0
 					AND media.deleted = 0
-				', [], ['assoc' => false]);
-			$stat_chapters = $stmt['result'][0][0] ?? 0;
+				', [], false);
+			$stat_chapters = $stmt->rows[0][0] ?? 0;
 			?>
 
 			<h3 class="c-about__title">Join <?=$stat_users?> others in tracking your favourite media.</h3>

@@ -1,13 +1,11 @@
 <?php
-if(!$has_session) {
+if( !$has_session ){
 	header('Location: /?error=require-sign-in');
 	exit();
 }
 
 $user_extra = sql('SELECT about FROM users WHERE id=?', ['i', $user['id']]);
-$user = array_merge($user, $user_extra['result'][0]);
-#$prefs_extra = sql('SELECT profile_colour FROM user_preferences WHERE user_id=?', ['i', $user['id']]);
-#$prefs['profile_colour'] = array_merge($prefs, $prefs_extra['result'][0]);
+$user = array_merge($user, $user_extra->rows[0]);
 ?>
 
 <main id="content" class="wrapper wrapper--content">
@@ -165,7 +163,7 @@ $user = array_merge($user, $user_extra['result'][0]);
 				</tr>
 				
 				<?php
-				$profile__active_sessions = sql('SELECT id, started, expiry, user_ip FROM sessions WHERE user_id=? ORDER BY started DESC', ['i', $user['id']])['result'];
+				$profile__active_sessions = sql('SELECT id, started, expiry, user_ip FROM sessions WHERE user_id=? ORDER BY started DESC', ['i', $user['id']])->rows;
 				
 				foreach($profile__active_sessions as $session) : ?>
 				
@@ -207,7 +205,7 @@ $user = array_merge($user, $user_extra['result'][0]);
 				<?php foreach($valid_timezones as $zone_group_label => $zone_group) : ?>
 				<optgroup label="<?=$zone_group_label?>">
 					<?php foreach($zone_group as $zone) : ?>
-					<option <?php if($zone === $prefs['timezone']) { echo "selected"; } ?>>
+					<option <?php if( isset($prefs['timezone']) && $zone === $prefs['timezone'] || $zone === 'UTC' ){ echo "selected"; } ?>>
 						<?=$zone?>
 					</option>
 					<?php endforeach; ?>
@@ -217,7 +215,7 @@ $user = array_merge($user, $user_extra['result'][0]);
 
 			<label for="change-colour" class="label">Change profile colour</label>
 			<input form="form-settings" id="change-colour" type="color" name="profile_colour" value="<?php
-					if($prefs['profile_colour'] !== null) {
+					if( isset($prefs['profile_colour']) && $prefs['profile_colour'] !== null ){
 						echo $prefs['profile_colour'];
 					} else {
 						echo '#ff3333';
@@ -284,12 +282,12 @@ $user = array_merge($user, $user_extra['result'][0]);
 
 				<label class="label">Which collection should it be imported to?</label>
 					<?php
-					$collections = sql('SELECT id, name, type FROM collections WHERE user_id=? AND deleted=0 ORDER BY name ASC', ['i', $user['id']])['result'];
+					$collections = sql('SELECT id, name, type FROM collections WHERE user_id=? AND deleted=0 ORDER BY name ASC', ['i', $user['id']])->rows;
 					$i = 0;
 					foreach($collections as $collection) :
 					?>
 					<label>
-						<input type="radio" name="collection_id" value="<?=$collection['id']?>" <?php if($i === 0) { echo "checked"; $i = 1; } ?>>
+						<input type="radio" name="collection_id" value="<?=$collection['id']?>" <?php if( $i === 0 ){ echo "checked"; $i = 1; } ?>>
 						<?=$collection['name']?> (<?=$collection['type']?>)
 					</label>
 					<?php endforeach; ?>

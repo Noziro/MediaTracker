@@ -4,7 +4,7 @@ include PATH.'server/server.php';
 
 $action = $_POST['action'];
 
-if(isset($_POST['return_to'])) {
+if( isset($_POST['return_to']) ){
 	$r2prev = $_POST['return_to'];
 	$r2login = '/login?return_to='.urlencode($r2prev);
 } else {
@@ -12,7 +12,7 @@ if(isset($_POST['return_to'])) {
 	$r2login = '/login';
 }
 
-if($action === "login") {
+if( $action === "login" ){
 	if(	   !array_key_exists('username', $_POST)
 		|| !array_key_exists('password', $_POST)
 	) {
@@ -21,14 +21,14 @@ if($action === "login") {
 
 	$login = $auth->login($_POST['username'], $_POST['password']);
 	
-	if ($login) {
+	if( $login ){
 		finalize($r2prev, ['login_success']);
 	} else {
 		finalize($r2login, ['login_bad', 'error']);
 	}
 }
 
-elseif($action === "register") {
+elseif( $action === "register" ){
 	$r2 = '/register';
 
 	// Check all required fields filled
@@ -47,23 +47,23 @@ elseif($action === "register") {
 	$post_pass = $_POST['password'];
 	$post_pass_confirm = $_POST['password-confirm'];
 	// Set email if not already set
-	if(array_key_exists('email', $_POST)) {
+	if( array_key_exists('email', $_POST) ){
 		$post_email = $_POST['email'];
 	} else {
 		$post_email = '';
 	}
 	
 	// Confirm user password
-	if(strlen($post_pass) < 6 || strlen($post_pass) > 72) {
+	if( strlen($post_pass) < 6 || strlen($post_pass) > 72 ){
 		finalize($r2, ['invalid_pass', 'error']);
 	}
 
-	if($post_pass != $post_pass_confirm) {
+	if( $post_pass != $post_pass_confirm ){
 		finalize($r2, ['register_match', 'error']);
 	}
 
 	// Validate username
-	if(!valid_name($post_user)) {
+	if( !valid_name($post_user) ){
 		finalize($r2, ['invalid_name', 'error']);
 	}
 
@@ -71,7 +71,7 @@ elseif($action === "register") {
 	else {
 		$register = $auth->register($post_user, $post_pass, $post_email);
 		
-		if (!$register) {
+		if( !$register ){
 			finalize($r2, ['register_exists', 'error']);
 		} else {
 			finalize('/welcome');
@@ -79,20 +79,20 @@ elseif($action === "register") {
 	}
 }
 
-elseif($action === "logout") {
+elseif( $action === "logout" ){
 	$logout = $auth->logout();
 	
-	if($logout) {
+	if( $logout ){
 		finalize($r2prev, ['logout_success']);
 	} else {
 		finalize($r2prev, ['logout_failure']);
 	}
 }
 
-elseif($action === "logout_all") {
+elseif( $action === "logout_all" ){
 	$logout = $auth->logout(true);
 	
-	if($logout) {
+	if( $logout ){
 		finalize($r2prev, ['logout_success']);
 	} else {
 		finalize($r2prev, ['logout_failure']);

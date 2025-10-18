@@ -15,8 +15,8 @@
 		<div class="c-media-browse">
 			<?php
 			$stmt = sql('SELECT id, name, image FROM media WHERE private=0 AND deleted=0 ORDER BY RAND() LIMIT 20');
-			$random_media = $stmt['result'];
-			if( $stmt['rows'] > 0 ) :
+			$random_media = $stmt->rows;
+			if( $stmt->row_count > 0 ) :
 			foreach($random_media as $media) :
 			?>
 
@@ -34,8 +34,8 @@
 
 			<?php
 			$stmt = sql('SELECT id, name FROM media WHERE private=0 AND deleted=0 ORDER BY id DESC LIMIT 20');
-			$new_media = $stmt['result'];
-			if( $stmt['rows'] > 0 ) :
+			$new_media = $stmt->rows;
+			if( $stmt->row_count > 0 ) :
 			foreach($new_media as $media) :
 			?>
 
@@ -51,15 +51,14 @@
 		<?php elseif(isset($_GET['name'])) :
 
 		$stmt = sql('SELECT COUNT(id) FROM media WHERE name LIKE ? AND private=0 AND deleted=0', ['s', '%'.$_GET['name'].'%']);
-		if(!$stmt['result']) { finalize('/browse', [$stmt['response_code'], $stmt['response_type']]); }
-		$total = reset($stmt['result'][0]);
+		if( !$stmt->ok ){ finalize('/browse', [$stmt->response_code, $stmt->response_type]); }
+		$total = reset($stmt->rows[0]);
 
 		$pg = new Pagination();
 		$pg->Setup(30, $total);
 
-		$stmt = sql('SELECT id, name, image FROM media WHERE name LIKE ? AND private=0 AND deleted=0 LIMIT ?, ?', ['sii', '%'.$_GET['name'].'%', $pg->offset, $pg->increment]);
-		if(!$stmt['result']) { finalize('/browse', [$stmt['response_code'], $stmt['response_type']]); }
-		$search = $stmt;
+		$search = sql('SELECT id, name, image FROM media WHERE name LIKE ? AND private=0 AND deleted=0 LIMIT ?, ?', ['sii', '%'.$_GET['name'].'%', $pg->offset, $pg->increment]);
+		if( !$search->ok ){ finalize('/browse', [$search->response_code, $search->response_type]); }
 		?>
 
 		<div class="content-header">
@@ -78,13 +77,13 @@
 
 		<div class="c-media-browse">
 			<?php
-			if($search['rows'] < 1) :
+			if($search->row_count < 1) :
 
 			echo 'No results.';
 
 			else:
 
-			$results = $search['result'];
+			$results = $search->rows;
 			foreach($results as $media) :
 			?>
 

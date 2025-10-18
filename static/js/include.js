@@ -3,8 +3,8 @@
 function setTheme(theme) {
 	var classes = document.documentElement.classList;
 	
-	for (var cls of classes) {
-		if (cls.startsWith('t-')) {
+	for( var cls of classes ){
+		if( cls.startsWith('t-') ){
 			classes.remove(cls);
 		}
 	}
@@ -18,6 +18,6 @@ function selectTheme(theme) {
 	localStorage.setItem('theme', theme);
 }
 
-if(window.localStorage.getItem('theme') !== null) {
+if( window.localStorage.getItem('theme') !== null ){
 	setTheme(localStorage.getItem('theme'));
 }

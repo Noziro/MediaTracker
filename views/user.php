@@ -1,17 +1,17 @@
 <?php
 // Check if user is set
 
-/*if(!isset($_GET["u"]) && !isset($_GET["n"]) {
+/*if( !isset($_GET["u"]) && !isset($_GET["n"] ){
 	header('Location: /404');
-} elseif(isset($_GET["u"]) && sql($db, "SELECT id FROM users WHERE id=?", "s", $_GET["u"])->num_rows < 1) {
+} elseif( isset($_GET["u"]) && sql($db, "SELECT id FROM users WHERE id=?", "s", $_GET["u"])->num_rows < 1 ){
 	header('Location: /404');
-} elseif(isset($_GET["name"]) && sql($db, "SELECT username FROM users WHERE id=?", "s", $_GET["u"])->num_rows < 1) {
+} elseif( isset($_GET["name"]) && sql($db, "SELECT username FROM users WHERE id=?", "s", $_GET["u"])->num_rows < 1 ){
 	header('Location: /404');
 }
 sql($db, "SELECT id, username FROM users WHERE id=?", "s", $_GET["u"])->num_rows < 1*/
 
-if(!isset($_GET["u"])) {
-	if($has_session) {
+if( !isset($_GET["u"]) ){
+	if( $has_session ){
 		$page_user__id = $user['id'];
 	} else {
 		finalize('/404');
@@ -22,22 +22,21 @@ if(!isset($_GET["u"])) {
 
 $page_user = sql('SELECT id, username, nickname, created_at, permission_level, profile_image, banner_image, about FROM users WHERE id=?', ['i', $page_user__id]);
 
-if($page_user['rows'] < 1) {
-	header('Location: /404');
-	exit();
+if( $page_user->row_count < 1 ){
+	finalize('/404');
 }
 
-$page_user = $page_user['result'][0];
+$page_user = $page_user->rows[0];
 
 $page_user_prefs_query = sql('SELECT profile_colour FROM user_preferences WHERE user_id=?', ['i', $page_user['id']]);
-if( $page_user_prefs_query['rows'] > 0 ){
-	$page_user_prefs = $page_user_prefs_query['result'][0];
+if( $page_user_prefs_query->row_count > 0 ){
+	$page_user_prefs = $page_user_prefs_query->rows[0];
 }
 else {
 	$page_user_prefs = null;
 }
 
-if($user['id'] === $page_user['id']) {
+if( isset($user['id']) && $user['id'] === $page_user['id'] ){
 	$friendship = 9;
 } else {
 	$friendship = 0;
@@ -50,7 +49,7 @@ $total_activity = reset(sql('
 	INNER JOIN media ON activity.media_id = media.id
 	INNER JOIN collections ON media.collection_id = collections.id
 	WHERE activity.user_id=? AND media.private <= ? AND collections.private <= ?',
-	['iii', $page_user['id'], $friendship, $friendship])['result'][0]);
+	['iii', $page_user['id'], $friendship, $friendship])->rows[0]);
 
 $pg = new Pagination();
 $pg->Setup(10, $total_activity);
@@ -66,7 +65,7 @@ $activity = sql('
 
 
 function ceil_decimal(float $float, int $precision = 1) {
-	if($precision === 0) {
+	if( $precision === 0 ){
 		return ceil($float);
 	} else {
 		$precision *= 10;
@@ -78,7 +77,7 @@ function ceil_decimal(float $float, int $precision = 1) {
 
 <!-- TODO: Fix classes. Having two BEM blocks layered on top of each other is disgusting -->
 <div class="wrapper banner <?php
-if(empty($page_user['banner_image'])) {
+if( empty($page_user['banner_image']) ){
 	$patterns = ['plaid', 'stripes-left', 'stripes-right', 'diamonds', 'half-square'];
 	echo "banner--pattern-".$patterns[rand(1,count($patterns)) - 1];
 	
@@ -105,8 +104,8 @@ if(empty($page_user['banner_image'])) {
 				<?php
 				$rank = 'User';
 				$rank_query = sql('SELECT title FROM permission_levels WHERE permission_level <= ? ORDER BY permission_level DESC LIMIT 1', ['i', $page_user['permission_level']]);
-				if( $rank_query['rows'] > 0 ){
-					$rank = ['result'][0]['title'];
+				if( $rank_query->row_count > 0 ){
+					$rank = $rank_query->rows[0]['title'];
 				}
 				?>
 				<?=$page_user['nickname']?>
@@ -119,7 +118,7 @@ if(empty($page_user['banner_image'])) {
 </div>
 
 <main id="content" class="wrapper wrapper--content">
-	<div class="wrapper__inner profile" <?php if($page_user_prefs !== null && isset($page_user_prefs['profile_colour'])) { echo 'style="--profile-colour: '.$page_user_prefs['profile_colour'].'"'; } ?>>
+	<div class="wrapper__inner profile" <?php if( $page_user_prefs !== null && isset($page_user_prefs['profile_colour']) ){ echo 'style="--profile-colour: '.$page_user_prefs['profile_colour'].'"'; } ?>>
 		<div class="profile__column profile__column--thin">
 			<div class="profile__section">
 				<span class="profile__section-header">Links</span>
@@ -130,7 +129,7 @@ if(empty($page_user['banner_image'])) {
 				<div class="c-divider"></div>
 				<a class="profile__user-link">Add Friend</a>
 				<a class="profile__user-link" href="/report?user=<?=$page_user['id']?>">Report</a>
-				<?php endif ?>
+				<?php endif; ?>
 			</div>
 
 			<div class="profile__section">
@@ -144,7 +143,7 @@ if(empty($page_user['banner_image'])) {
 			<div class="profile__section">
 				<span class="profile__section-header">History</span>
 
-				<?php if($activity['rows'] > 0) : ?>
+				<?php if($activity->row_count > 0) : ?>
 				<div class="c-user-history">
 					<div class="c-user-history__block-wrap">
 						<?php
@@ -160,8 +159,8 @@ if(empty($page_user['banner_image'])) {
 								ORDER BY day DESC
 							', ['i', $page_user['id']]);
 						$history_flattened = [];
-						if($history['rows'] > 0) {
-							foreach($history['result'] as $row) {
+						if( $history->row_count > 0 ){
+							foreach( $history->rows as $row ){
 								$history_flattened[$row['day']] = $row['count'];
 							}
 							$history_max_num = sql('
@@ -178,17 +177,17 @@ if(empty($page_user['banner_image'])) {
 										GROUP BY day
 										ORDER BY day DESC
 									) as sub
-								', ['i', $page_user['id']])['result'][0]['max'];
+								', ['i', $page_user['id']])->rows[0]['max'];
 						}
 						
 						$last_month = [];
-						for($i = 0; $i < 90; $i++) {
+						for( $i = 0; $i < 90; $i++ ){
 							$last_month[] = date('Y-m-d', strtotime('-'.$i.' days'));
 						}
 
 						foreach($last_month as $day) :
 
-						if(array_key_exists($day, $history_flattened))  {
+						if( array_key_exists($day, $history_flattened) ){
 							// get opacity. checks level in relation to max
 							$count = $history_flattened[$day];
 							$opacity = ceil_decimal($count / $history_max_num, 1);
@@ -237,15 +236,15 @@ if(empty($page_user['banner_image'])) {
 
 				<?php
 				$i = 0;
-				if($activity['rows'] > 0) :
-					foreach($activity['result'] as $activity) :
-						if($activity['media_private'] > $friendship || $activity['collection_private'] > $friendship) {
+				if($activity->row_count > 0) :
+					foreach($activity->rows as $activity_item) :
+						if( $activity_item['media_private'] > $friendship || $activity_item['collection_private'] > $friendship ){
 							continue;
 						}
-						if(isset($activity['media_id'])) :
-							$stmt = sql('SELECT media.id, media.collection_id, media.name, media.progress FROM media WHERE media.id=?', ['i', $activity['media_id']]);
-							$item = $stmt['result'][0];
-							if(!$stmt['result']) {
+						if(isset($activity_item['media_id'])) :
+							$stmt = sql('SELECT media.id, media.collection_id, media.name, media.progress FROM media WHERE media.id=?', ['i', $activity_item['media_id']]);
+							$item = $stmt->rows[0];
+							if( !$stmt->ok ){
 								continue;
 							}
 
@@ -254,12 +253,12 @@ if(empty($page_user['banner_image'])) {
 
 				<div class="c-activity">
 					<?php
-					if($activity['type'] > 0 && $activity['type'] < 6) :
+					if($activity_item['type'] > 0 && $activity_item['type'] < 6) :
 					?>
 
 					<div class="c-activity__header">
 						<?php
-						switch($activity['type']) {
+						switch($activity_item['type']) {
 								case 1:
 									echo 'Started ';
 									break;
@@ -280,15 +279,13 @@ if(empty($page_user['banner_image'])) {
 						<a href="/item?id=<?=$item['id']?>"><?=$item['name']?></a>
 					</div>
 
-					<?php
-					endif;
-					?>
+					<?php endif; ?>
 
 					<div class="c-activity__date">
-						<?=readable_date($activity['created_at'])?>
+						<?=readable_date($activity_item['created_at'])?>
 					</div>
 
-					<?php if($activity['media_private'] > 0 || $activity['collection_private'] > 0) : ?>
+					<?php if($activity_item['media_private'] > 0 || $activity_item['collection_private'] > 0) : ?>
 					<div class="c-activity__actions">
 						<span class="c-activity__tag">
 							Private
@@ -325,8 +322,8 @@ if(empty($page_user['banner_image'])) {
 						SELECT COUNT(id)
 						FROM media
 						WHERE user_id = ?
-					', ['i', $page_user['id']], ['assoc' => false]);
-				$stat_total = $stmt['result'][0][0] ?? 0;
+					', ['i', $page_user['id']], false);
+				$stat_total = $stmt->rows[0][0] ?? 0;
 
 				$stmt = sql('
 						SELECT SUM(media.progress + media.rewatched)
@@ -335,8 +332,8 @@ if(empty($page_user['banner_image'])) {
 						ON collections.id = media.collection_id
 						WHERE media.user_id = ?
 						AND collections.type = "video"
-					', ['i', $page_user['id']], ['assoc' => false]);
-				$stat_episodes = $stmt['result'][0][0] ?? 0;
+					', ['i', $page_user['id']], false);
+				$stat_episodes = $stmt->rows[0][0] ?? 0;
 
 				$stmt = sql('
 						SELECT SUM(media.progress + media.rewatched)
@@ -345,23 +342,23 @@ if(empty($page_user['banner_image'])) {
 						ON collections.id = media.collection_id
 						WHERE media.user_id = ?
 						AND collections.type = "literature"
-					', ['i', $page_user['id']], ['assoc' => false]);
-				$stat_chapters = $stmt['result'][0][0] ?? 0;
+					', ['i', $page_user['id']], false);
+				$stat_chapters = $stmt->rows[0][0] ?? 0;
 
 				$stmt = sql('
 						SELECT SUM(media.rewatched) / SUM(media.progress)
 						FROM media
 						WHERE user_id = ?
-					', ['i', $page_user['id']], ['assoc' => false]);
-				$stat_rewatch = round(100 * $stmt['result'][0][0] ?? 0, 2);
+					', ['i', $page_user['id']], false);
+				$stat_rewatch = round(100 * $stmt->rows[0][0] ?? 0, 2);
 
 				$stmt = sql('
 						SELECT AVG(score)
 						FROM media
 						WHERE user_id = ?
 						AND score != 0
-					', ['i', $page_user['id']], ['assoc' => false]);
-				$stat_avg_score = round($stmt['result'][0][0] ?? 0, 2);
+					', ['i', $page_user['id']], false);
+				$stat_avg_score = round($stmt->rows[0][0] ?? 0, 2);
 
 				?>
 
@@ -408,8 +405,8 @@ if(empty($page_user['banner_image'])) {
 
 				<?php
 				$favs = sql('SELECT media.id, media.name, media.image FROM media INNER JOIN collections ON collections.id = media.collection_id WHERE media.user_id=? AND media.favourite=1 AND collections.private <= ? ORDER BY name ASC', ['ii', $page_user['id'], $friendship]);
-				if($favs['rows'] > 0) :
-					foreach($favs['result'] as $fav) :
+				if($favs->row_count > 0) :
+					foreach($favs->rows as $fav) :
 				?>
 
 				<div><a href="/item?id=<?=$fav['id']?>"><?=$fav['name']?></a></div>
@@ -423,9 +420,7 @@ if(empty($page_user['banner_image'])) {
 					None yet.
 				</div>
 
-				<?php
-				endif;
-				?>
+				<?php endif; ?>
 			</div>
 		</div>
 	</div>

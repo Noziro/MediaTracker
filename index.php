@@ -1,7 +1,4 @@
 <?php
-define("SITE_NAME", "MediaTracker");
-
-
 
 # REQUIRED SETUP
 
@@ -20,10 +17,10 @@ $url = strtok($_SERVER["REQUEST_URI"], '?');
 
 # Check for various conditions related to the URL and make usable later in code
 
-if($url == '/' && !$has_session) {
+if( $url == '/' && !$has_session ){
 	$url = 'about';
 }
-elseif($url == '/' && $has_session) {
+elseif( $url == '/' && $has_session ){
 	$url = 'index';
 }
 else {
@@ -34,12 +31,12 @@ else {
 // replaces all slashes with ^. This matches the file names in "views" folder
 $url = str_replace('/', '^', $url);
 
-if(file_exists("views/$url.php") != 1) {
+if( file_exists("views/$url.php") != 1 ){
 	finalize('/404');
 }
 
 # Check for SQL connection
-if(mysqli_connect_errno()) {
+if( mysqli_connect_errno() ){
 	#500
 	http_response_code(500);
 	$url = '500';
@@ -55,9 +52,9 @@ if( $has_session && $url_readable === 'login'
 }
 
 // TODO - this is rather garbage. Better to redirect all number error codes in .htaccess to error.php or something
-if($url_readable === '403' || $url_readable === '404' || $url_readable === '500') {
+if( $url_readable === '403' || $url_readable === '404' || $url_readable === '500' ){
 	$file = 'error';
-} elseif($url_readable === 'register') {
+} elseif( $url_readable === 'register' ){
 	$file = 'login';
 } else {
 	$file = $url;
@@ -70,7 +67,7 @@ if($url_readable === '403' || $url_readable === '404' || $url_readable === '500'
 	<head>
 		<title><?php
 			echo SITE_NAME . " - ";
-			if($url == "index") {
+			if( $url == "index" ){
 				echo "Track Your Collections!";
 			} else {
 				echo ucfirst($url_readable);
@@ -103,7 +100,7 @@ if($url_readable === '403' || $url_readable === '404' || $url_readable === '500'
 		</script>
 	</head>
 	<body class="page <?php
-			if(isset($_GET['frame'])) {
+			if( isset($_GET['frame']) ){
 				echo "page--frame ";
 			}
 
@@ -173,12 +170,11 @@ if($url_readable === '403' || $url_readable === '404' || $url_readable === '500'
 		
 		<?php
 		if(isset($_SESSION['notice'])) :
-		$msg = $_SESSION['notice'];
-		foreach($_SESSION['notice'] as $msg) :
+		foreach($_SESSION['notice'] as $notice) :
 		?>
 		
 		<div class="wrapper <?php
-			if($msg['type'] === 'error') {
+			if( $notice->type === 'error' ){
 				echo "wrapper--notice-error";
 			} else {
 				echo "wrapper--notice";
@@ -186,77 +182,8 @@ if($url_readable === '403' || $url_readable === '404' || $url_readable === '500'
 		?>">
 			<div class="wrapper__inner notice">
 				<?php
-				switch($msg['case']) {
-					// Notices
-					case 'login_success':
-						echo "Successfully logged into your account. Welcome back!";
-						break;
-					case 'register_success':
-						echo "Successfully created your account. Have fun!";
-						break;
-					case 'logout_success':
-						echo "Successfully logged out of your account. Thanks for visiting.";
-						break;
-					case 'success':
-						echo "Action performed successfully.";
-						break;
-					case 'partial_success':
-						echo "Action partially succeeded - some updates failed. See below for details.";
-						break;
-					case 'no_change_detected':
-						echo "No changes were applied, as none were detected.";
-						break;
-					
-					// Errors
-					case 'required_field':
-						echo "Please fill out the required fields.";
-						break;
-					case 'login_bad':
-						echo "Incorrect login credentials. Please try again.";
-						break;
-					case 'register_exists':
-						echo "User already exists.";
-						break;
-					case 'register_match':
-						echo "Passwords do not match.";
-						break;
-					case 'invalid_name':
-						echo "Name contains invalid characters.";
-						break;
-					case 'invalid_pass':
-						echo "Password does not meet requirements.";
-						break;
-					case 'logout_failure':
-						echo "Failed to log you out. Please try again or report the error to the admins.";
-						break;
-					case 'require_sign_in':
-						echo "Please sign in before attempting this action.";
-						break;
-					case 'database_failure':
-						echo "An error occured in the server database while performing your request.";
-						break;
-					case 'database_null_commit':
-						echo "An attempted database commit did not result in an action.";
-						break;
-					case 'disallowed_action':
-						echo "Attempted to perform an invalid or unrecognized action.";
-						break;
-					case 'unauthorized':
-						echo "Attempted operation outside of user authority.";
-						break;
-					case 'invalid_value':
-						echo "A value you entered was invalid or out of expected bounds. Please try again.";
-						break;
-
-					case 'blank':
-						break;
-
-					// Default
-					default:
-						echo "This was meant to say something, but it doesn't!";
-						break;
-				}
-				echo '<div>'.$msg['details'].'</div>';
+				echo $notice->message;
+				echo '<div>'.$notice->details.'</div>';
 				?>
 			</div>
 		</div>
