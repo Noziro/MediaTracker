@@ -91,7 +91,7 @@ function upload_image($image, $subdir = '') {
 
 // ACTIONS
 
-elseif($action === "collection_create") {
+if($action === "collection_create") {
 	// Required fields
 	if(!isset($_POST['name']) || !isset($_POST['type'])) {
 		finalize($r2, ['required_field', 'error']);
