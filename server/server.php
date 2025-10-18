@@ -6,13 +6,18 @@ $pl_timer_start = hrtime(True);
 
 date_default_timezone_set('UTC');
 
-include "keyring.php";
-// keys.php contains potentially sensitive information such as the MYSQL_HOST/USER/PASS/DB/PORT variables.
+$host = getenv('DB_HOST') ?: 'localhost';
+$user = getenv('DB_USER') ?: 'mediatracker';
+$pass = getenv('DB_PASSWORD') ?: 'change_me';
+$dbname = getenv('DB_DATABASE') ?: 'mediatracker';
+$port = getenv('DB_PORT') ? intval(getenv('DB_PORT')) : 3306;
 
-$db = new mysqli(MYSQL_HOST, MYSQL_USER, MYSQL_PASS, MYSQL_DB, MYSQL_PORT);
+$db = new mysqli($host, $user, $pass, $dbname, $port);
 
-$stmt = $db->prepare('SET @@global.time_zone = "+00:00"');
-$stmt->execute();
+$result = $db->query("SHOW TABLES LIKE 'collections'");
+if (!$result || !$result->fetch_assoc()) {
+	include_once(__DIR__.'/schema.php');
+}
 
 session_start();
 

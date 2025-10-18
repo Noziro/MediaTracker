@@ -14,7 +14,7 @@ RewriteRule ^(static|upload) - [L,NC]
 ## Only matches if NOT directory
 RewriteCond %{REQUEST_FILENAME} !-d
 ## Only matches if valid file
-RewriteCond "%{REQUEST_FILENAME}.php" -f
+RewriteCond %{REQUEST_FILENAME}.php -f
 ## Allows access
 RewriteRule ^interface\/(.*)$ interface/$1.php [L,NC]
 

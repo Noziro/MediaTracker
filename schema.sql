@@ -1,12 +1,3 @@
--- phpMyAdmin SQL Dump
--- version 4.9.0.1
--- https://www.phpmyadmin.net/
---
--- Host: 127.0.0.1
--- Generation Time: Aug 18, 2021 at 03:26 AM
--- Server version: 10.3.16-MariaDB
--- PHP Version: 7.3.6
-
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
 
@@ -16,11 +7,8 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
---
--- Database: `collections`
---
-CREATE DATABASE IF NOT EXISTS `collections` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
-USE `collections`;
+CREATE DATABASE IF NOT EXISTS `mediatracker` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci;
+USE `mediatracker`;
 
 -- --------------------------------------------------------
 
@@ -30,7 +18,7 @@ USE `collections`;
 
 CREATE TABLE `activity` (
   `user_id` int(11) NOT NULL,
-  `type` tinyint(2) NOT NULL DEFAULT 0,
+  `type` tinyint NOT NULL DEFAULT 0,
   `media_id` int(15) DEFAULT NULL,
   `body` text NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -63,15 +51,15 @@ CREATE TABLE `collections` (
   `user_id` int(11) NOT NULL,
   `name` varchar(50) NOT NULL,
   `type` varchar(50) NOT NULL,
-  `display_image` tinyint(1) NOT NULL DEFAULT 1,
-  `display_score` tinyint(1) NOT NULL DEFAULT 1,
-  `display_progress` tinyint(1) NOT NULL DEFAULT 1,
-  `display_user_started` tinyint(1) NOT NULL DEFAULT 1,
-  `display_user_finished` tinyint(1) NOT NULL DEFAULT 1,
-  `display_days` tinyint(1) NOT NULL DEFAULT 1,
-  `rating_system` tinyint(3) NOT NULL DEFAULT 10,
-  `private` tinyint(1) NOT NULL,
-  `deleted` tinyint(1) NOT NULL
+  `display_image` tinyint NOT NULL DEFAULT 1,
+  `display_score` tinyint NOT NULL DEFAULT 1,
+  `display_progress` tinyint NOT NULL DEFAULT 1,
+  `display_user_started` tinyint NOT NULL DEFAULT 1,
+  `display_user_finished` tinyint NOT NULL DEFAULT 1,
+  `display_days` tinyint NOT NULL DEFAULT 1,
+  `rating_system` tinyint NOT NULL DEFAULT 10,
+  `private` tinyint NOT NULL,
+  `deleted` tinyint NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -99,21 +87,21 @@ CREATE TABLE `media` (
   `description` text NOT NULL,
   `comments` text NOT NULL,
   `credits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `links` longtext CHARACTER SET armscii8 COLLATE armscii8_bin NOT NULL,
-  `adult` tinyint(1) NOT NULL DEFAULT 0,
-  `favourite` tinyint(1) NOT NULL,
-  `private` tinyint(1) NOT NULL,
-  `deleted` tinyint(1) NOT NULL,
+  `links` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `adult` tinyint NOT NULL DEFAULT 0,
+  `favourite` tinyint NOT NULL,
+  `private` tinyint NOT NULL,
+  `deleted` tinyint NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Triggers `media`
 --
-DELIMITER $$
-CREATE TRIGGER `new_media` BEFORE INSERT ON `media` FOR EACH ROW SET NEW.`status` = CASE WHEN NEW.status = '' THEN 'planned' ELSE NEW.status END
-$$
-DELIMITER ;
+CREATE TRIGGER `new_media` 
+BEFORE INSERT ON `media` 
+FOR EACH ROW 
+SET NEW.`status` = CASE WHEN NEW.status = '' THEN 'planned' ELSE NEW.status END;
 
 -- --------------------------------------------------------
 
@@ -125,7 +113,7 @@ CREATE TABLE `media_name` (
   `media_id` int(15) NOT NULL,
   `type` tinytext NOT NULL,
   `name` tinytext NOT NULL,
-  `is_default` tinyint(1) NOT NULL
+  `is_default` tinyint NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -153,7 +141,7 @@ CREATE TABLE `replies` (
   `body` text NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `deleted` tinyint(1) NOT NULL DEFAULT 0
+  `deleted` tinyint NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -183,9 +171,9 @@ CREATE TABLE `threads` (
   `title` tinytext NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `locked` tinyint(1) NOT NULL DEFAULT 0,
-  `deleted` tinyint(1) NOT NULL DEFAULT 0,
-  `anonymous` tinyint(1) NOT NULL
+  `locked` tinyint NOT NULL DEFAULT 0,
+  `deleted` tinyint NOT NULL DEFAULT 0,
+  `anonymous` tinyint NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -222,10 +210,10 @@ CREATE TABLE `user_preferences` (
 --
 -- Triggers `user_preferences`
 --
-DELIMITER $$
-CREATE TRIGGER `new_user_preferences` BEFORE INSERT ON `user_preferences` FOR EACH ROW SET NEW.`timezone` = CASE WHEN NEW.timezone = '' THEN 'UTC' ELSE NEW.timezone END
-$$
-DELIMITER ;
+CREATE TRIGGER `new_user_preferences`
+BEFORE INSERT ON `user_preferences`
+FOR EACH ROW
+SET NEW.`timezone` = CASE WHEN NEW.timezone = '' THEN 'UTC' ELSE NEW.timezone END;
 
 --
 -- Indexes for dumped tables

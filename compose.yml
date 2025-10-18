@@ -1,0 +1,52 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mediatracker
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      DB_HOST: db
+      DB_PORT: "3306"
+      DB_ROOT_PASSWORD: root_password_change_me
+      DB_DATABASE: mediatracker
+      DB_USER: admin
+      DB_PASSWORD: change_me
+    volumes:
+      - ./:/var/www/html # for live code editing, remove if not needed
+    ports:
+      - "8080:80"
+    networks:
+      - mediatracker_internal
+
+  db:
+    image: mariadb:11.4
+    container_name: mediatracker_db
+    restart: unless-stopped
+    environment:
+      TZ: UTC
+      MARIADB_ROOT_PASSWORD: root_password_change_me
+      MARIADB_DATABASE: mediatracker
+      MARIADB_USER: admin
+      MARIADB_PASSWORD: change_me
+    ports:
+      - "3306:3306" # for local / dev access, remove if not needed
+    volumes:
+      - mt_db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    networks:
+      - mediatracker_internal
+
+volumes:
+  mt_db:
+
+networks:
+  mediatracker_internal:
+    driver: bridge
