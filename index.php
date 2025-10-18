@@ -50,6 +50,15 @@ if(mysqli_connect_errno()) {
 $url_split = explode('^', $url);
 $url_readable = end($url_split);
 
+if( $has_session && $url_readable === 'login'
+	|| $has_session && $url_readable === 'register'
+	) {
+	finalize('/');
+}
+if( $url_readable === 'groups' ) {
+	finalize('/404');
+}
+
 // TODO - this is rather garbage. Better to redirect all number error codes in .htaccess to error.php or something
 if($url_readable === '403' || $url_readable === '404' || $url_readable === '500') {
 	$file = 'error';

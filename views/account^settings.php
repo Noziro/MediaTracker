@@ -318,7 +318,7 @@ $user = array_merge($user, $user_extra['result'][0]);
 			<?php
 			else :
 				// TODO - this fails
-				finalize('/404');
+				#finalize('/404');
 			
 			endif;
 			?>

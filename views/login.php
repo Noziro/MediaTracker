@@ -1,5 +1,3 @@
-<?php if($has_session) { finalize('/'); } ?>
-
 <main id="content" class="wrapper wrapper--content">
 	<div class="wrapper__inner login-flow">
 		<div class="login-flow__form">

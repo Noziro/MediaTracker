@@ -29,7 +29,13 @@ if($page_user['rows'] < 1) {
 
 $page_user = $page_user['result'][0];
 
-$page_user_prefs = sql('SELECT profile_colour FROM user_preferences WHERE user_id=?', ['i', $page_user['id']])['result'][0];
+$page_user_prefs_query = sql('SELECT profile_colour FROM user_preferences WHERE user_id=?', ['i', $page_user['id']]);
+if( $page_user_prefs_query['rows'] > 0 ){
+	$page_user_prefs = $page_user_prefs_query['result'][0];
+}
+else {
+	$page_user_prefs = null;
+}
 
 if($user['id'] === $page_user['id']) {
 	$friendship = 9;
@@ -96,7 +102,13 @@ if(empty($page_user['banner_image'])) {
 
 		<div class="content-header">
 			<h2 class="content-header__title">
-				<?php $rank = sql('SELECT title FROM permission_levels WHERE permission_level <= ? ORDER BY permission_level DESC LIMIT 1', ['i', $page_user['permission_level']])['result'][0]['title']; ?>
+				<?php
+				$rank = 'User';
+				$rank_query = sql('SELECT title FROM permission_levels WHERE permission_level <= ? ORDER BY permission_level DESC LIMIT 1', ['i', $page_user['permission_level']]);
+				if( $rank_query['rows'] > 0 ){
+					$rank = ['result'][0]['title'];
+				}
+				?>
 				<?=$page_user['nickname']?>
 				<span class="site-rank site-rank--<?=strtolower(str_replace(' ', '-', $rank))?>">
 					<?=$rank?>
@@ -107,7 +119,7 @@ if(empty($page_user['banner_image'])) {
 </div>
 
 <main id="content" class="wrapper wrapper--content">
-	<div class="wrapper__inner profile" <?php if($page_user_prefs['profile_colour'] !== null) { echo 'style="--profile-colour: '.$page_user_prefs['profile_colour'].'"'; } ?>>
+	<div class="wrapper__inner profile" <?php if($page_user_prefs !== null && isset($page_user_prefs['profile_colour'])) { echo 'style="--profile-colour: '.$page_user_prefs['profile_colour'].'"'; } ?>>
 		<div class="profile__column profile__column--thin">
 			<div class="profile__section">
 				<span class="profile__section-header">Links</span>

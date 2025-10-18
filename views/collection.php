@@ -172,21 +172,18 @@
 					
 					<td class="table__cell">
 						<?php
-						$s = $item['user_started_at'];
-						$e = $item['user_finished_at'];
-						$sd = date_create($s);
-						$ed = date_create($e);
-						$n = date_create();
+						$started = $item['user_started_at'];
+						$ended = $item['user_finished_at'];
 
-						if(isset($s) && isset($e)) {
-							$days = date_diff($sd,$ed)->format('%a');
+						if(isset($started) && isset($ended)) {
+							$days = date_diff(date_create($started),date_create($ended))->format('%a');
 							if($days < 1) {
 								$days = 1;
 							}
 							echo $days;
-						} elseif(isset($s)) {
-							$days = date_diff($sd,$n)->format('%a');
-							if($sd > $n) {
+						} elseif(isset($started)) {
+							$days = date_diff(date_create($started),date_create())->format('%a');
+							if(date_create($started) > date_create()) {
 								echo 'N/A';
 							} else {
 								if($days < 1) {

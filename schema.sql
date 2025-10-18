@@ -20,7 +20,7 @@ CREATE TABLE `activity` (
   `user_id` int(11) NOT NULL,
   `type` tinyint NOT NULL DEFAULT 0,
   `media_id` int(15) DEFAULT NULL,
-  `body` text NOT NULL,
+  `body` text NOT NULL DEFAULT '',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -58,8 +58,8 @@ CREATE TABLE `collections` (
   `display_user_finished` tinyint NOT NULL DEFAULT 1,
   `display_days` tinyint NOT NULL DEFAULT 1,
   `rating_system` tinyint NOT NULL DEFAULT 10,
-  `private` tinyint NOT NULL,
-  `deleted` tinyint NOT NULL
+  `private` tinyint NOT NULL DEFAULT 0,
+  `deleted` tinyint NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -72,9 +72,9 @@ CREATE TABLE `media` (
   `id` int(15) NOT NULL,
   `user_id` int(11) NOT NULL,
   `collection_id` int(11) NOT NULL,
-  `status` tinytext NOT NULL,
+  `status` tinytext NOT NULL DEFAULT 'planned',
   `name` tinytext NOT NULL,
-  `image` tinytext NOT NULL,
+  `image` tinytext NOT NULL DEFAULT '',
   `score` int(3) DEFAULT 0,
   `episodes` smallint(6) DEFAULT 0,
   `progress` smallint(6) NOT NULL DEFAULT 0,
@@ -84,24 +84,16 @@ CREATE TABLE `media` (
   `release_date` date DEFAULT NULL,
   `started_at` date DEFAULT NULL,
   `finished_at` date DEFAULT NULL,
-  `description` text NOT NULL,
-  `comments` text NOT NULL,
+  `description` text NOT NULL DEFAULT '',
+  `comments` text NOT NULL DEFAULT '',
   `credits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `links` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
   `adult` tinyint NOT NULL DEFAULT 0,
-  `favourite` tinyint NOT NULL,
-  `private` tinyint NOT NULL,
-  `deleted` tinyint NOT NULL,
+  `favourite` tinyint NOT NULL DEFAULT 0,
+  `private` tinyint NOT NULL DEFAULT 0,
+  `deleted` tinyint NOT NULL DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
---
--- Triggers `media`
---
-CREATE TRIGGER `new_media` 
-BEFORE INSERT ON `media` 
-FOR EACH ROW 
-SET NEW.`status` = CASE WHEN NEW.status = '' THEN 'planned' ELSE NEW.status END;
 
 -- --------------------------------------------------------
 
@@ -125,7 +117,7 @@ CREATE TABLE `media_name` (
 CREATE TABLE `permission_levels` (
   `permission_level` int(2) NOT NULL,
   `title` varchar(50) NOT NULL,
-  `description` text NOT NULL
+  `description` text NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -190,9 +182,9 @@ CREATE TABLE `users` (
   `password` varchar(255) NOT NULL,
   `permission_level` int(2) NOT NULL DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `profile_image` tinytext NOT NULL,
-  `banner_image` tinytext NOT NULL,
-  `about` text NOT NULL
+  `profile_image` tinytext NOT NULL DEFAULT '',
+  `banner_image` tinytext NOT NULL DEFAULT '',
+  `about` text NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -203,17 +195,9 @@ CREATE TABLE `users` (
 
 CREATE TABLE `user_preferences` (
   `user_id` int(11) NOT NULL,
-  `timezone` tinytext NOT NULL,
+  `timezone` tinytext NOT NULL DEFAULT 'UTC',
   `profile_colour` varchar(7) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
---
--- Triggers `user_preferences`
---
-CREATE TRIGGER `new_user_preferences`
-BEFORE INSERT ON `user_preferences`
-FOR EACH ROW
-SET NEW.`timezone` = CASE WHEN NEW.timezone = '' THEN 'UTC' ELSE NEW.timezone END;
 
 --
 -- Indexes for dumped tables

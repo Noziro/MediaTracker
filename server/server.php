@@ -34,6 +34,21 @@ session_start();
 
 // GENERIC FUNCTIONS
 
+function pretty_print($var) {
+	if( gettype($var) === 'array' || gettype($var) === 'object' ) {
+		echo '<pre>'.print_r($var, True).'</pre>';
+	}
+	elseif( gettype($var) === 'boolean' ) {
+		echo $var ? 'true' : 'false';
+	}
+	elseif( gettype($var) === 'integer' ) {
+		echo $var ? 'true' : 'false';
+	}
+	else {
+		echo $var;
+	}
+}
+
 function to_int($s) {
 	return intval(round($s));
 }
@@ -98,11 +113,9 @@ class Authentication {
 
 		// Check for existence & get info
 		$stmt = sql('SELECT id FROM users WHERE username=?', ['s', $post_name_normalized]);
-		if (!$stmt['result'] || $stmt['rows'] > 0) {
+		if( $stmt['result'] === false || $stmt['rows'] > 0 ){
 			return false;
 		}
-
-		$user = $stmt['result'][0];
 		
 		// Hash password
 		$pass_hashed = password_hash($post_pass, PASSWORD_BCRYPT);
@@ -301,11 +314,13 @@ if($has_session) {
 $permission_levels_temp = sql('SELECT title, permission_level FROM permission_levels ORDER BY permission_level ASC')['result'];
 $permission_levels = [];
 
-foreach($permission_levels_temp as $perm_pair) {
-	$title = $perm_pair['title'];
-	$level = $perm_pair['permission_level'];
-	
-	$permission_levels[$title] = $level;
+if( gettype($permission_levels_temp) === 'array' && count($permission_levels_temp) > 0 ){	
+	foreach($permission_levels_temp as $perm_pair) {
+		$title = $perm_pair['title'];
+		$level = $perm_pair['permission_level'];
+		
+		$permission_levels[$title] = $level;
+	}
 }
 
 
@@ -787,26 +802,27 @@ function readable_date($date, $suffix = true, $verbose = false) {
 	$then = new DateTime($date);
 	$diff = $now->diff($then);
 	
-	$diff->w = floor($diff->d / 7);
-    $diff->d -= $diff->w * 7;
+	$weeks = floor($diff->d / 7);
+	$diff->d -= $weeks * 7;
 	
 	$string = [
         'y' => 'year',
         'm' => 'month',
-        'w' => 'week',
+		// 'w' => 'week', // Removed as weeks are calculated separately
         'd' => 'day',
         'h' => 'hour',
         'i' => 'minute',
         's' => 'second',
     ];
 	
-    foreach ($string as $k => &$v) {
-        if ($diff->$k) {
-            $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? 's' : '');
-        } else {
-            unset($string[$k]);
-        }
-    }
+	foreach ($string as $k => &$v) {
+		$value = $k === 'w' ? $weeks : $diff->$k;
+		if ($value) {
+			$v = $value . ' ' . $v . ($value > 1 ? 's' : '');
+		} else {
+			unset($string[$k]);
+		}
+	}
 	
     if(!$verbose) $string = array_slice($string, 0, 1);
 	if(!$suffix) {
@@ -845,8 +861,9 @@ $activity_types = [
 //     response_code -> string to describe outcome, used in notices
 //     response_type -> string to describe type of outcome, used in notices
 //     rows -> number of affected/returned rows
-function sql(string $stmt, $params = false, $options = false) {
+function sql( string $stmt, array $params = [], array $options = [] ){
 	global $db;
+	# TODO: if keeping this function, make a class for this return value and keep types consistent ffs
 	$dbfail = [
 			'result' => false,
 			'response_code' => 'database_failure',
@@ -856,7 +873,7 @@ function sql(string $stmt, $params = false, $options = false) {
 	
 	// Execute statement
 	if(!$q = $db->prepare($stmt)) { return $dbfail; }
-	if($params !== false) { $q->bind_param(...$params); }
+	if(count($params) > 0) { $q->bind_param(...$params); }
 	if(!$q->execute()) { return $dbfail; }
 
 	// SELECT
@@ -864,8 +881,8 @@ function sql(string $stmt, $params = false, $options = false) {
 		$res = $q->get_result();
 		$rows = $res->num_rows;
 		if($rows < 1) {
-			$res = true;
-		} elseif($options['assoc'] === false) {
+			$res = true; # TODO: make this return an empty array instead of bool, wtf were you thinking
+		} elseif(isset($options['assoc']) && $options['assoc'] === false) {
 			$res = $res->fetch_all();
 		} else {
 			$res = $res->fetch_all(MYSQLI_ASSOC);

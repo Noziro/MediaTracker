@@ -16,6 +16,7 @@
 			<?php
 			$stmt = sql('SELECT id, name, image FROM media WHERE private=0 AND deleted=0 ORDER BY RAND() LIMIT 20');
 			$random_media = $stmt['result'];
+			if( $stmt['rows'] > 0 ) :
 			foreach($random_media as $media) :
 			?>
 
@@ -25,7 +26,7 @@
 				</div>
 			</a>
 
-			<?php endforeach; ?>
+			<?php endforeach; endif; ?>
 		</div>
 
 		<div class="c-media-list">
@@ -34,6 +35,7 @@
 			<?php
 			$stmt = sql('SELECT id, name FROM media WHERE private=0 AND deleted=0 ORDER BY id DESC LIMIT 20');
 			$new_media = $stmt['result'];
+			if( $stmt['rows'] > 0 ) :
 			foreach($new_media as $media) :
 			?>
 
@@ -41,7 +43,7 @@
 				<a href="/item?id=<?=$media['id']?>"><?=$media['name']?></a>
 			</div>
 
-			<?php endforeach; ?>
+			<?php endforeach; endif; ?>
 		</div>
 
 
