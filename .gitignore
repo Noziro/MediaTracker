@@ -4,3 +4,4 @@
 *.psd
 keyring.*
 upload/*
+*.bat
