@@ -248,7 +248,7 @@ elseif( $action === 'collection_delete' || $action === 'collection_undelete' ){
 	if( !$stmt->ok ){ finalize($r2, [$stmt->response_code, $stmt->response_type]); }
 
 	if( $action === 'collection_delete' ){
-		$r2 = '/collection/'.$user['id'];
+		$r2 = '/collection';
 	}
 
 	finalize($r2, ['success']);

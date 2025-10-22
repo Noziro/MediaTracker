@@ -1,16 +1,71 @@
+<?php
+# TODO: stop this SELECT from occuring on every collection page
+$orphaned_items = sql('
+	SELECT COUNT(m.id)
+	FROM media AS m
+	JOIN collections AS c ON m.collection_id = c.id
+	WHERE m.user_id=? AND c.deleted=1',
+	['i', $user['id']], false);
+
+$is_orphanage = end($external_url['path_array']) === 'orphans';
+?>
+
 <main id="content" class="wrapper wrapper--content">
 	<div class="wrapper__inner">
 		<?php
-		if(isset($_GET['c'])) :
-		$collection = sql('SELECT id, user_id, name, type, display_image, display_score, display_progress, display_user_started, display_user_finished, display_days, rating_system, private, deleted FROM collections WHERE id=?', ['i', $_GET['c']]);
-		if( $collection->row_count < 1 ){
-			finalize('/404');
+		if( isset($_GET['c']) || $is_orphanage ) :
+
+		if( isset($_GET['c']) ){
+			$stmt = sql('
+				SELECT id, user_id, name, type, display_image, display_score, display_progress, display_user_started, display_user_finished, display_days, rating_system, private, deleted
+				FROM collections
+				WHERE id=?',
+				['i', $_GET['c']]);
+			if( $stmt->row_count < 1 ){
+				finalize('/404');
+			}
+			$collection = $stmt->rows[0];
+			if( $collection['deleted'] === 1 ){
+				finalize('/403');
+			}
+
+			$items = sql('
+				SELECT id, status, name, image, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments, favourite
+				FROM media
+				WHERE collection_id=? AND deleted=0
+				ORDER BY status ASC, name ASC',
+				['i', $collection['id']]);
+		
+			$page_user = sql('SELECT id, nickname FROM users WHERE id=?', ['i', $collection['user_id']])->rows[0];
 		}
-		$collection = $collection->rows[0];
+		elseif( $is_orphanage ){
+			$collection = [
+				'name' => 'Orphaned Items',
+				'user_id' => $user['id'],
+				'deleted' => 0,
+				'display_image' => 1,
+				'display_score' => 1,
+				'display_progress' => 1,
+				'display_user_started' => 1,
+				'display_user_finished' => 1,
+				'display_days' => 1,
+				'rating_system' => 100
+			];
+			$items = sql('
+				SELECT m.id, m.status, m.name, m.image, m.score, m.episodes, m.progress, m.rewatched, m.user_started_at, m.user_finished_at, m.release_date, m.started_at, m.finished_at, m.comments, m.favourite
+				FROM media AS m
+				JOIN collections AS c ON m.collection_id = c.id
+				WHERE m.user_id=? AND c.deleted=1
+				ORDER BY status ASC, name ASC',
+				['i', $user['id']]);
 
-		$items = sql('SELECT id, status, name, image, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments, favourite FROM media WHERE collection_id=? AND deleted=0 ORDER BY status ASC, name ASC', ['i', $collection['id']]);
+			$page_user = $user;
+		}
+		else{
+			finalize('/500');
+		}
 
-		$page_user = sql('SELECT id, nickname FROM users WHERE id=?', ['i', $collection['user_id']])->rows[0];
+
 
 		$columns = [
 			'display_image' => 'Image',
@@ -37,6 +92,7 @@
 		<?php if($has_session && $user['id'] === $page_user['id']) : ?>
 		<div class="page-actions">
 			<div class="page-actions__button-list">
+				<?php if( isset($_GET['c']) ) : ?>
 				<button class="page-actions__action button" type="button" onclick="toggleModal('modal--collection-edit', true)">
 					Edit Collection Details
 				</button>
@@ -44,14 +100,17 @@
 				<button class="page-actions__action button" type="button" onclick="toggleModal('modal--item-add', true)">
 					Add New Item
 				</button>
+				<?php endif; ?>
 				
 				<button class="page-actions__action button button--disabled" type="button" disabled>
 					Mass Edit <!-- TODO - will activate a multi-selection mode with checkboxes for each item in which you can edit attributes or delete -->
 				</button>
 
+				<?php if( isset($_GET['c']) ) : ?>
 				<button class="page-actions__action button" type="button" onclick="modalConfirmation('Are you sure you wish to delete this collection?', 'collection_delete', 'collection_id', <?=$collection['id']?>)">
 					Delete Collection
 				</button>
+				<?php endif; ?>
 			</div>
 		</div>
 		<?php endif ?>
@@ -68,9 +127,9 @@
 		else :
 		?>
 
-		<?php if($collection['deleted'] === 1) : ?>
+		<?php if( $is_orphanage ) : ?>
 
-		<div class="dialog-box">This collection and its items are marked for deletion and will be permanently lost within X months. <!-- TODO - specify months once feature is implemented --></div>
+		<div class="dialog-box">These items belong to deleted collections and have no home! You may want to re-house them.</div>
 
 		<?php endif; ?>
 
@@ -484,7 +543,6 @@
 			}
 
 			$collections = sql('SELECT id, user_id, name, type, private FROM collections WHERE user_id=? AND deleted=0 AND private<=? ORDER BY name ASC', ['ii', $page_user['id'], $friendship]);
-			$deleted_collections = sql('SELECT id, user_id, name, type, private FROM collections WHERE user_id=? AND deleted=1 AND private<=? ORDER BY name ASC', ['ii', $page_user['id'], $friendship]);
 		?>
 
 
@@ -580,10 +638,11 @@
 
 
 		<?php
-		if($deleted_collections->row_count > 0 && $user['id'] === $page_user['id']) :
+		$orphaned_items_count = $orphaned_items->row_count > 0 ? $orphaned_items->rows[0][0] : 0;
+		if($orphaned_items_count > 0 && $user['id'] === $page_user['id']) :
 		?>
 
-		<h2 class="c-heading">Deleted Collections</h2>
+		<h2 class="c-heading">Automatic Collections</h2>
 
 		<table class="table">
 			<thead>
@@ -595,32 +654,22 @@
 				</tr>
 			</thead>
 			<tbody>
-				<?php foreach($deleted_collections->rows as $collection) : ?>
-
 				<tr class="table__body-row">
 					<td class="table__cell">
-						<a class="u-bold" href="/collection?c=<?=$collection['id']?>">
-							<?=$collection['name']?>
+						<a class="u-bold" href="/collection/orphans">
+							Orphaned Items
 						</a>
 					</td>
 					<td class="table__cell">
-						<?php
-						echo reset(sql('SELECT COUNT(id) FROM media WHERE collection_id=?', ['i', $collection['id']])->rows[0]);
-						?>
+						<?=$orphaned_items_count?>
 					</td>
 					<td class="table__cell">
-						<?=$collection['type']?>
+						Mixed
 					</td>
 					<td class="table__cell">
-						<?php if($collection['private'] === 9) : ?>
 						Private
-						<?php else : ?>
-						Public
-						<?php endif; ?>
 					</td>
 				</tr>
-
-				<?php endforeach; ?>
 			</tbody>
 		</table>
 

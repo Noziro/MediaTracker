@@ -12,8 +12,14 @@ include PATH."server/server.php";
 
 # INDEX-SPECIFIC SETUP
 
+# the URL as displayed in the client browser
+$external_url = [
+	'path_string' => strtok($_SERVER["REQUEST_URI"], '?'),
+	'path_array' => array_filter(explode('/', strtok($_SERVER["REQUEST_URI"], '?')))
+];
+
 # Strips GET variables off the end and returns only the base URL
-$url = strtok($_SERVER["REQUEST_URI"], '?');
+$url = $external_url['path_string'];
 
 # Check for various conditions related to the URL and make usable later in code
 
@@ -31,6 +37,9 @@ else {
 // replaces all slashes with ^. This matches the file names in "views" folder
 $url = str_replace('/', '^', $url);
 
+if( $url === 'collection^orphans' ){
+	$url = 'collection';
+}
 if( file_exists("views/$url.php") != 1 ){
 	finalize('/404');
 }
