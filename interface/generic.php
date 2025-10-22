@@ -794,7 +794,7 @@ elseif( $action === 'change_settings' ){
 		$tz = $_POST['timezone'];
 
 		// If value not the same as before
-		if( $tz !== $prefs['timezone'] ){
+		if( $tz !== $user['timezone'] ){
 			// If not valid input
 			$needle = false;
 			foreach( $valid_timezones as $zone_group ){
@@ -809,7 +809,7 @@ elseif( $action === 'change_settings' ){
 			}
 
 			// If valid, continue
-			$to_update['user_preferences'][] = [
+			$to_update['users'][] = [
 				'column' => 'timezone',
 				'type' => 's',
 				'value' => $tz
@@ -819,7 +819,7 @@ elseif( $action === 'change_settings' ){
 
 	// PROFILE COLOUR
 	if( array_key_exists('reset_profile_colour', $_POST) && $_POST['reset_profile_colour'] == 1 ){
-		$to_update['user_preferences'][] = [
+		$to_update['users'][] = [
 			'column' => 'profile_colour',
 			'type' => 's',
 			'value' => null
@@ -830,7 +830,7 @@ elseif( $action === 'change_settings' ){
 
 		// If value not the same as before and not default
 		// TODO - hardcoding the default colour like this and preventing users from permanently setting it is unwanted behaviour. Improve this later.
-		if( $col !== $prefs['profile_colour'] && $col !== '#ff3333' ){
+		if( $col !== $user['profile_colour'] && $col !== '#ff3333' ){
 			// If not valid input
 			if(
 				strlen($col) !== 7
@@ -840,7 +840,7 @@ elseif( $action === 'change_settings' ){
 			}
 
 			// If valid, continue
-			$to_update['user_preferences'][] = [
+			$to_update['users'][] = [
 				'column' => 'profile_colour',
 				'type' => 's',
 				'value' => $col

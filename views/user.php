@@ -28,9 +28,9 @@ if( $page_user->row_count < 1 ){
 
 $page_user = $page_user->rows[0];
 
-$page_user_prefs_query = sql('SELECT profile_colour FROM user_preferences WHERE user_id=?', ['i', $page_user['id']]);
-if( $page_user_prefs_query->row_count > 0 ){
-	$page_user_prefs = $page_user_prefs_query->rows[0];
+$stmt = sql('SELECT profile_colour FROM users WHERE id=?', ['i', $page_user['id']]);
+if( $stmt->row_count > 0 ){
+	$page_user_prefs = $stmt->rows[0];
 }
 else {
 	$page_user_prefs = null;

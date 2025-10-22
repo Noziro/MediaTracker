@@ -8,32 +8,21 @@ USE `mediatracker`;
 
 
 
+
 CREATE TABLE `users` (
-  `id` int(11) NOT NULL,
-  `username` varchar(50) NOT NULL,
-  `nickname` varchar(50) DEFAULT '',
-  `email` varchar(255) DEFAULT '',
-  `password` varchar(255) NOT NULL,
-  `permission_level` int(2) NOT NULL DEFAULT 1,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `profile_image` tinytext NOT NULL DEFAULT '',
-  `banner_image` tinytext NOT NULL DEFAULT '',
-  `about` text NOT NULL DEFAULT ''
+	`id` int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
+	`username` varchar(50) NOT NULL UNIQUE,
+	`nickname` varchar(50) DEFAULT '',
+	`email` varchar(255) DEFAULT '',
+	`password` varchar(255) NOT NULL,
+	`permission_level` int(2) NOT NULL DEFAULT 1,
+	`created_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+	`profile_colour` varchar(7) DEFAULT NULL,
+	`profile_image` tinytext NOT NULL DEFAULT '',
+	`banner_image` tinytext NOT NULL DEFAULT '',
+	`about` text NOT NULL DEFAULT '',
+	`timezone` tinytext NOT NULL DEFAULT 'UTC'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-ALTER TABLE `users`
-  ADD UNIQUE KEY `id` (`id`),
-  ADD UNIQUE KEY `username` (`username`);
-ALTER TABLE `users`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
-
-
-CREATE TABLE `user_preferences` (
-  `user_id` int(11) NOT NULL,
-  `timezone` tinytext NOT NULL DEFAULT 'UTC',
-  `profile_colour` varchar(7) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-ALTER TABLE `user_preferences`
-  ADD PRIMARY KEY (`user_id`);
 
 
 CREATE TABLE `collections` (

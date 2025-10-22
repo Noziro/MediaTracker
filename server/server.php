@@ -125,7 +125,6 @@ class Authentication {
 		
 		// Insert user into DB
 		sql('INSERT INTO users (username, nickname, email, password) VALUES (?, ?, ?, ?)', ['ssss', $post_name_normalized, $post_name, $email, $pass_hashed]);
-		sql('INSERT INTO user_preferences (user_id) VALUES (LAST_INSERT_ID())');
 		
 		// Automatically login after registration.
 		$this->login($post_name, $post_pass);
@@ -154,20 +153,10 @@ class Authentication {
 	// Gets info about current user. Used after checking if they are logged in with is_logged_in(). Returns SQL_ASSOC or FALSE
 	public function get_current_user() {
 		# TODO: double check that this is not abusable with an expired session token
-		$stmt = sql('SELECT users.id, users.username, users.nickname, users.email, users.permission_level FROM users INNER JOIN sessions ON sessions.user_id = users.id WHERE sessions.id=?', ['s', $_COOKIE['session']]);
+		$stmt = sql('SELECT users.id, users.username, users.nickname, users.email, users.permission_level, users.profile_colour, users.timezone FROM users INNER JOIN sessions ON sessions.user_id = users.id WHERE sessions.id=?', ['s', $_COOKIE['session']]);
 
 		if( !$stmt->ok || $stmt->row_count < 1 ){
 			return false;
-		} else {
-			return $stmt->rows[0];
-		}
-	}
-
-	public function get_current_user_prefs(): array {
-		$stmt = sql('SELECT * FROM user_preferences INNER JOIN sessions ON sessions.user_id = user_preferences.user_id WHERE sessions.id=?', ['s', $_COOKIE['session']]);
-		
-		if( !$stmt->ok || $stmt->row_count < 1 ){
-			return [];
 		} else {
 			return $stmt->rows[0];
 		}
@@ -302,15 +291,13 @@ $auth = new Authentication();
 $has_session = $auth->is_logged_in();
 if( $has_session ){
 	$user = $auth->get_current_user();
-	$prefs = $auth->get_current_user_prefs();
 	$permission_level = $user['permission_level'];
 } else {
 	$user = [];
-	$prefs = [];
 	$permission_level = 0;
 }
-if( !isset($prefs['timezone']) ){
-	$prefs['timezone'] = 'UTC';
+if( !isset($user['timezone']) ){
+	$user['timezone'] = 'UTC';
 }
 
 // ACCESS LEVEL
@@ -786,8 +773,8 @@ $valid_timezones = [
 
 // Get user timezone
 function utc_date_to_user($utc, $hour = true) {
-	global $prefs;
-	$preferred_timezone = isset($prefs['timezone']) ? $prefs['timezone'] : 'UTC';
+	global $user;
+	$preferred_timezone = isset($user['timezone']) ? $user['timezone'] : 'UTC';
 	$timezone_utc = new DateTimeZone('UTC');
 	$timezone = new DateTimeZone($preferred_timezone);
 	$date = new DateTime($utc, $timezone_utc);

@@ -205,7 +205,7 @@ $user = array_merge($user, $user_extra->rows[0]);
 				<?php foreach($valid_timezones as $zone_group_label => $zone_group) : ?>
 				<optgroup label="<?=$zone_group_label?>">
 					<?php foreach($zone_group as $zone) : ?>
-					<option <?php if( isset($prefs['timezone']) && $zone === $prefs['timezone'] || $zone === 'UTC' ){ echo "selected"; } ?>>
+					<option <?php if( isset($user['timezone']) && $zone === $user['timezone'] || $zone === 'UTC' ){ echo "selected"; } ?>>
 						<?=$zone?>
 					</option>
 					<?php endforeach; ?>
@@ -215,8 +215,8 @@ $user = array_merge($user, $user_extra->rows[0]);
 
 			<label for="change-colour" class="label">Change profile colour</label>
 			<input form="form-settings" id="change-colour" type="color" name="profile_colour" value="<?php
-					if( isset($prefs['profile_colour']) && $prefs['profile_colour'] !== null ){
-						echo $prefs['profile_colour'];
+					if( isset($user['profile_colour']) && $user['profile_colour'] !== null ){
+						echo $user['profile_colour'];
 					} else {
 						echo '#ff3333';
 					}
