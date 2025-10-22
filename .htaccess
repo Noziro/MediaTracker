@@ -2,25 +2,23 @@
 
 RewriteEngine on
 
-# Provides access to files in static folder (but not directories)
-## Only matches if NOT directory
-RewriteCond %{REQUEST_FILENAME} !-d
-## Only matches if valid file
+# Provides access to files in static folder, unchanged
+## only applies to valid files
 RewriteCond %{REQUEST_FILENAME} -f
-## Allows access
-RewriteRule ^(static|upload) - [L,NC]
+## sends request unchanged
+RewriteRule ^(static|upload)\/ - [L]
 
-# Provides access to files in interface folder (but not directories)
-## Only matches if NOT directory
+# Redirect "/interface/example" URLs to "/interface/example.php"
+## do not redirect if this points to a directory
 RewriteCond %{REQUEST_FILENAME} !-d
-## Only matches if valid file
-RewriteCond %{REQUEST_FILENAME}.php -f
-## Allows access
-RewriteRule ^interface\/(.*)$ interface/$1.php [L,NC]
+## as this is rewriting the path, it will start again from the top then go to the next rule
+RewriteRule ^interface\/(.*?)(\.php)?$ interface/$1.php [NC]
 
-# Redirects all non-asset files to index
-RewriteRule ^(?!upload|static|interface).* index.php [L]
+# Catches valid interface requests and serves them.
+## must be valid file
+RewriteCond %{REQUEST_FILENAME} -f
+## sends request unchanged
+RewriteRule ^interface\/ - [L,NC]
 
-# Redirects all directories to index
-RewriteCond %{REQUEST_FILENAME} -d
-RewriteRule . index.php [L]
+# Redirects everything not caught by earlier rules to index
+RewriteRule . index.php
