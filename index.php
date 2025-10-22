@@ -14,6 +14,9 @@ DEFINE("URL", [
 	'PATH_ARRAY' => remove_empties(explode('/', strtok($_SERVER["REQUEST_URI"], '?')))
 ]);
 
+# Include HttpResponse class for error redirection
+include PATH."server/http_response.php";
+
 
 
 // INDEX-SPECIFIC SETUP
@@ -31,7 +34,7 @@ elseif( URL['PATH_ARRAY'][0] === 'register' ){
 	$file = 'login';
 }
 // TODO: this is rather garbage. Better to redirect all number error codes in .htaccess to error.php or something
-elseif( in_array(URL['PATH_ARRAY'][0], ['403', '404', '500']) ){
+elseif( count(URL['PATH_ARRAY']) === 1 && in_array(intval(URL['PATH_ARRAY'][0]), array_keys(HttpResponse::$error_codes)) && intval(URL['PATH_ARRAY'][0]) >= 400 ){
 	$file = 'error';
 }
 else {
@@ -47,11 +50,10 @@ $page_title = isset($page_title) ? $page_title : ucfirst(nth_last(URL['PATH_ARRA
 
 # SQL connection must be OK
 if( mysqli_connect_errno() ){
-	http_response_code(500);
-	$file = '500';
+	finalize('/500');
 }
 # file must exist
-if( file_exists("views/$file.php") != 1 ){
+if( file_exists("views/$file.php") === false ){
 	finalize('/404');
 }
 # user cannot re-login
