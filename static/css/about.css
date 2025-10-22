@@ -36,8 +36,7 @@
 .c-about__section--primary {
 	height: 500px;
 	background:
-		linear-gradient(35deg, rgba(191, 161, 209, 0.7), rgba(98, 73, 212, 0.7)),
-		url('/static/img/about--primary.jpg');
+		linear-gradient(35deg, rgba(191, 161, 209, 0.7), rgba(98, 73, 212, 0.7));
 	color: var(--backing-content);
 	text-shadow:
 		1px .5px .5px rgba(0,0,0,0.5),
