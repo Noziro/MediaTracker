@@ -62,6 +62,23 @@ function format_user_text($s) {
 	return nl2br(htmlspecialchars($s));
 }
 
+// Gets the last element of the array, starting from index 1 (last)
+function nth_last( array $arr, int $nth = 1 ){
+	return $arr[count($arr)-$nth];
+}
+
+// This function purely exists because the builtin array_filter() does not re-number array indexes
+function remove_empties( array $arr ): array {
+	$filtered_arr = [];
+	foreach( $arr as $item ){
+		if( trim($item) === '' || $item === null ){
+			continue;
+		}
+		$filtered_arr[] = $item;
+	}
+	return $filtered_arr;
+}
+
 
 
 // AUTH SYSTEM

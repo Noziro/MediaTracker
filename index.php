@@ -1,6 +1,6 @@
 <?php
 
-# REQUIRED SETUP
+// SETUP
 
 # Defines basic PATH for easy use across both client & server
 define("PATH", $_SERVER["DOCUMENT_ROOT"] . "/");
@@ -8,80 +8,62 @@ define("PATH", $_SERVER["DOCUMENT_ROOT"] . "/");
 # Includes various important variables and functions
 include PATH."server/server.php";
 
+# the URL as displayed in the client browse
+DEFINE("URL", [
+	'PATH_STRING' => strtok($_SERVER["REQUEST_URI"], '?'),
+	'PATH_ARRAY' => remove_empties(explode('/', strtok($_SERVER["REQUEST_URI"], '?')))
+]);
 
 
-# INDEX-SPECIFIC SETUP
 
-# the URL as displayed in the client browser
-$external_url = [
-	'path_string' => strtok($_SERVER["REQUEST_URI"], '?'),
-	'path_array' => array_filter(explode('/', strtok($_SERVER["REQUEST_URI"], '?')))
-];
+// INDEX-SPECIFIC SETUP
 
-# Strips GET variables off the end and returns only the base URL
-$url = $external_url['path_string'];
+// Determine which file to load as the main page content
 
-# Check for various conditions related to the URL and make usable later in code
-
-if( $url == '/' && !$has_session ){
-	$url = 'about';
+if( empty(URL['PATH_ARRAY']) ){
+	$file = $has_session ? 'index' : 'about';
+	$page_title = $has_session ? 'Dashboard' : 'Track Your Collections!';
 }
-elseif( $url == '/' && $has_session ){
-	$url = 'index';
+elseif( URL['PATH_ARRAY'][0] === 'collection' ){
+	$file = 'collection';
+}
+elseif( URL['PATH_ARRAY'][0] === 'register' ){
+	$file = 'login';
+}
+// TODO: this is rather garbage. Better to redirect all number error codes in .htaccess to error.php or something
+elseif( in_array(URL['PATH_ARRAY'][0], ['403', '404', '500']) ){
+	$file = 'error';
 }
 else {
-	// strips the / off the beginning
-	$url = substr($url, 1);
+	# replaces all slashes with ^. This matches the file names in "views" folder
+	$file = str_replace('/', '^', substr(URL['PATH_STRING'], 1));
 }
 
-// replaces all slashes with ^. This matches the file names in "views" folder
-$url = str_replace('/', '^', $url);
+// Set page title.
+# Defaults to page name unless set earlier or on index
+$page_title = isset($page_title) ? $page_title : ucfirst(nth_last(URL['PATH_ARRAY']));
 
-if( $url === 'collection^orphans' ){
-	$url = 'collection';
+// Redirect or fail page depending on certain factors
+
+# SQL connection must be OK
+if( mysqli_connect_errno() ){
+	http_response_code(500);
+	$file = '500';
 }
-if( file_exists("views/$url.php") != 1 ){
+# file must exist
+if( file_exists("views/$file.php") != 1 ){
 	finalize('/404');
 }
-
-# Check for SQL connection
-if( mysqli_connect_errno() ){
-	#500
-	http_response_code(500);
-	$url = '500';
-}
-
-$url_split = explode('^', $url);
-$url_readable = end($url_split);
-
-if( $has_session && $url_readable === 'login'
-	|| $has_session && $url_readable === 'register'
-	) {
+# user cannot re-login
+if( in_array($file, ['login', 'register']) && $has_session ){
 	finalize('/');
 }
-
-// TODO - this is rather garbage. Better to redirect all number error codes in .htaccess to error.php or something
-if( $url_readable === '403' || $url_readable === '404' || $url_readable === '500' ){
-	$file = 'error';
-} elseif( $url_readable === 'register' ){
-	$file = 'login';
-} else {
-	$file = $url;
-}
-
 ?>
 
 <!DOCTYPE HTML>
 <html lang="en" class="t-light">
 	<head>
-		<title><?php
-			echo SITE_NAME . " - ";
-			if( $url == "index" ){
-				echo "Track Your Collections!";
-			} else {
-				echo ucfirst($url_readable);
-			}
-		?></title>
+		<title><?=SITE_NAME." - ".$page_title?></title>
 		<meta charset="utf-8">
 		<meta name="description" content="Placeholder">
 		<meta name="keywords" content="Placeholder">
@@ -113,7 +95,7 @@ if( $url_readable === '403' || $url_readable === '404' || $url_readable === '500
 				echo "page--frame ";
 			}
 
-			echo 't-'.implode(" t-", $url_split);
+			echo 't-'.implode(" t-", URL['PATH_ARRAY']);
 		?>">
 		<?php if(!isset($_GET['frame'])) : ?> 
 		<nav id="nav" class="wrapper wrapper--site-nav">
@@ -203,7 +185,7 @@ if( $url_readable === '403' || $url_readable === '404' || $url_readable === '500
 		?>
 		
 		<?php 
-		include PATH."views/$url.php";
+		include PATH."views/$file.php";
 		?>
 		
 		<?php if(!isset($_GET['frame'])) : ?> 

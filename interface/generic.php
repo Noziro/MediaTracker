@@ -451,7 +451,7 @@ elseif( $action === "collection_item_create" || $action === "collection_item_edi
 		foreach( $_POST['links'] as $link ){
 			$link = trim($link);
 			if($link !== ""
-			&& filter_var($url, FILTER_VALIDATE_URL) === False
+			&& filter_var($link, FILTER_VALIDATE_URL) === False
 			&& strpos($link, 'http') === 0) {
 				$validatedLinks[] = $link;
 			}

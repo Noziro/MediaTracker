@@ -7,7 +7,7 @@ $orphaned_items = sql('
 	WHERE m.user_id=? AND c.deleted=1',
 	['i', $user['id']], false);
 
-$is_orphanage = end($external_url['path_array']) === 'orphans';
+$is_orphanage = nth_last(URL['PATH_ARRAY']) === 'orphans';
 ?>
 
 <main id="content" class="wrapper wrapper--content">
