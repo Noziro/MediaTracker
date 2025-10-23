@@ -30,9 +30,6 @@ if( empty(URL['PATH_ARRAY']) ){
 elseif( URL['PATH_ARRAY'][0] === 'collection' ){
 	$file = 'collection';
 }
-elseif( URL['PATH_ARRAY'][0] === 'register' ){
-	$file = 'login';
-}
 // TODO: this is rather garbage. Better to redirect all number error codes in .htaccess to error.php or something
 elseif( count(URL['PATH_ARRAY']) === 1 && in_array(intval(URL['PATH_ARRAY'][0]), array_keys(HttpResponse::$error_codes)) && intval(URL['PATH_ARRAY'][0]) >= 400 ){
 	$file = 'error';
@@ -42,7 +39,24 @@ else {
 	$file = str_replace('/', '^', substr(URL['PATH_STRING'], 1));
 }
 
+// Set CSS and JS files to load based on $file
+
+$static_files_to_load = [
+	'css' => [
+		'style',
+		$file
+	],
+	'js' => [
+		'scripts',
+		$file
+	]
+];
+if( count(URL['PATH_ARRAY']) > 0 && URL['PATH_ARRAY'][0] === 'register' ){
+	$static_files_to_load['css'][] = 'login';
+}
+
 // Set page title.
+
 # Defaults to page name unless set earlier or on index
 $page_title = isset($page_title) ? $page_title : ucfirst(nth_last(URL['PATH_ARRAY']));
 
@@ -73,18 +87,18 @@ if( in_array($file, ['login', 'register']) && $has_session ){
 		<link rel="icon" type="image/png" href="/static/img/favicon-32.png" sizes="32x32">
 		<link rel="icon" type="image/png" href="/static/img/favicon-256.png" sizes="256x256">
 		
-		<link rel="stylesheet" href="/static/css/style.css">
-		
-		<?php if (file_exists(PATH."static/css/".$file.".css")) : ?>
-		<link rel="stylesheet" href="<?="/static/css/".$file?>.css">
-		<?php endif ?>
-		
-		<?php if (file_exists(PATH."static/js/".$file.".js")) : ?>
-		<script type="text/javascript" src="<?="/static/js/".$file.".js"?>" defer></script>
-		<?php endif ?>
-		
-		<!--<script type="text/javascript" src="/static/js/jquery-3.3.1.min.js" async></script>-->
-		<script type="text/javascript" src="/static/js/scripts.js" defer></script>
+		<?php
+		foreach( $static_files_to_load['css'] as $css_file ){
+			if( file_exists(PATH."static/css/".$css_file.".css") ){
+				echo '<link rel="stylesheet" href="/static/css/'.$css_file.'.css">';
+			}
+		}
+		foreach( $static_files_to_load['js'] as $js_file ){
+			if( file_exists(PATH."static/js/".$js_file.".js") ){
+				echo '<script type="text/javascript" src="/static/js/'.$js_file.'.js" defer></script>';
+			}
+		}
+		?>
 		
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,400i,600,600i|Roboto+Mono">
 		
