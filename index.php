@@ -24,7 +24,7 @@ include PATH."server/http_response.php";
 // Determine which file to load as the main page content
 
 if( empty(URL['PATH_ARRAY']) ){
-	$file = $has_session ? 'index' : 'about';
+	$file = $has_session ? 'dashboard' : 'about';
 	$page_title = $has_session ? 'Dashboard' : 'Track Your Collections!';
 }
 # match collection in the format of:
