@@ -1,3 +1,13 @@
+<?php
+
+$users = sql('
+	SELECT id, nickname
+	FROM users
+	ORDER BY created_at DESC
+	LIMIT 20');
+
+?>
+
 <main id="content" class="wrapper wrapper--content">
 	<div class="wrapper__inner">
 		<div class="content-header">
@@ -28,20 +38,44 @@
 			<?php endforeach; endif; ?>
 		</div>
 
-		<div class="c-media-list">
-			<h4 class="c-media-list__heading">Newly Added Media</h3>
+		<div class="l-horizontal">
 
-			<?php
-			$stmt = sql('SELECT id, name FROM media WHERE private=0 AND deleted=0 ORDER BY id DESC LIMIT 20');
-			if( $stmt->row_count > 0 ) :
-			foreach( $stmt->rows as $media ) :
-			?>
+			<div class="c-media-list">
+				<h4 class="c-media-list__heading">Newly Added Media</h3>
 
-			<div class="c-media-list__media">
-				<a href="/item/<?=$media['id']?>"><?=$media['name']?></a>
+				<?php
+				$stmt = sql('SELECT id, name FROM media WHERE private=0 AND deleted=0 ORDER BY id DESC LIMIT 20');
+				if( $stmt->row_count > 0 ) :
+				foreach( $stmt->rows as $media ) :
+				?>
+
+				<div class="c-media-list__media">
+					<a href="/item/<?=$media['id']?>"><?=$media['name']?></a>
+				</div>
+
+				<?php endforeach; endif; ?>
 			</div>
 
-			<?php endforeach; endif; ?>
+			<div class="c-media-list">
+				<h4 class="c-media-list__heading">New Users</h3>
+
+				<?php
+				if( $users->row_count > 0 ) :
+				foreach( $users->rows as $user ) :
+				?>
+
+				<div class="c-media-list__media">
+					<a href="/user/<?=$user['id']?>"><?=$user['nickname']?></a>
+				</div>
+
+				<?php endforeach; ?>
+				
+				<div class="c-media-list__media">
+					<a href="/browse/users"><b>See More</b></a>
+				</div>
+				
+				<?php endif; ?>
+			</div>
 		</div>
 	</div>
 </main>

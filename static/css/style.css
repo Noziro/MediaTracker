@@ -413,6 +413,12 @@ html {
 	margin: 0 auto;
 }
 
+.l-horizontal {
+	display: flex;
+	flex-flow: row nowrap;
+	align-items: flex-start;
+}
+
 /* Nav */
 
 .site-nav {
@@ -644,6 +650,54 @@ html {
 	color: var(--text-regular);
 } .search-bar:focus {
 	border-color: var(--border-active);
+}
+
+
+
+/* USER CARDS */
+
+.c-user-browse {
+	display: flex;
+	flex-flow: row wrap;
+	gap: 10px;
+}
+
+.c-user-card {
+	position: relative;
+	width: 200px;
+	height: 40px;
+	padding-left: 40px;
+	background-size: cover;
+	background-position: center top;
+	background-image:
+		linear-gradient(to left, color-mix(in hsl, transparent, var(--backing-content)), var(--backing-content) 80%),
+		var(--banner, none);
+	background-color: var(--backing-content);
+}
+.c-user-card__text {
+	padding: 6px;
+	display: flex;
+	flex-flow: column nowrap;
+	justify-content: space-between;
+}
+.c-user-card__avatar {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 40px;
+	height: 40px;
+	object-fit: cover;
+}
+.c-user-card__banner {
+	position: absolute;
+	top: 0;
+	right: 0;
+	z-index: -1;
+	display: block;
+	width: calc(100% - 40px);
+	height: 18px;
+	mask-image: linear-gradient(to top, transparent, black 6px);
+	object-fit: cover;
 }
 
 
