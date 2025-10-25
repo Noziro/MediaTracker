@@ -65,6 +65,10 @@ function upload_image( array $image, string $subdir = '' ): UploadResult {
 
 	// validate file before upload
 
+	if( !is_writable($base_path) ){
+		return new UploadResult(response_code: 'file_system_insufficient_permissions');
+	}
+
 	if( $image['size'] < 1 ){
 		return new UploadResult(response_code: 'image_invalid');
 	}

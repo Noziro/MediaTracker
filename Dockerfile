@@ -23,4 +23,16 @@ WORKDIR /var/www/html
 
 EXPOSE 80
 
+# data directory setup
+
+ENV DATA_DIR /mnt/data
+
+RUN mkdir -p ${DATA_DIR}
+
+RUN chmod +x /var/www/html/docker.sh
+
+# runtime instructions
+
+ENTRYPOINT ["/var/www/html/docker.sh"]
+
 CMD ["apache2-foreground"]

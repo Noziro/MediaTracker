@@ -16,6 +16,7 @@ services:
       DB_PASSWORD: change_me
     volumes:
       - ./:/var/www/html # for live code editing, remove if not needed
+      - mt_data:/mnt/data # for persistent image uploads and more
     ports:
       - "8080:80"
     networks:
@@ -46,6 +47,7 @@ services:
 
 volumes:
   mt_db:
+  mt_data:
 
 networks:
   mediatracker_internal:

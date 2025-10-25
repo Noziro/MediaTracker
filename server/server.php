@@ -1047,6 +1047,11 @@ class Notice {
 			'type' => 'error',
 			'message' => "Something went wrong while uploading your image."
 		],
+		'file_system_insufficient_permissions' => [
+			'type' => 'error',
+			'message' => "The server has insufficient file system permissions to perform this action.",
+			'details' => 'The admin must make changes to the app environment to resolve this error.'
+		],
 
 		// Neutral
 		'no_change_detected' => [
@@ -1074,6 +1079,7 @@ class Notice {
 			$this->code = $code;
 			$this->type = $this->valid_codes[$code]['type'];
 			$this->message = $this->valid_codes[$code]['message'];
+			$this->details = $this->valid_codes[$code]['details'] ?? '';
 		} else {
 			throw new ValueError("Invalid notice code: $response_code");
 		}
