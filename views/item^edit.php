@@ -23,7 +23,11 @@ if( !$has_session || $user['id'] !== $item['user_id'] ){
 	<div class="wrapper__inner">
 		<form id="collection-item-edit" action="/interface/generic" method="POST" enctype="multipart/form-data">
 			<input type="hidden" name="action" value="collection_item_edit">
-			<input type="hidden" name="return_to" value="/collection/<?=$item['collection_id'].'#item-'.$item['id']?>">
+			<?php
+			if( isset($_GET['return_to']) ){
+				echo '<input type="hidden" name="return_to" value="'.$_GET['return_to'].'">';
+			}
+			?>
 			<input type="hidden" name="item_id" value="<?=$item['id']?>">
 
 			<div class="item-fields">

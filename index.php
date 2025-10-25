@@ -27,28 +27,34 @@ if( empty(URL['PATH_ARRAY']) ){
 	$file = $has_session ? 'index' : 'about';
 	$page_title = $has_session ? 'Dashboard' : 'Track Your Collections!';
 }
-elseif( count(URL['PATH_ARRAY']) <= 2 && URL['PATH_ARRAY'][0] === 'collection' ){
-	$file = 'collection';
-}
 # match collection in the format of:
 # - /my/collection (auto-detect your own collection)
 # - /user/{ID}/collection (any user's collection)
 # - /collection/{ID} (a specific collection)
+elseif( count(URL['PATH_ARRAY']) <= 2 && URL['PATH_ARRAY'][0] === 'collection' ){
+	$file = 'collection';
+	$page_title = 'Collection';
+}
 elseif( URL['PATH_STRING'] === '/my/collection' ||
 	URL['PATH_ARRAY'][0] === 'user' && count(URL['PATH_ARRAY']) === 3 && URL['PATH_ARRAY'][2] === 'collection' ){
 	$file = 'collection';
+	$page_title = 'Collection';
 }
 elseif( count(URL['PATH_ARRAY']) === 2 && URL['PATH_ARRAY'][0] === 'item' ){
 	$file = 'item';
+	$page_title = 'Item';
 }
 elseif( count(URL['PATH_ARRAY']) === 2 && URL['PATH_ARRAY'][0] === 'user' ){
 	$file = 'user';
+	$page_title = 'User';
 }
 elseif( count(URL['PATH_ARRAY']) === 3 && URL['PATH_ARRAY'][0] === 'item' && URL['PATH_ARRAY'][2] === 'edit' ){
 	$file = 'item^edit';
+	$page_title = 'Edit Item';
 }
 elseif( count(URL['PATH_ARRAY']) === 3 && URL['PATH_ARRAY'][0] === 'account' && URL['PATH_ARRAY'][1] === 'settings' ){
 	$file = 'account^settings';
+	$page_title = 'Settings / '.ucfirst(URL['PATH_ARRAY'][2]);
 }
 // TODO: this is rather garbage. Better to redirect all number error codes in .htaccess to error.php or something
 elseif( count(URL['PATH_ARRAY']) === 1 && in_array(intval(URL['PATH_ARRAY'][0]), array_keys(HttpResponse::$error_codes)) && intval(URL['PATH_ARRAY'][0]) >= 400 ){

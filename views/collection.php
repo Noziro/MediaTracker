@@ -1,12 +1,4 @@
 <?php
-# TODO: stop this SELECT from occuring on every collection page
-$orphaned_items = sql('
-	SELECT COUNT(m.id)
-	FROM media AS m
-	JOIN collections AS c ON m.collection_id = c.id
-	WHERE m.user_id=? AND c.deleted=1',
-	['i', $user['id']], false);
-
 # Determine which page to load based on URL
 if( URL['PATH_ARRAY'][0] === 'collection' ){
 	$page = 'specific_collection';
@@ -38,6 +30,15 @@ elseif( URL['PATH_STRING'] === '/my/collection' ||
 }
 else {
 	finalize('/404');
+}
+
+if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
+	$orphaned_items = sql('
+		SELECT COUNT(m.id)
+		FROM media AS m
+		JOIN collections AS c ON m.collection_id = c.id
+		WHERE m.user_id=? AND c.deleted=1',
+		['i', $user['id']], false);
 }
 ?>
 
@@ -201,7 +202,7 @@ else {
 						<a href="/item/<?=$item['id']?>"><?=$item['name']?></a>
 
 						<?php if($collection['user_id'] === $user['id']) : ?>
-						<a class="js-item-edit" href="/item/<?=$item['id']?>/edit?frame=1" onclick="editItem(<?=$item['id']?>)" style="float:right;">
+						<a href="/item/<?=$item['id']?>/edit?return_to=/collection/<?=$is_orphanage ? 'orphans' : $collection['id']?>#item-<?=$item['id']?>" style="float:right;">
 							Edit
 						</a>
 						<?php endif; ?>
@@ -529,18 +530,6 @@ else {
 				<div class="dialog-box dialog-box--subcontent">
 					Not implemented yet - search for other users' items to take data from
 				</div>
-			</div>
-		</div>
-
-
-
-		<div id="modal--item-edit" class="modal modal--hidden" role="dialog" aria-modal="true">
-			<button class="modal__background" onclick="toggleModal('modal--item-edit', false)"></button>
-			<div class="modal__inner modal__inner--wide">
-				<a class="modal__close" onclick="toggleModal('modal--item-edit', false)">Close</a>
-				<h3 class="modal__header">
-					Edit Item
-				</h3>
 			</div>
 		</div>
 		<?php endif; ?>

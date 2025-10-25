@@ -35,6 +35,11 @@ $collection = $stmt->rows[0];
 <main id="content" class="wrapper wrapper--content">
 	<div class="wrapper__inner">
 		<div class="content-header">
+			<div class="content-header__breadcrumb">
+				<a href="/browse">Browse</a> >
+				<span><?=$item['name']?></span>
+			</div>
+		
 			<h2 class="content-header__title">
 				<?=$item['name']?>
 			</h2>
@@ -91,9 +96,19 @@ $collection = $stmt->rows[0];
 			|| $collection['private'] === 9 && $user['id'] !== $item['user_id']
 		) :
 		?>
-		<div>Added by an anonymous user</div>
+		<div>From the library an anonymous user</div>
 		<?php else : ?>
-		<div>Added by <a href="/user/<?=$item['user_id']?>"><?=$stmt->rows[0]['nickname']?></a></div>
+		<div>From the library of <a href="/user/<?=$item['user_id']?>"><?=$stmt->rows[0]['nickname']?></a></div>
+		<?php endif; ?>
+
+		<?php if($collection['user_id'] === $user['id']) : ?>
+		<div class="page-actions">
+			<div class="page-actions__button-list">
+				<a class="page-actions__action button" href="/item/<?=$item['id']?>/edit?return_to=/item/<?=$item['id']?>" style="float:right;">
+					Edit
+				</a>
+			</div>
+		</div>
 		<?php endif; ?>
 	</div>
 </main>
