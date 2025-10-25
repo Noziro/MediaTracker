@@ -15,6 +15,9 @@ $pl_timer_start = hrtime(True);
 
 date_default_timezone_set('UTC');
 
+const VALID_STATUS = ['current', 'completed', 'paused', 'dropped', 'planned', 'other'];
+const VALID_MEDIA_TYPES = ['video', 'game', 'literature', 'other'];
+
 $db = new mysqli(...array_values(SQL_CREDENTIALS));
 
 $result = $db->query("SHOW TABLES LIKE 'collections'");
@@ -87,6 +90,14 @@ function preg_eval( string $pattern, string $string ): bool {
 		return true;
 	}
 	return false;
+}
+
+// simple function to simplify adding a data-autofill text for a variable that has an unknown value
+function autofill_if_set( $mixed ): string {
+	if( isset($mixed) ){
+		echo ' data-autofill="'.$mixed.'" ';
+	}
+	return '';
 }
 
 
@@ -1109,10 +1120,6 @@ function finalize(string $page = '/', ...$input_notices) {
 
 
 // COLLECTION FUNCTIONS
-
-$valid_coll_types = ['video', 'game', 'literature', 'other'];
-
-$valid_status = ['current', 'completed', 'paused', 'dropped', 'planned', 'other'];
 
 // Input a score from a certain rating system and convert to 100-scale
 function score_normalize(int $score, int $system) {

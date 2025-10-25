@@ -119,7 +119,7 @@ if( $action === "collection_create" ){
 	$name = trim($_POST['name']);
 
 	$type = trim($_POST['type']);
-	if( !in_array((string)$type, $valid_coll_types, True) ){
+	if( !in_array((string)$type, VALID_MEDIA_TYPES, True) ){
 		finalize($r2, ['invalid_value', 'error']);
 	}
 
@@ -165,7 +165,7 @@ elseif( $action === "collection_edit" ){
 	$name = trim($_POST['name']);
 
 	$type = trim($_POST['type']);
-	if( !in_array((string)$type, $valid_coll_types, True) ){
+	if( !in_array((string)$type, VALID_MEDIA_TYPES, True) ){
 		finalize($r2, ['invalid_value', 'error']);
 	}
 
@@ -340,7 +340,7 @@ elseif( $action === "collection_item_create" || $action === "collection_item_edi
 	if( array_key_exists('status', $_POST) ){
 		$status = (string)$_POST['status'];
 
-		if( !in_array($status, $valid_status, True) ){
+		if( !in_array($status, VALID_STATUS, True) ){
 			finalize($r2, ['invalid_value', 'error']);
 		}
 	}

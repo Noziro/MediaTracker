@@ -326,7 +326,7 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 					
 					<label class="label">Type</label>
 					<select class="select" name="type">
-						<?php foreach($valid_coll_types as $type) : ?>
+						<?php foreach(VALID_MEDIA_TYPES as $type) : ?>
 						<option <?php if( $type === $collection['type'] ){ echo "selected"; } ?>><?=$type?></option>
 						<?php endforeach; ?>
 					</select>
@@ -392,135 +392,11 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 					<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 					<input type="hidden" name="collection_id" value="<?=$collection['id']?>">
 
-					<div class="item-fields">
-						<div class="item-fields__divider">
-							<span class="item-fields__header">Item Information</span>
-						</div>
-
-						<div class="item-fields__field">
-							<label class="label">Name <span class="label__desc">(required)</span></label>
-							<input class="input input--wide js-modal-focus" type="text" name="name" required>
-						</div>
-
-						<div class="item-fields__field">
-							<label class="label">Total Episodes</label>
-							<input class="input input--thin" name="episodes" type="number" min="0">
-						</div>
-						
-
-						<div class="item-fields__field">
-							<label class="label">Flags</label>
-							<div class="checkbox-group">
-								<label class="checkbox-group__item">
-									<input type="hidden" name="adult" value="0"> <!-- fallback value -->
-									<input class="checkbox" type="checkbox" name="adult" value="1">
-									Adult
-								</label>
-							</div>
-						</div>
-
-						<div class="item-fields__field">
-							<label class="label">Links</label>
-							
-							<input class="input" type="text" name="links[]">
-							
-							<div class="l-button-list">
-								<button type="button" id="js-add-input" class="l-button-list__button button">+</button>
-								<button type="button" id="js-remove-input" class="l-button-list__button button button--disabled" disabled="disabled">-</button>
-							</div>
-						</div>
-
-						<div class="item-fields__field">
-							<label class="label">Image</label>
-
-							<input class="file-upload" type="file" name="image">
-						</div>
-					</div>
-
-					<button type="button" class="button" onclick="toggleElement('advanced-item-fields')">Show/hide advanced</button>
-
-					<div id="advanced-item-fields" class="item-fields u-hidden">
-						<div class="item-fields__field item-fields__field--date">
-							<label class="label">Media Started At</label>
-							<input id="js-set-today-3" class="input input--auto" name="started_at" type="date">
-							<a class="subtext" onclick="setToday('js-set-today-3')">Today</a>
-						</div>
-
-						<div class="item-fields__field item-fields__field--date">
-							<label class="label">Media Finished At</label>
-							<input id="js-set-today-4" class="input input--auto" name="finished_at" type="date">
-							<a class="subtext" onclick="setToday('js-set-today-4')">Today</a>
-						</div>
-					</div>
-
-					<div class="item-fields">
-						<div class="item-fields__divider">
-							<span class="item-fields__header">User Data</span>
-						</div>
-
-						<div class="item-fields__field">
-							<label class="label">Status</label>
-							<select class="select" type="text" name="status" required>
-								<?php foreach($valid_status as $status) : ?>
-								<option <?php if( $status === 'completed' ){ echo "selected"; }?>><?=$status?></option>
-								<?php endforeach; ?>
-							</select>
-						</div>
-
-						<div class="item-fields__field">
-							<label class="label">Rating <span class="label__desc">(out of <?=$collection['rating_system']?>)</span></label>
-							<input class="input input--thin" name="score" type="number" min="0" max="<?=$collection['rating_system']?>">
-						</div>
-
-						<div class="item-fields__field">
-							<label class="label">Completed Episodes</label>
-							<input class="input input--thin" name="progress" type="number" min="0">
-						</div>
-
-						<div class="item-fields__field">
-							<label class="label">
-								Rewatched Episodes
-								<div class="label__desc">for a 25 episode show, input 25</div>
-							</label>
-							<input class="input input--thin" name="rewatched" type="number" min="0">
-						</div>
-
-						<div class="item-fields__field item-fields__field--date">
-							<label class="label">User Started At</label>
-							<input id="js-set-today-1" class="input input--auto" name="user_started_at" type="date" max="">
-							<a class="subtext" onclick="setToday('js-set-today-1')">Today</a>
-						</div>
-
-						<div class="item-fields__field item-fields__field--date">
-							<label class="label">User Finished At</label>
-							<input id="js-set-today-2" class="input input--auto" name="user_finished_at" type="date">
-							<a class="subtext" onclick="setToday('js-set-today-2')">Today</a>
-						</div>
-
-						<div class="item-fields__field">
-							<label class="label">Flags</label>
-							<div class="checkbox-group">
-								<label class="checkbox-group__item">
-									<input type="hidden" name="favourite" value="0"> <!-- fallback value -->
-									<input class="checkbox" type="checkbox" name="favourite" value="1">
-									Favourite
-								</label>
-								
-								<label class="checkbox-group__item">
-									<input type="hidden" name="private" value="0"> <!-- fallback value -->
-									<input class="checkbox" type="checkbox" name="private" value="1">
-									Private
-								</label>
-							</div>
-						</div>
-						
-						<div class="item-fields__divider"></div>
-
-						<div class="item-fields__field">
-							<label class="label">Comments</label>
-							<textarea class="text-input js-autofill" name="comments" <?php if( isset($item['comments']) ){ echo 'data-autofill="'.$item['comments'].'"'; } ?>></textarea>
-						</div>
-					</div>
+					<?php
+					$module_item = [];
+					$module_collection = $collection;
+					include(PATH.'modules/item_fields.php');
+					?>
 				</form>
 
 				<div class="l-button-list">
@@ -707,7 +583,7 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 					
 					<label class="label" for="collection-type">Type</label>
 					<select id="collection-type" class="select" name="type">
-						<?php foreach($valid_coll_types as $type) : ?>
+						<?php foreach(VALID_MEDIA_TYPES as $type) : ?>
 						<option><?=$type?></option>
 						<?php endforeach; ?>
 					</select>
