@@ -1,8 +1,9 @@
 <?php
 if( !$has_session ){
-	header('Location: /?error=require-sign-in');
-	exit();
+	finalize('/', ['require_sign_in', 'error']);
 }
+
+$section = count(URL['PATH_ARRAY']) === 3 ? URL['PATH_ARRAY'][2] : '';
 
 $user_extra = sql('SELECT about FROM users WHERE id=?', ['i', $user['id']]);
 $user = array_merge($user, $user_extra->rows[0]);
@@ -13,11 +14,11 @@ $user = array_merge($user, $user_extra->rows[0]);
 		<div class="split__section split__section--sidebar">
 			<span class="split__sidebar-header">Settings</span>
 
-			<a class="split__sidebar-item" href="/account/settings?section=profile">Profile</a>
-			<a class="split__sidebar-item" href="/account/settings?section=security">Security</a>
-			<a class="split__sidebar-item" href="/account/settings?section=privacy">Privacy</a>
-			<a class="split__sidebar-item" href="/account/settings?section=preferences">Preferences</a>
-			<a class="split__sidebar-item" href="/account/settings?section=data">Data</a>
+			<a class="split__sidebar-item" href="/account/settings/profile">Profile</a>
+			<a class="split__sidebar-item" href="/account/settings/security">Security</a>
+			<a class="split__sidebar-item" href="/account/settings/privacy">Privacy</a>
+			<a class="split__sidebar-item" href="/account/settings/preferences">Preferences</a>
+			<a class="split__sidebar-item" href="/account/settings/data">Data</a>
 		</div>
 		
 
@@ -28,7 +29,7 @@ $user = array_merge($user, $user_extra->rows[0]);
 				<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 			</form>
 			
-			<?php if(!isset($_GET['section']) || $_GET['section'] === 'profile') : ?>
+			<?php if( $section === '' || $section === 'profile' ) : ?>
 
 			<h3 class="settings__header">User Profile</h3>
 
@@ -80,7 +81,7 @@ $user = array_merge($user, $user_extra->rows[0]);
 
 
 			
-			<?php elseif($_GET['section'] === 'security') : ?>
+			<?php elseif( $section === 'security' ) : ?>
 			
 			<h3 class="settings__header">Modify Account</h3>
 			
@@ -196,7 +197,7 @@ $user = array_merge($user, $user_extra->rows[0]);
 
 
 			
-			<?php elseif($_GET['section'] === 'preferences') : ?>
+			<?php elseif( $section === 'preferences' ) : ?>
 			
 			<h3 class="settings__header">User Experience</h3>
 			
@@ -240,7 +241,7 @@ $user = array_merge($user, $user_extra->rows[0]);
 
 
 
-			<?php elseif($_GET['section'] === 'privacy') : ?>
+			<?php elseif( $section === 'privacy' ) : ?>
 
 			<h3 class="settings__header">Collection Options</h3>
 
@@ -252,7 +253,7 @@ $user = array_merge($user, $user_extra->rows[0]);
 
 
 
-			<?php elseif($_GET['section'] === 'data') : ?>
+			<?php elseif( $section === 'data' ) : ?>
 
 			<h3 class="settings__header">Import/Export Lists</h3>
 

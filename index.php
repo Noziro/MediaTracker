@@ -27,8 +27,28 @@ if( empty(URL['PATH_ARRAY']) ){
 	$file = $has_session ? 'index' : 'about';
 	$page_title = $has_session ? 'Dashboard' : 'Track Your Collections!';
 }
-elseif( URL['PATH_ARRAY'][0] === 'collection' ){
+elseif( count(URL['PATH_ARRAY']) <= 2 && URL['PATH_ARRAY'][0] === 'collection' ){
 	$file = 'collection';
+}
+# match collection in the format of:
+# - /my/collection (auto-detect your own collection)
+# - /user/{ID}/collection (any user's collection)
+# - /collection/{ID} (a specific collection)
+elseif( URL['PATH_STRING'] === '/my/collection' ||
+	URL['PATH_ARRAY'][0] === 'user' && count(URL['PATH_ARRAY']) === 3 && URL['PATH_ARRAY'][2] === 'collection' ){
+	$file = 'collection';
+}
+elseif( count(URL['PATH_ARRAY']) === 2 && URL['PATH_ARRAY'][0] === 'item' ){
+	$file = 'item';
+}
+elseif( count(URL['PATH_ARRAY']) === 2 && URL['PATH_ARRAY'][0] === 'user' ){
+	$file = 'user';
+}
+elseif( count(URL['PATH_ARRAY']) === 3 && URL['PATH_ARRAY'][0] === 'item' && URL['PATH_ARRAY'][2] === 'edit' ){
+	$file = 'item^edit';
+}
+elseif( count(URL['PATH_ARRAY']) === 3 && URL['PATH_ARRAY'][0] === 'account' && URL['PATH_ARRAY'][1] === 'settings' ){
+	$file = 'account^settings';
 }
 // TODO: this is rather garbage. Better to redirect all number error codes in .htaccess to error.php or something
 elseif( count(URL['PATH_ARRAY']) === 1 && in_array(intval(URL['PATH_ARRAY'][0]), array_keys(HttpResponse::$error_codes)) && intval(URL['PATH_ARRAY'][0]) >= 400 ){
@@ -53,6 +73,9 @@ $static_files_to_load = [
 ];
 if( count(URL['PATH_ARRAY']) > 0 && URL['PATH_ARRAY'][0] === 'register' ){
 	$static_files_to_load['css'][] = 'login';
+}
+if( count(URL['PATH_ARRAY']) > 1 && URL['PATH_ARRAY'][1] === 'search' ){
+	$static_files_to_load['css'][] = 'browse';
 }
 
 // Set page title.
@@ -134,10 +157,10 @@ if( in_array($file, ['login', 'register']) && $has_session ){
 				<div class="site-nav__section">
 					<?php if($has_session) : ?>
 					
-					<a class="site-nav__item" href="/collection">Collection</a>
+					<a class="site-nav__item" href="/my/collection">Collection</a>
 					
 					<div class="dropdown notifications" style="display: none;">
-						<a class="site-nav__item" href="/collection">!</a>
+						<a class="site-nav__item" href="/my/collection">!</a>
 						
 						<div class="dropdown-menu list vertical">
 							Notifications -TODO-
@@ -145,10 +168,10 @@ if( in_array($file, ['login', 'register']) && $has_session ){
 					</div>
 					
 					<div class="dropdown profile">
-						<a class="site-nav__item" href="<?="/user?u=".$user["id"]?>"><?=$user["nickname"]?></a>
+						<a class="site-nav__item" href="<?="/user/".$user["id"]?>"><?=$user["nickname"]?></a>
 						
 						<div class="dropdown-menu list vertical">
-							<a class="site-nav__item" href="<?="/user?u=".$user["id"]?>">Profile</a>
+							<a class="site-nav__item" href="<?="/user/".$user["id"]?>">Profile</a>
 							<a class="site-nav__item" href="/account/settings">Settings</a>
 							
 							<form id="form-logout"style="display:none" action="/interface/session" method="POST">

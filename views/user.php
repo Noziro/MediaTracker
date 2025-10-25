@@ -1,26 +1,20 @@
 <?php
-// Check if user is set
-
-/*if( !isset($_GET["u"]) && !isset($_GET["n"] ){
-	header('Location: /404');
-} elseif( isset($_GET["u"]) && sql($db, "SELECT id FROM users WHERE id=?", "s", $_GET["u"])->num_rows < 1 ){
-	header('Location: /404');
-} elseif( isset($_GET["name"]) && sql($db, "SELECT username FROM users WHERE id=?", "s", $_GET["u"])->num_rows < 1 ){
-	header('Location: /404');
+if( count(URL['PATH_ARRAY']) < 2 && !$has_session ){
+	finalize('/404');
 }
-sql($db, "SELECT id, username FROM users WHERE id=?", "s", $_GET["u"])->num_rows < 1*/
-
-if( !isset($_GET["u"]) ){
-	if( $has_session ){
-		$page_user__id = $user['id'];
-	} else {
+elseif( count(URL['PATH_ARRAY']) < 2 ){
+	$page_user_id = $user['id'];
+}
+else {
+	$page_user_id = URL['PATH_ARRAY'][1];
+	if( !preg_eval('/\d+/', $page_user_id) ){
+		pretty_print($page_user_id);
 		finalize('/404');
 	}
-} else {
-	$page_user__id = $_GET["u"];
+	$page_user_id = intval($page_user_id);
 }
 
-$page_user = sql('SELECT id, username, nickname, created_at, permission_level, profile_image, banner_image, about FROM users WHERE id=?', ['i', $page_user__id]);
+$page_user = sql('SELECT id, username, nickname, created_at, permission_level, profile_image, banner_image, about FROM users WHERE id=?', ['i', $page_user_id]);
 
 if( $page_user->row_count < 1 ){
 	finalize('/404');
@@ -54,7 +48,7 @@ $total_activity = reset(sql('
 $pg = new Pagination();
 $pg->Setup(10, $total_activity);
 $activity = sql('
-	SELECT activity.user_id, activity.user_id, activity.type, activity.media_id, activity.created_at, activity.updated_at, media.private AS media_private, collections.private AS collection_private
+	SELECT activity.user_id, activity.type, activity.media_id, activity.created_at, activity.updated_at, media.private AS media_private, collections.private AS collection_private
 	FROM activity
 	INNER JOIN media ON activity.media_id = media.id
 	INNER JOIN collections ON media.collection_id = collections.id
@@ -123,7 +117,7 @@ if( empty($page_user['banner_image']) ){
 			<div class="profile__section">
 				<span class="profile__section-header">Links</span>
 
-				<a class="profile__user-link profile__user-link--primary" href="/collection?u=<?=$page_user['id']?>">Collection</a>
+				<a class="profile__user-link profile__user-link--primary" href="/user/<?=$page_user['id']?>/collection">Collection</a>
 				<!-- TODO: List friends here -->
 				<?php if($has_session && $user['id'] !== $page_user['id']) : ?>
 				<div class="c-divider"></div>
@@ -276,7 +270,7 @@ if( empty($page_user['banner_image']) ){
 									break;
 							}
 						?>
-						<a href="/item?id=<?=$item['id']?>"><?=$item['name']?></a>
+						<a href="/item/<?=$item['id']?>"><?=$item['name']?></a>
 					</div>
 
 					<?php endif; ?>
@@ -409,7 +403,7 @@ if( empty($page_user['banner_image']) ){
 					foreach($favs->rows as $fav) :
 				?>
 
-				<div><a href="/item?id=<?=$fav['id']?>"><?=$fav['name']?></a></div>
+				<div><a href="/item/<?=$fav['id']?>"><?=$fav['name']?></a></div>
 
 				<?php
 					endforeach;

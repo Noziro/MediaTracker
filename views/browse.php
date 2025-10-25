@@ -1,7 +1,5 @@
 <main id="content" class="wrapper wrapper--content">
 	<div class="wrapper__inner">
-		<?php if(count($_GET) === 0) : ?>
-
 		<div class="content-header">
 			<h2 class="content-header__title">Browse</h2>
 		</div>
@@ -14,13 +12,14 @@
 
 		<div class="c-media-browse">
 			<?php
-			$stmt = sql('SELECT id, name, image FROM media WHERE private=0 AND deleted=0 ORDER BY RAND() LIMIT 20');
+			$stmt = sql('
+				SELECT id, name, image FROM media WHERE private=0 AND deleted=0 ORDER BY RAND() LIMIT 20');
 			$random_media = $stmt->rows;
 			if( $stmt->row_count > 0 ) :
 			foreach($random_media as $media) :
 			?>
 
-			<a class="c-media" href="/item?id=<?=$media['id']?>">
+			<a class="c-media" href="/item/<?=$media['id']?>">
 				<div class="c-media__inner" <?php if(strlen($media['image']) > 0) : ?> style="background-image: url(<?=$media['image']?>)" <?php endif; ?>>
 					<?=$media['name']?>
 				</div>
@@ -34,74 +33,15 @@
 
 			<?php
 			$stmt = sql('SELECT id, name FROM media WHERE private=0 AND deleted=0 ORDER BY id DESC LIMIT 20');
-			$new_media = $stmt->rows;
 			if( $stmt->row_count > 0 ) :
-			foreach($new_media as $media) :
+			foreach( $stmt->rows as $media ) :
 			?>
 
 			<div class="c-media-list__media">
-				<a href="/item?id=<?=$media['id']?>"><?=$media['name']?></a>
+				<a href="/item/<?=$media['id']?>"><?=$media['name']?></a>
 			</div>
 
 			<?php endforeach; endif; ?>
 		</div>
-
-
-
-		<?php elseif(isset($_GET['name'])) :
-
-		$stmt = sql('SELECT COUNT(id) FROM media WHERE name LIKE ? AND private=0 AND deleted=0', ['s', '%'.$_GET['name'].'%']);
-		if( !$stmt->ok ){ finalize('/browse', [$stmt->response_code, $stmt->response_type]); }
-		$total = reset($stmt->rows[0]);
-
-		$pg = new Pagination();
-		$pg->Setup(30, $total);
-
-		$search = sql('SELECT id, name, image FROM media WHERE name LIKE ? AND private=0 AND deleted=0 LIMIT ?, ?', ['sii', '%'.$_GET['name'].'%', $pg->offset, $pg->increment]);
-		if( !$search->ok ){ finalize('/browse', [$search->response_code, $search->response_type]); }
-		?>
-
-		<div class="content-header">
-			<div class="content-header__breadcrumb">
-				<a href="/browse">Browse</a> >
-				<span>Search Results</span>
-			</div>
-			<h2 class="content-header__title">Search Results</h2>
-		</div>
-
-		<?php if($pg->total > $pg->increment) : ?>
-		<div class="page-actions">
-			<?php $pg->Generate() ?>
-		</div>
-		<?php endif; ?>
-
-		<div class="c-media-browse">
-			<?php
-			if($search->row_count < 1) :
-
-			echo 'No results.';
-
-			else:
-
-			$results = $search->rows;
-			foreach($results as $media) :
-			?>
-
-			<a class="c-media" href="/item?id=<?=$media['id']?>">
-				<div class="c-media__inner" <?php if(strlen($media['image']) > 0) : ?> style="background-image: url(<?=$media['image']?>)" <?php endif; ?>>
-					<?=$media['name']?>
-				</div>
-			</a>
-
-			<?php endforeach; endif; ?>
-		</div>
-
-		<?php
-		else :
-
-		//finalize('/browse', ['invalid_value']);
-
-		endif;
-		?>
 	</div>
 </main>

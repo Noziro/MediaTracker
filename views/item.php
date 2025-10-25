@@ -1,10 +1,16 @@
 <?php
 
-if( !isset($_GET['id']) ){
+if( count(URL['PATH_ARRAY']) < 2 ){
 	finalize('/404');
 }
 
-$stmt = sql('SELECT id, user_id, collection_id, image, name, episodes, release_date, started_at, finished_at, links, adult, private, deleted FROM media WHERE id=? LIMIT 1', ['i', $_GET['id']]);
+$item_id = URL['PATH_ARRAY'][1];
+if( !preg_eval('/\d+/', $item_id) ){
+	finalize('/404');
+}
+$item_id = intval($item_id);
+
+$stmt = sql('SELECT id, user_id, collection_id, image, name, episodes, release_date, started_at, finished_at, links, adult, private, deleted FROM media WHERE id=? LIMIT 1', ['i', $item_id]);
 if( !$stmt->ok || $stmt->row_count === 0 ){
 	finalize('/404');
 }
@@ -87,7 +93,7 @@ $collection = $stmt->rows[0];
 		?>
 		<div>Added by an anonymous user</div>
 		<?php else : ?>
-		<div>Added by <a href="/user?u=<?=$item['user_id']?>"><?=$stmt->rows[0]['nickname']?></a></div>
+		<div>Added by <a href="/user/<?=$item['user_id']?>"><?=$stmt->rows[0]['nickname']?></a></div>
 		<?php endif; ?>
 	</div>
 </main>

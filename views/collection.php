@@ -7,38 +7,46 @@ $orphaned_items = sql('
 	WHERE m.user_id=? AND c.deleted=1',
 	['i', $user['id']], false);
 
-$is_orphanage = nth_last(URL['PATH_ARRAY']) === 'orphans';
+# Determine which page to load based on URL
+if( URL['PATH_ARRAY'][0] === 'collection' ){
+	$page = 'specific_collection';
+	$is_orphanage = nth_last(URL['PATH_ARRAY']) === 'orphans';
+	if( !$is_orphanage ){
+		if( count(URL['PATH_ARRAY']) < 2 ){
+			finalize('/404');
+		}
+		$collection_id = URL['PATH_ARRAY'][1];
+		if( !preg_eval('/\d+/', $collection_id) ){
+			finalize('/404');
+		}
+		$collection_id = intval($collection_id);
+	}
+}
+elseif( URL['PATH_STRING'] === '/my/collection' ||
+	URL['PATH_ARRAY'][0] === 'user' && URL['PATH_ARRAY'][2] === 'collection' ){
+	$page = 'entire_collection';
+	if( URL['PATH_ARRAY'][0] === 'my' ){
+		$page_user_id = $user['id'];
+	}
+	else {
+		$page_user_id = URL['PATH_ARRAY'][1];
+		if( !preg_eval('/\d+/', $page_user_id) ){
+			finalize('/404');
+		}
+		$page_user_id = intval($page_user_id);
+	}
+}
+else {
+	finalize('/404');
+}
 ?>
 
 <main id="content" class="wrapper wrapper--content">
 	<div class="wrapper__inner">
 		<?php
-		if( isset($_GET['c']) || $is_orphanage ) :
+		if( $page === 'specific_collection' ) :
 
-		if( isset($_GET['c']) ){
-			$stmt = sql('
-				SELECT id, user_id, name, type, display_image, display_score, display_progress, display_user_started, display_user_finished, display_days, rating_system, private, deleted
-				FROM collections
-				WHERE id=?',
-				['i', $_GET['c']]);
-			if( $stmt->row_count < 1 ){
-				finalize('/404');
-			}
-			$collection = $stmt->rows[0];
-			if( $collection['deleted'] === 1 ){
-				finalize('/403');
-			}
-
-			$items = sql('
-				SELECT id, status, name, image, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments, favourite
-				FROM media
-				WHERE collection_id=? AND deleted=0
-				ORDER BY status ASC, name ASC',
-				['i', $collection['id']]);
-		
-			$page_user = sql('SELECT id, nickname FROM users WHERE id=?', ['i', $collection['user_id']])->rows[0];
-		}
-		elseif( $is_orphanage ){
+		if( $is_orphanage ){
 			$collection = [
 				'name' => 'Orphaned Items',
 				'user_id' => $user['id'],
@@ -61,8 +69,28 @@ $is_orphanage = nth_last(URL['PATH_ARRAY']) === 'orphans';
 
 			$page_user = $user;
 		}
-		else{
-			finalize('/500');
+		else {
+			$stmt = sql('
+				SELECT id, user_id, name, type, display_image, display_score, display_progress, display_user_started, display_user_finished, display_days, rating_system, private, deleted
+				FROM collections
+				WHERE id=?',
+				['i', $collection_id]);
+			if( $stmt->row_count < 1 ){
+				finalize('/404');
+			}
+			$collection = $stmt->rows[0];
+			if( $collection['deleted'] === 1 ){
+				finalize('/403');
+			}
+
+			$items = sql('
+				SELECT id, status, name, image, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments, favourite
+				FROM media
+				WHERE collection_id=? AND deleted=0
+				ORDER BY status ASC, name ASC',
+				['i', $collection['id']]);
+		
+			$page_user = sql('SELECT id, nickname FROM users WHERE id=?', ['i', $collection['user_id']])->rows[0];
 		}
 
 
@@ -79,8 +107,8 @@ $is_orphanage = nth_last(URL['PATH_ARRAY']) === 'orphans';
 
 		<div class="content-header">
 			<div class="content-header__breadcrumb">
-				<a href="<?="/user?u=".$page_user['id']?>"><?=$page_user['nickname']?></a> >
-				<a href="<?="/collection?u=".$page_user['id']?>">Collection</a> >
+				<a href="<?="/user/".$page_user['id']?>"><?=$page_user['nickname']?></a> >
+				<a href="/user/<?=$page_user['id']?>/collection">Collection</a> >
 				<span><?=$collection['name']?></span>
 			</div>
 			
@@ -92,7 +120,7 @@ $is_orphanage = nth_last(URL['PATH_ARRAY']) === 'orphans';
 		<?php if($has_session && $user['id'] === $page_user['id']) : ?>
 		<div class="page-actions">
 			<div class="page-actions__button-list">
-				<?php if( isset($_GET['c']) ) : ?>
+				<?php if( isset($collection_id) ) : ?>
 				<button class="page-actions__action button" type="button" onclick="toggleModal('modal--collection-edit', true)">
 					Edit Collection Details
 				</button>
@@ -106,7 +134,7 @@ $is_orphanage = nth_last(URL['PATH_ARRAY']) === 'orphans';
 					Mass Edit <!-- TODO - will activate a multi-selection mode with checkboxes for each item in which you can edit attributes or delete -->
 				</button>
 
-				<?php if( isset($_GET['c']) ) : ?>
+				<?php if( isset($collection_id) ) : ?>
 				<button class="page-actions__action button" type="button" onclick="modalConfirmation('Are you sure you wish to delete this collection?', 'collection_delete', 'collection_id', <?=$collection['id']?>)">
 					Delete Collection
 				</button>
@@ -170,10 +198,10 @@ $is_orphanage = nth_last(URL['PATH_ARRAY']) === 'orphans';
 					<?php endif; ?>
 
 					<td class="table__cell">
-						<a href="/item?id=<?=$item['id']?>"><?=$item['name']?></a>
+						<a href="/item/<?=$item['id']?>"><?=$item['name']?></a>
 
 						<?php if($collection['user_id'] === $user['id']) : ?>
-						<a class="js-item-edit" href="/item?id=edit?id=<?=$item['id']?>&frame=1" onclick="editItem(<?=$item['id']?>)" style="float:right;">
+						<a class="js-item-edit" href="/item/<?=$item['id']?>/edit?frame=1" onclick="editItem(<?=$item['id']?>)" style="float:right;">
 							Edit
 						</a>
 						<?php endif; ?>
@@ -524,13 +552,7 @@ $is_orphanage = nth_last(URL['PATH_ARRAY']) === 'orphans';
 		<?php
 		// If user is not specified, redirect to own page.
 		elseif(!isset($_GET['u']) && $has_session || isset($_GET['u'])) :
-			if( !isset($_GET['u']) ){
-				$page_user__id = $user['id'];
-			} else {
-				$page_user__id = $_GET['u'];
-			}
-
-			$stmt = sql('SELECT id, nickname FROM users WHERE id=?', ['i', $page_user__id]);
+			$stmt = sql('SELECT id, nickname FROM users WHERE id=?', ['i', $page_user_id]);
 			if( !$stmt->ok || $stmt->row_count < 1 ){ finalize('/404'); }
 			$page_user = $stmt->rows[0];
 
@@ -549,11 +571,11 @@ $is_orphanage = nth_last(URL['PATH_ARRAY']) === 'orphans';
 
 		<div class="content-header">
 			<div class="content-header__breadcrumb">
-				<a href="<?="/user?u=".$page_user['id']?>"><?=$page_user['nickname']?></a> >
+				<a href="<?="/user/".$page_user['id']?>"><?=$page_user['nickname']?></a> >
 				<span>Collection</span>
 			</div>
 			
-			<h2 class="content-header__title"><?=$page_user['nickname']?>'s Collection</h2>
+			<h2 class="content-header__title"><?=$has_session && $page_user['id'] === $user['id'] ? 'Your' : $page_user['nickname']."'s"?> Collection</h2>
 		</div>
 
 
@@ -608,7 +630,7 @@ $is_orphanage = nth_last(URL['PATH_ARRAY']) === 'orphans';
 
 				<tr class="table__body-row">
 					<td class="table__cell">
-						<a class="u-bold" href="/collection?c=<?=$collection['id']?>">
+						<a class="u-bold" href="/collection/<?=$collection['id']?>">
 							<?=$collection['name']?>
 						</a>
 					</td>

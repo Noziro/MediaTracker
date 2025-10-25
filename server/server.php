@@ -79,6 +79,16 @@ function remove_empties( array $arr ): array {
 	return $filtered_arr;
 }
 
+// Returns true if a regular expression would match the provided string, false if not.
+function preg_eval( string $pattern, string $string ): bool {
+	$matches = [];
+	preg_match($pattern, $string, $matches);
+	if( count($matches) > 0 ){
+		return true;
+	}
+	return false;
+}
+
 
 
 // AUTH SYSTEM
@@ -904,6 +914,9 @@ function sql( string $stmt, array $params = [], bool $associate_names = true ){
 	global $db;
 	$rows = [];
 	$row_count = -999;
+
+	# ignore value if only types are passed, as this is an obviously faulty param array.
+	$params = count($params) < 2 ? [] : $params;
 	
 	// Execute statement
 	if( !$q = $db->prepare($stmt) ){
