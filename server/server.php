@@ -1039,6 +1039,14 @@ class Notice {
 			'type' => 'error',
 			'message' => "A value you entered was invalid or out of expected bounds. Please try again."
 		],
+		'image_invalid' => [
+			'type' => 'error',
+			'message' => "Uploaded file is invalid."
+		],
+		'image_failure' => [
+			'type' => 'error',
+			'message' => "Something went wrong while uploading your image."
+		],
 
 		// Neutral
 		'no_change_detected' => [

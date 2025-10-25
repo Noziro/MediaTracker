@@ -39,51 +39,65 @@ function generate_random_characters($amount, $characters = '0123456789abcdefghij
 	return $str;
 }
 
-// Stores an image uploaded via POST that was fetched from $_FILES
-// Returns a dictionary with the results
-// [
-//     "outcome" => true/false
-//     "url" => 'url string'
-//     "error" => [response_code, response_type, details]
-// ]
-function upload_image($image, $subdir = '') {
-	$returnval = [
-		'outcome' => false,
-		'url' => '',
-		'error' => []
-	];
-	
-	if( !empty($subdir) ){
-		$dir = 'upload/'.$subdir.'/';
-	} else {
-		$dir = 'upload/';
+
+// Data class to store results of file uploads
+class UploadResult {
+	public bool $ok;
+	public string $path;
+	public Notice $notice;
+
+	function __construct( string $path = '', string $response_code = 'default' ){
+		$this->ok = strlen($path) > 0;
+		$this->path = $path;
+		$this->notice = new Notice($response_code);
 	}
+}
+
+// Stores an image uploaded via POST that was fetched from $_FILES
+# TODO: add supports for requirements such as minimum or maximum image dimensions and size
+# TODO: check whether camera metadata is stored in these and if so, how to strip it out
+function upload_image( array $image, string $subdir = '' ): UploadResult {
+	// setup
+	
+	# why tf does getenv return false instead of null when it doesn't exist? bruh
+	$base_path = rtrim(getenv('DATA_DIR') !== false ? getenv('DATA_DIR') : PATH, '/');
+	$sub_path = trim('upload/'.$subdir, '/');
+
+	// validate file before upload
 
 	if( $image['size'] < 1 ){
-		$returnval['error'] = ['blank', 'error', 'Uploaded file is invalid.'];
+		return new UploadResult(response_code: 'image_invalid');
 	}
+
+	// "upload" (move) file
+
 	$ext = '.'.explode('.', $image['name'])[1];
 
+	$full_path_prefix = implode('/', [$base_path, $sub_path]);
+
+	# keep generating random strings until a valid name is found.
+	# TODO: there has gotta be a better way than this?
 	while(true) {
 		$filename = generate_random_characters(64);
-		$internal_image_location = PATH.$dir.$filename.$ext;
+		$internal_image_location = implode('/', [$full_path_prefix, $filename.$ext]);
 		if( file_exists($internal_image_location) ){
 			continue;
 		}
 		break;
 	}
 
-	$image_location = '/'.$dir.$filename.$ext;
+	$external_image_location = implode('/', ['', $sub_path, $filename.$ext]);
 	
-	$uploaded = move_uploaded_file($image['tmp_name'], $internal_image_location);
-	if( !$uploaded ){
-		$returnval['error'] = ['blank', 'error', 'Something went wrong while uploading your image.'];
-	} else {
-		$returnval['outcome'] = true;
-		$returnval['url'] = $image_location;
+	# make local directory if needed, then move
+	if( !is_dir($full_path_prefix) ){
+		mkdir($full_path_prefix, recursive: true);
 	}
-
-	return $returnval;
+	$uploaded = move_uploaded_file($image['tmp_name'], $internal_image_location);
+	
+	if( !$uploaded ){
+		return new UploadResult(response_code: 'image_failure');
+	}
+	return new UploadResult(path: $external_image_location, response_code: 'success');
 }
 
 
@@ -338,11 +352,11 @@ elseif( $action === "collection_item_create" || $action === "collection_item_edi
 
 	// Validate and upload image
 	if( array_key_exists('image', $_FILES) && $_FILES['image']['name'] !== '' ){
-		$uploaded = upload_image($_FILES['image'], 'cover');
-		if( !$uploaded['outcome'] ){
-			finalize($r2, $uploaded['error']);
+		$uploaded = upload_image($_FILES['image'], 'media_cover');
+		if( !$uploaded->ok ){
+			finalize($r2, [$uploaded->notice->code, $uploaded->notice->message, $uploaded->notice->details]);
 		} else {
-			$image_location = $uploaded['url'];
+			$image_location = $uploaded->path;
 		}
 	}
 
@@ -715,28 +729,28 @@ elseif( $action === 'change_settings' ){
 
 	// PROFILE IMAGE
 	if( array_key_exists('profile_image', $_FILES) && $_FILES['profile_image']['name'] !== '' ){
-		$uploaded = upload_image($_FILES['profile_image'], 'profile');
-		if( !$uploaded['outcome'] ){
-			$error_list[] = $uploaded['error'];
+		$uploaded = upload_image($_FILES['profile_image'], 'user_avatar');
+		if( !$uploaded->ok ){
+			$error_list[] = [$uploaded->notice->code, $uploaded->notice->message, $uploaded->notice->details];
 		} else {
 			$to_update['users'][] = [
 				'column' => 'profile_image',
 				'type' => 's',
-				'value' => $uploaded['url']
+				'value' => $uploaded->path
 			];
 		}
 	}
 
 	// BANNER IMAGE
 	if( array_key_exists('banner_image', $_FILES) && $_FILES['banner_image']['name'] !== '' ){
-		$uploaded = upload_image($_FILES['banner_image'], 'profile_banner');
-		if( !$uploaded['outcome'] ){
-			$error_list[] = $uploaded['error'];
+		$uploaded = upload_image($_FILES['banner_image'], 'user_banner');
+		if( !$uploaded->ok ){
+			$error_list[] = [$uploaded->notice->code, $uploaded->notice->message, $uploaded->notice->details];
 		} else {
 			$to_update['users'][] = [
 				'column' => 'banner_image',
 				'type' => 's',
-				'value' => $uploaded['url']
+				'value' => $uploaded->path
 			];
 		}
 	}
