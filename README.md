@@ -12,6 +12,7 @@ This project is in very early stages, and is not meant to be ready for use yet.
 Commit messages should all begin with one of these prefixes, designating the main purpose of the commit. For example, a fix may also be included in a commit labelled (Feature).
 
 - (Feature) For commits that add new functionality to the end user.
+- (UX) For commits focus almost entirely on the user appearance and experience, but add little real functionality.
 - (Plumbing) For commits that rework internals with very little effect on end users.
 - (Fix) For commits that primarily fix problems.
 - (Meta) For commits that only change informational files or resources such as .gitignore.
