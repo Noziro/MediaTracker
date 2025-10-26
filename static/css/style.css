@@ -701,6 +701,34 @@ html {
 }
 
 
+.c-media-card {
+	position: relative;
+	display: block;
+	width: 120px;
+	aspect-ratio: 2/3;
+	background:
+		var(--cover, none) center / cover,
+		var(--backing-subcontent);
+}
+.c-media-card__status {
+	position: absolute;
+	top: 4px;
+	left: 4px;
+}
+.c-media-card__actions {
+	position: absolute;
+	top: 4px;
+	right: 4px;
+}
+.c-media-card__text {
+	position: absolute;
+	bottom: 0;
+	width: 100%;
+	padding: 4px;
+	background: color-mix(in hsl, var(--backing-content), transparent 30%);
+}
+
+
 
 /* TABLES */
 
