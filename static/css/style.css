@@ -59,7 +59,8 @@
 	--accent-pastel: hsl(0, 72%, 76%);
 }
 
-.t-light {
+/* provides a fallback for any non-set theme value */
+.t-light, :root {
 	--backing-page: hsl(0, 0%, 94%);
 	--backing-head: hsl(0, 0%, 100%);
 	--backing-footer: hsl(0, 0%, 88%);
@@ -84,13 +85,40 @@
 }
 
 .t-blackout {
-	--backing-page: #000;
-	--text-regular: #fff;
+	--backing-page: hsl(0, 0%, 0%);
+	--backing-head: hsl(0, 0%, 0%);
+	--backing-footer: hsl(0, 0%, 0%);
+	--backing-content: hsl(0, 0%, 7%);
+	--backing-subcontent: hsl(0, 0%, 14%);
+	--backing-button: var(--backing-subcontent);
+	--backing-input: hsl(0, 0%, 21%);
+	
+	--border-light: hsl(0, 0%, 7%);
+	--border-medium: hsl(0, 0%, 14%);
+	--border-head: var(--border-medium);
+	
+	--text-regular: hsl(0, 0%, 100%);
+	--text-medium: hsl(0, 0%, 80%);
+	--text-light: hsl(0, 0%, 60%);
+	--text-active: var(--accent-1);
 }
 
 .t-contrast {
-	--backing-page: #fff;
-	--text-regular: #000;
+	--backing-page: hsl(0, 0%, 88%);
+	--backing-head: hsl(0, 0%, 94%);
+	--backing-footer: var(--backing-head);
+	--backing-content: hsl(0, 0%, 100%);
+	--backing-subcontent: hsl(0, 0%, 80%);
+	--backing-button: var(--backing-subcontent);
+	--backing-input: hsl(0, 0%, 100%);
+	
+	--border-light: hsl(0, 0%, 75%);
+	--border-medium: hsl(0, 0%, 50%);
+	--border-head: var(--border-medium);
+	
+	--text-regular: hsl(0, 0%, 0%);
+	--text-medium: hsl(0, 0%, 5%);
+	--text-light: hsl(0, 0%, 10%);
 }
 
 /* GLOBALS */
@@ -654,7 +682,7 @@ html {
 .theme-preview__backing {
 	width: 100%;
 	height: 100%;
-	background: var(--backing-page);
+	background: linear-gradient(35deg, var(--backing-content) 60%, transparent 0) var(--backing-page);
 	border-radius: var(--rounding);
 }
 .theme-preview__text {
