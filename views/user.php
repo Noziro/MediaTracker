@@ -8,7 +8,7 @@ elseif( count(URL['PATH_ARRAY']) < 2 ){
 else {
 	$page_user_id = URL['PATH_ARRAY'][1];
 	if( !preg_eval('/\d+/', $page_user_id) ){
-		pretty_print($page_user_id);
+		pprint($page_user_id);
 		finalize('/404');
 	}
 	$page_user_id = intval($page_user_id);

@@ -11,7 +11,7 @@ This module expects a variable called $module_user with valid user data of:
 	<img class="c-user-card__avatar" src="<?=$module_user['profile_image']?>"></img>
 	<div class="c-user-card__text">
 		<a href="/user/<?=$module_user['id']?>"><b class="c-user-card__name"><?=$module_user['nickname']?></b></a>
-		<span class="subtext" title="User since <?=utc_date_to_user($page_user['created_at'])?>.">
+		<span class="subtext" title="User since <?=utc_date_to_user($module_user['created_at'])?>.">
 			User for <?=readable_date($module_user['created_at'], false)?>
 		</span>
 	</div>

@@ -10,7 +10,7 @@ include PATH.'server/server.php';
 // AUTH
 
 if( !$has_session ){
-	finalize('/', ['require_sign_in', 'error']); 
+	bailout('/', 'require_sign_in'); 
 }
 
 $action = $_POST['action'];
@@ -112,7 +112,7 @@ function upload_image( array $image, string $subdir = '' ): UploadResult {
 if( $action === "collection_create" ){
 	// Required fields
 	if( !isset($_POST['name']) || !isset($_POST['type']) ){
-		finalize($r2, ['required_field', 'error']);
+		bailout($r2, 'required_field');
 	}
 
 	// Define variables
@@ -120,7 +120,7 @@ if( $action === "collection_create" ){
 
 	$type = trim($_POST['type']);
 	if( !in_array((string)$type, VALID_MEDIA_TYPES, True) ){
-		finalize($r2, ['invalid_value', 'error']);
+		bailout($r2, 'invalid_value');
 	}
 
 	if( !isset($_POST['private']) || !in_array((int)$_POST['private'], [0,9], True) ){
@@ -131,9 +131,9 @@ if( $action === "collection_create" ){
 
 	// Execute DB
 	$stmt = sql('INSERT INTO collections (user_id, name, type, private) VALUES (?, ?, ?, ?)', ['issi', $user['id'], $name, $type, $private]);
-	if( !$stmt->ok ){ finalize($r2, [$stmt->response_code, $stmt->response_type]); }
+	if( !$stmt->ok ){ bailout($r2, $stmt->response_code); }
 	
-	finalize($r2, ['success']);
+	bailout($r2, 'success');
 }
 
 
@@ -142,23 +142,23 @@ if( $action === "collection_create" ){
 
 elseif( $action === "collection_edit" ){
 	if( !isset($_POST['collection_id']) ){
-		finalize($r2, ['disallowed_action', 'error']);
+		bailout($r2, 'disallowed_action');
 	}
 
 	// Required Fields
 	if( !isset($_POST['name']) || !isset($_POST['type']) ){
-		finalize($r2, ['required_field', 'error']);
+		bailout($r2, 'required_field');
 	}
 	
 	// Check existence
 	$stmt = sql('SELECT id, user_id, rating_system FROM collections WHERE id=?', ['i', $_POST['collection_id']]);
-	if( !$stmt->ok ){ finalize($r2, [$stmt->response_code, $stmt->response_type]); }
-	if( $stmt->row_count < 1 ){ finalize($r2, ['disallowed_action', 'error']); }
+	if( !$stmt->ok ){ bailout($r2, $stmt->response_code); }
+	if( $stmt->row_count < 1 ){ bailout($r2, 'disallowed_action'); }
 	$collection = $stmt->rows[0];
 
 	// Check user authority
 	if( $user['id'] !== $collection['user_id'] ){
-		finalize($r2, ['unauthorized', 'error']);
+		bailout($r2, 'unauthorized');
 	}
 
 	// Define variables
@@ -166,7 +166,7 @@ elseif( $action === "collection_edit" ){
 
 	$type = trim($_POST['type']);
 	if( !in_array((string)$type, VALID_MEDIA_TYPES, True) ){
-		finalize($r2, ['invalid_value', 'error']);
+		bailout($r2, 'invalid_value');
 	}
 
 	if( !isset($_POST['private']) || !in_array((int)$_POST['private'], [0,9], True) ){
@@ -186,7 +186,7 @@ elseif( $action === "collection_edit" ){
 
 	foreach( $columns as $col => $val ){
 		if( !isset($_POST[$col]) ){
-			finalize($r2, ['invalid_value', 'error']);
+			bailout($r2, 'invalid_value');
 		} else {
 			$columns[$col] = $_POST[$col];
 		}
@@ -197,7 +197,7 @@ elseif( $action === "collection_edit" ){
 
 		// If not valid input
 		if( !in_array((int)$rating_system, [3,5,10,20,100], True) ){
-			finalize($r2, ['invalid_value', 'error']);
+			bailout($r2, 'invalid_value');
 		}
 	} else {
 		$rating_system = $collection['rating_system'];
@@ -230,9 +230,9 @@ elseif( $action === "collection_edit" ){
 		$private,
 		$collection['id']
 	]);
-	if( !$stmt->ok ){ finalize($r2, [$stmt->response_code, $stmt->response_type]); }
+	if( !$stmt->ok ){ bailout($r2, $stmt->response_code); }
 
-	finalize($r2, ['success']);
+	bailout($r2, 'success');
 }
 
 
@@ -241,7 +241,7 @@ elseif( $action === "collection_edit" ){
 
 elseif( $action === 'collection_delete' || $action === 'collection_undelete' ){
 	if( !isset($_POST['collection_id']) ){
-		finalize($r2, ['disallowed_action', 'error']);
+		bailout($r2, 'disallowed_action');
 	}
 
 	if( $action === 'collection_delete' ){
@@ -252,24 +252,24 @@ elseif( $action === 'collection_delete' || $action === 'collection_undelete' ){
 
 	// Check existence
 	$stmt = sql('SELECT id, user_id FROM collections WHERE id=?', ['i', $_POST['collection_id']]);
-	if( !$stmt->ok ){ finalize($r2, [$stmt->response_code, $stmt->response_type]); }
-	if( $stmt->row_count < 1 ){ finalize($r2, ['disallowed_action', 'error']); }
+	if( !$stmt->ok ){ bailout($r2, $stmt->response_code); }
+	if( $stmt->row_count < 1 ){ bailout($r2, 'disallowed_action'); }
 	$collection = $stmt->rows[0];
 
 	// Check user authority
 	if( $user['id'] !== $collection['user_id'] ){
-		finalize($r2, ['unauthorized', 'error']);
+		bailout($r2, 'unauthorized');
 	}
 
 	// Execute DB
 	$stmt = sql('UPDATE collections SET deleted=? WHERE id=?', ['ii', $delete, $collection['id']]);
-	if( !$stmt->ok ){ finalize($r2, [$stmt->response_code, $stmt->response_type]); }
+	if( !$stmt->ok ){ bailout($r2, $stmt->response_code); }
 
 	if( $action === 'collection_delete' ){
 		$r2 = '/collection';
 	}
 
-	finalize($r2, ['success']);
+	bailout($r2, 'success');
 }
 
 
@@ -279,40 +279,40 @@ elseif( $action === 'collection_delete' || $action === 'collection_undelete' ){
 elseif( $action === "collection_item_create" || $action === "collection_item_edit" ){
 	if( $action === "collection_item_create" ){
 		if( !isset($_POST['collection_id']) ){
-			finalize($r2, ['disallowed_action', 'error']);
+			bailout($r2, 'disallowed_action');
 		}
 
 		// Get info
 		$stmt = sql('SELECT id, user_id, rating_system FROM collections WHERE id=?', ['i', $_POST['collection_id']]);
-		if( !$stmt->ok ){ finalize($r2, [$stmt->response_code, $stmt->response_type]); }
-		if( $stmt->row_count < 1 ){ finalize($r2, ['disallowed_action', 'error']); }
+		if( !$stmt->ok ){ bailout($r2, $stmt->response_code); }
+		if( $stmt->row_count < 1 ){ bailout($r2, 'disallowed_action'); }
 		$collection = $stmt->rows[0];
 	} elseif( $action === "collection_item_edit" ){
 		if( !isset($_POST['item_id']) ){
-			finalize($r2, ['disallowed_action', 'error']);
+			bailout($r2, 'disallowed_action');
 		}
 
 		// Get item info
 		$stmt = sql('SELECT image FROM media WHERE id=?', ['i', $_POST['item_id']]);
-		if( !$stmt->ok ){ finalize($r2, [$stmt->response_code, $stmt->response_type]); }
-		if( $stmt->row_count < 1 ){ finalize($r2, ['disallowed_action', 'error']); }
+		if( !$stmt->ok ){ bailout($r2, $stmt->response_code); }
+		if( $stmt->row_count < 1 ){ bailout($r2, 'disallowed_action'); }
 		$item = $stmt->rows[0];
 
 		// Get collection info
 		$stmt = sql('SELECT collections.id, collections.user_id, collections.rating_system FROM collections INNER JOIN media ON collections.id = media.collection_id WHERE media.id=?', ['i', $_POST['item_id']]);
-		if( !$stmt->ok ){ finalize($r2, [$stmt->response_code, $stmt->response_type]); }
-		if( $stmt->row_count < 1 ){ finalize($r2, ['disallowed_action', 'error']); }
+		if( !$stmt->ok ){ bailout($r2, $stmt->response_code); }
+		if( $stmt->row_count < 1 ){ bailout($r2, 'disallowed_action'); }
 		$collection = $stmt->rows[0];
 	}
 
 	// Check user authority
 	if( $user['id'] !== $collection['user_id'] ){
-		finalize('/collection', ['unauthorized', 'error']);
+		bailout('/collection', 'unauthorized');
 	}
 	
 	// Required fields
 	if( !isset($_POST['name']) || !isset($_POST['status']) ){
-		finalize($r2, ['required_field', 'error']);
+		bailout($r2, 'required_field');
 	}
 
 
@@ -341,7 +341,7 @@ elseif( $action === "collection_item_create" || $action === "collection_item_edi
 		$status = (string)$_POST['status'];
 
 		if( !in_array($status, VALID_STATUS, True) ){
-			finalize($r2, ['invalid_value', 'error']);
+			bailout($r2, 'invalid_value');
 		}
 	}
 
@@ -349,7 +349,7 @@ elseif( $action === "collection_item_create" || $action === "collection_item_edi
 	if( array_key_exists('score', $_POST) ){
 		$score = (int)$_POST['score'];
 		if( $score < 0 || $score > $collection['rating_system'] ){
-			finalize($r2, ['invalid_value', 'error']);
+			bailout($r2, 'invalid_value');
 		}
 		$score = score_normalize($score, $collection['rating_system']);
 	}
@@ -358,7 +358,7 @@ elseif( $action === "collection_item_create" || $action === "collection_item_edi
 	if( array_key_exists('image', $_FILES) && $_FILES['image']['name'] !== '' ){
 		$uploaded = upload_image($_FILES['image'], 'media_cover');
 		if( !$uploaded->ok ){
-			finalize($r2, [$uploaded->notice->code, $uploaded->notice->message, $uploaded->notice->details]);
+			bailout($r2, $uploaded->notice->code, $uploaded->notice->details);
 		} else {
 			$image_location = $uploaded->path;
 		}
@@ -368,14 +368,14 @@ elseif( $action === "collection_item_create" || $action === "collection_item_edi
 	if( array_key_exists('progress', $_POST) ){
 		$progress = (int)$_POST['progress'];
 		if( $progress < 0 ){
-			finalize($r2, ['invalid_value', 'error']);
+			bailout($r2, 'invalid_value');
 		}
 	}
 
 	if( array_key_exists('episodes', $_POST) ){
 		$episodes = (int)$_POST['episodes'];
 		if( $episodes < 0 ){
-			finalize($r2, ['invalid_value', 'error']);
+			bailout($r2, 'invalid_value');
 		}
 		// Increase total episodes to match watched episodes if needed
 		if( $episodes < $progress ){
@@ -386,7 +386,7 @@ elseif( $action === "collection_item_create" || $action === "collection_item_edi
 	if( array_key_exists('rewatched', $_POST) ){
 		$rewatched = (int)$_POST['rewatched'];
 		if( $rewatched < 0 ){
-			finalize($r2, ['invalid_value', 'error']);
+			bailout($r2, 'invalid_value');
 		}
 	}
 
@@ -422,7 +422,7 @@ elseif( $action === "collection_item_create" || $action === "collection_item_edi
 			|| (int)$d < 1
 			|| (int)$d > 31 // yes, this will accept invalid day ranges. this is dealt with below
 			) {
-				finalize($r2, ['invalid_value', 'error']);
+				bailout($r2, 'invalid_value');
 		}
 
 		// Uses PHP date functions to validate that the year/day is actually valid
@@ -459,7 +459,7 @@ elseif( $action === "collection_item_create" || $action === "collection_item_edi
 		$comments = $_POST['comments'];
 		$maxlen = pow(2,16) - 1;
 		if( strlen($comments) > $maxlen ){
-			finalize($r2, ['invalid_value', 'error']);
+			bailout($r2, 'invalid_value');
 		}
 	}
 
@@ -481,21 +481,21 @@ elseif( $action === "collection_item_create" || $action === "collection_item_edi
 	if( array_key_exists('adult', $_POST) ){
 		$adult = $_POST['adult'];
 		if( $adult < 0 || $adult > 1 ){
-			finalize($r2, ['invalid_value', 'error']);
+			bailout($r2, 'invalid_value');
 		}
 	}
 
 	if( array_key_exists('favourite', $_POST) ){
 		$favourite = $_POST['favourite'];
 		if( $favourite < 0 || $favourite > 1 ){
-			finalize($r2, ['invalid_value', 'error']);
+			bailout($r2, 'invalid_value');
 		}
 	}
 
 	if( array_key_exists('private', $_POST) ){
 		$private = $_POST['private'];
 		if( $private < 0 || $private > 1 ){
-			finalize($r2, ['invalid_value', 'error']);
+			bailout($r2, 'invalid_value');
 		}
 	}
 
@@ -590,7 +590,7 @@ elseif( $action === "collection_item_create" || $action === "collection_item_edi
 			$_POST['item_id']
 		]);
 	}
-	if( !$stmt->ok ){ finalize($r2, [$stmt->response_code, $stmt->response_type]); }
+	if( !$stmt->ok ){ bailout($r2, $stmt->response_code); }
 
 	if( $action === 'collection_item_create' ){
 		// Get newly added ID
@@ -601,16 +601,16 @@ elseif( $action === "collection_item_create" || $action === "collection_item_edi
 		}
 		
 		// Create activity
-		$stmt = sql('INSERT INTO activity (user_id, type, media_id) VALUES (?, ?, ?)', ['iii', $user['id'], $activity_types[$status], $new_item_id]);
+		$stmt = sql('INSERT INTO activity (user_id, type, media_id) VALUES (?, ?, ?)', ['iii', $user['id'], VALID_ACTIVITY_TYPES[$status], $new_item_id]);
 		if( !$stmt->ok ){
 			$details = 'Primary action performed successfully. Secondary action of creating activity post failed.';
 		}
 	}
 	
 	if( isset($details) ){
-		finalize($r2, ['blank', 'generic', $details]);
+		bailout($r2, 'blank', $details);
 	}
-	finalize($r2, ['success', 'generic']);
+	bailout($r2, 'success');
 }
 
 
@@ -619,7 +619,7 @@ elseif( $action === "collection_item_create" || $action === "collection_item_edi
 
 if( $action === 'collection_item_delete' || $action === 'collection_item_undelete' ){
 	if( !isset($_POST['item_id']) ){
-		finalize($r2, ['disallowed_action', 'error']);
+		bailout($r2, 'disallowed_action');
 	}
 
 	if( $action === 'collection_item_delete' ){
@@ -630,20 +630,20 @@ if( $action === 'collection_item_delete' || $action === 'collection_item_undelet
 
 	// Get info & check existence
 	$stmt = sql('SELECT id, user_id, collection_id FROM media WHERE id=?', ['i', $_POST['item']]);
-	if( !$stmt->ok ){ finalize($r2, [$stmt->response_code, $stmt->response_type]); }
-	if( $stmt->row_count < 1 ){ finalize($r2, ['disallowed_action', 'error']); }
+	if( !$stmt->ok ){ bailout($r2, $stmt->response_code); }
+	if( $stmt->row_count < 1 ){ bailout($r2, 'disallowed_action'); }
 	$item = $stmt->rows[0];
 
 	// Check user authority
 	if( $user['id'] !== $item['user_id'] ){
-		finalize($r2, ['unauthorized', 'error']);
+		bailout($r2, 'unauthorized');
 	}
 
 	// Execute DB
 	$stmt = sql('UPDATE media SET deleted=? WHERE id=?', ['ii', $delete, $item['id']]);
-	if( !$stmt->ok ){ finalize($r2, [$stmt->response_code, $stmt->response_type]); }
+	if( !$stmt->ok ){ bailout($r2, $stmt->response_code); }
 
-	finalize($r2, ['success']);
+	bailout($r2, 'success');
 }
 
 
@@ -653,7 +653,7 @@ if( $action === 'collection_item_delete' || $action === 'collection_item_undelet
 elseif( $action === 'change_settings' ){
 	// ALL SETTINGS
 	if( !$has_session ){
-		finalize($r2, ['require_sign_in', 'error']);
+		bailout($r2, 'require_sign_in');
 	}
 
 	// Variables which will be added onto as settings are changed.
@@ -815,7 +815,7 @@ elseif( $action === 'change_settings' ){
 		if( $tz !== $user['timezone'] ){
 			// If not valid input
 			$needle = false;
-			foreach( $valid_timezones as $zone_group ){
+			foreach( VALID_TIMEZONES as $zone_group ){
 				if( in_array($tz, $zone_group, True) ){
 					$needle = true;
 					break;
@@ -913,7 +913,7 @@ elseif( $action === 'change_settings' ){
 	if( $changed && count($error_list) > 0 ){
 		finalize($r2, ['partial_success'], ...$error_list);
 	} elseif( $changed ){
-		finalize($r2, ['success']);
+		bailout($r2, 'success');
 	} else {
 		finalize($r2, ['no_change_detected'], ...$error_list);
 	}
@@ -925,10 +925,10 @@ elseif( $action === 'change_settings' ){
 
 elseif( $action === 'import-list' ){
 	if( !array_key_exists('file', $_POST) ){
-		finalize($r2, ['required_field', 'error']);
+		bailout($r2, 'required_field');
 	}
 
-	finalize($r2, ['blank', 'generic', 'feature not implemented yet']);
+	bailout($r2, 'blank', 'feature not implemented yet');
 }
 
 
@@ -936,5 +936,5 @@ elseif( $action === 'import-list' ){
 
 
 // File should only reach this point if no other actions have reached finalization.
-finalize($r2, ['disallowed_action', 'error']);
+bailout($r2, 'disallowed_action');
 ?>

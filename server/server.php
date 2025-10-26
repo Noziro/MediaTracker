@@ -17,348 +17,16 @@ date_default_timezone_set('UTC');
 
 const VALID_STATUS = ['current', 'completed', 'paused', 'dropped', 'planned', 'other'];
 const VALID_MEDIA_TYPES = ['video', 'game', 'literature', 'other'];
-
-$db = new mysqli(...array_values(SQL_CREDENTIALS));
-
-$result = $db->query("SHOW TABLES LIKE 'collections'");
-if( !$result || !$result->fetch_assoc() ){
-	include_once(__DIR__.'/schema.php');
-}
-
-session_start();
-
-// TODO - this should be cleaned up or deleted
-#set_error_handler("errorHandler");
-#function errorHandler($errno, $errstr, $errfile, $errline)
-#{
-#    error_log("$errstr in $errfile:$errline");
-#	echo $errstr.'<br><br>';
-#    #header('Location: /500');
-#}
-
-
-
-// GENERIC FUNCTIONS
-
-function pretty_print($var) {
-	if( gettype($var) === 'array' || gettype($var) === 'object' ){
-		echo '<pre>'.print_r($var, True).'</pre>';
-	}
-	elseif( gettype($var) === 'boolean' ){
-		echo $var ? 'true' : 'false';
-	}
-	elseif( gettype($var) === 'integer' ){
-		echo $var;
-	}
-	else {
-		echo $var;
-	}
-}
-
-function to_int($s) {
-	return intval(round($s));
-}
-
-// Formats text that is retrieved from SQL database.
-function format_user_text($s) {
-	// encode BB here
-	return nl2br(htmlspecialchars($s));
-}
-
-// Gets the last element of the array, starting from index 1 (last)
-function nth_last( array $arr, int $nth = 1 ){
-	return $arr[count($arr)-$nth];
-}
-
-// This function purely exists because the builtin array_filter() does not re-number array indexes
-function remove_empties( array $arr ): array {
-	$filtered_arr = [];
-	foreach( $arr as $item ){
-		if( trim($item) === '' || $item === null ){
-			continue;
-		}
-		$filtered_arr[] = $item;
-	}
-	return $filtered_arr;
-}
-
-// Returns true if a regular expression would match the provided string, false if not.
-function preg_eval( string $pattern, string $string ): bool {
-	$matches = [];
-	preg_match($pattern, $string, $matches);
-	if( count($matches) > 0 ){
-		return true;
-	}
-	return false;
-}
-
-// simple function to simplify adding a data-autofill text for a variable that has an unknown value
-function autofill_if_set( $mixed ): string {
-	if( isset($mixed) ){
-		echo ' data-autofill="'.$mixed.'" ';
-	}
-	return '';
-}
-
-
-
-// AUTH SYSTEM
-
-class Authentication {
-	private $db;
-	
-	public function Authentication() {
-        $this->db = $GLOBALS['db']; // This is terrible. Don't do this.
-	}
-	
-	// Function called by user attempting login. Returns BOOL for success/fail.
-	public function login(string $post_name, string $post_pass) {
-		// Username is case insensitive.
-		$post_name_normalized = strtolower($post_name);
-
-		// Check user exists & get info
-		$stmt = sql('SELECT id, username, password FROM users WHERE username=?', ['s', $post_name_normalized]);
-		if( !$stmt->ok || $stmt->row_count < 1 ){
-			return false;
-		}
-		
-		$user_data = $stmt->rows[0];
-		
-		// Validate password
-		$valid = password_verify($post_pass, $user_data['password']);
-		if( !$valid ){
-			return false;
-		}
-
-		// Set expiry date in Unix time for use in database and cookies
-		$offset = 90 * 24 * 60 * 60; // days * hours * minutes * seconds
-		$expiry = time() + $offset;
-		
-		// Set other variables
-		$session = $this->generate_session_id();
-		$user_ip = $_SERVER['REMOTE_ADDR'];
-
-		// Create new user session
-		$stmt = sql('INSERT INTO sessions (id, user_id, expiry, user_ip) VALUES (?, ?, ?, ?)', ['siis', $session, $user_data['id'], $expiry, $user_ip]);
-		if( !$stmt->ok ){
-			return false;
-		}
-		
-		setcookie('session', $session, $expiry, '/');
-		return true;
-	}
-	
-	// Function called by user attempting register. Returns BOOL for success/fail.
-	public function register(string $post_name, string $post_pass, string $email = '') {
-		$post_name_normalized = strtolower($post_name);
-
-		// Check for existence & get info
-		$stmt = sql('SELECT id FROM users WHERE username=?', ['s', $post_name_normalized]);
-		if( !$stmt->ok || $stmt->row_count > 0 ){
-			return false;
-		}
-		
-		// Hash password
-		$pass_hashed = password_hash($post_pass, PASSWORD_BCRYPT);
-		
-		// Insert user into DB
-		sql('INSERT INTO users (username, nickname, email, password) VALUES (?, ?, ?, ?)', ['ssss', $post_name_normalized, $post_name, $email, $pass_hashed]);
-		
-		// Automatically login after registration.
-		$this->login($post_name, $post_pass);
-		
-		return true;
-	}
-	
-	// Function used internally to check if visitor has an active user session. Returns BOOL.
-	public function is_logged_in() {
-		if( !array_key_exists('session', $_COOKIE) ){
-			return false;
-		}
-		$session = sql('SELECT expiry FROM sessions WHERE id=?', ['s', $_COOKIE['session']]);
-		if( $session->row_count > 0 ){
-			if( $session->rows[0]['expiry'] < time() ){
-				sql('DELETE FROM sessions WHERE id=?', ['s', $_COOKIE['session']]);
-				setcookie('session', '', time() - 3600);
-				return false;
-			}
-			return true;
-		} else {
-			return false;
-		}
-	}
-	
-	// Gets info about current user. Used after checking if they are logged in with is_logged_in(). Returns SQL_ASSOC or FALSE
-	public function get_current_user() {
-		# TODO: double check that this is not abusable with an expired session token
-		$stmt = sql('SELECT users.id, users.username, users.nickname, users.email, users.permission_level, users.profile_colour, users.timezone FROM users INNER JOIN sessions ON sessions.user_id = users.id WHERE sessions.id=?', ['s', $_COOKIE['session']]);
-
-		if( !$stmt->ok || $stmt->row_count < 1 ){
-			return false;
-		} else {
-			return $stmt->rows[0];
-		}
-	}
-	
-	// Logs out user via wiping their session. Provies option for wiping only your session or all sessions. Returns BOOL on success/failure.
-	public function logout($logout_all = false) {
-		if( !array_key_exists('session', $_COOKIE) ){
-			return false;
-		}
-		
-		// Remove session from the database
-		if( $logout_all ){
-			$user = $this->get_current_user();
-			$stmt = sql('DELETE FROM sessions WHERE user_id=?', ['s', $user['id']]);
-		} else {
-			$stmt = sql('DELETE FROM sessions WHERE id=?', ['s', $_COOKIE['session']]);
-		}
-		if( !$stmt->ok ){
-			return false;
-		}
-		
-		// Remove the cookie by setting expiry time to the past
-		setcookie('session', '', time() - 3600);
-		
-		return true;
-	}
-	
-	// Generate and return 32 character session ID.
-	private function generate_session_id() {
-		$id = bin2hex(random_bytes(16));
-		
-		// If ID exists, get new one
-		if( sql('SELECT id FROM sessions WHERE id=?', ['s', $id])->row_count > 0 ){
-			$id = generate_session_id();
-		}
-		
-		return $id;
-	}
-}
-
-// PAGINATION
-
-class Pagination {
-	public $offset;
-	public $increment;
-	public $total;
-
-	public function Pagination() {
-		$this->offset = isset($_GET['offset']) ? $_GET['offset'] : 0;
-		$this->increment = 20;
-		$this->total = 0;
-	}
-
-	public function Setup($increment, $total) {
-		$this->increment = $increment;
-		$this->total = $total;
-	}
-
-	public function Generate() {
-		if( $this->total <= $this->increment ){
-			return false;
-		}
-
-		// Get page count
-		$pages = $this->increment === 0 ? 0 : ceil($this->total / $this->increment);
-		// Replaces all "page=#" from URL query
-		$normalized_query = preg_replace("/\&offset\=.+?(?=(\&|$))/", "", $_SERVER['QUERY_STRING']);
-
-		// Begin HTML
-		echo '<div class="page-actions__pagination">Page:';
-				
-		if( $pages < 8 ){
-			$i = 0;
-			while($i < $pages) {
-				$o = $i * $this->increment;
-				$i++;
-				echo ' <a class="page-actions__pagination-link" href="?'.$normalized_query.'&offset='.$o.'">'.$i.'</a>';
-			}
-		}
-		else {
-			// Always displays first two and last two pages plus the closest pages to the user
-			$current_page = ceil($this->offset / $this->increment) + 1;
-			$pages_to_display = [1, $current_page, $pages];
-			$nearby_pages = [$current_page - 2, $current_page - 1, $current_page + 1, $current_page + 2];
-			foreach( $nearby_pages as $p ){
-				if( $p > 1 && $p < $pages ){
-					array_push($pages_to_display, $p);
-				}
-			}
-
-			$pages_to_display = array_unique($pages_to_display, SORT_NUMERIC);
-			sort($pages_to_display);
-			
-			$previous_page = 0;
-			
-			foreach( $pages_to_display as $page ){
-				$offset = ($page - 1) * $this->increment;
-
-				if( $page - 1 != $previous_page ){
-					echo ' … ';
-				}
-				
-				echo ' <a class="page-actions__pagination-link" href="?'.$normalized_query.'&offset='.$offset.'">'.$page.'</a>';
-
-				$previous_page = $page;
-			}
-		}
-		
-		echo '</div>';
-		// End HTML
-
-		return true;
-	}
-}
-
-function valid_name(string $str) {
-	$okay = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_";
-
-	foreach( str_split($str) as $c ){
-		if( strpos($okay, $c) === False ){
-			return False;
-		}
-	}
-	
-	return true;
-}
-
-// Set user variables because god knows I'm checking if users are logged on literally every page
-
-$auth = new Authentication();
-$has_session = $auth->is_logged_in();
-if( $has_session ){
-	$user = $auth->get_current_user();
-	$permission_level = $user['permission_level'];
-} else {
-	$user = [];
-	$permission_level = 0;
-}
-if( !isset($user['timezone']) ){
-	$user['timezone'] = 'UTC';
-}
-
-// ACCESS LEVEL
-
-$stmt = sql('SELECT title, permission_level FROM permission_levels ORDER BY permission_level ASC');
-$permission_levels = [];
-
-if( $stmt->row_count > 0 ){	
-	foreach( $stmt->rows as $perm_pair ){
-		$title = $perm_pair['title'];
-		$level = $perm_pair['permission_level'];
-		
-		$permission_levels[$title] = $level;
-	}
-}
-
-
-
-// TIME FUNCTIONS
-
-// Valid timezones
-
-$valid_timezones = [
+const VALID_ACTIVITY_TYPES = [
+	'unspecified' => 0,
+	'current' => 1,
+	'completed' => 2,
+	'paused' => 3,
+	'dropped' => 4,
+	'planned' => 5,
+	'post' => 10
+];
+const VALID_TIMEZONES = [
 	'Africa' => [
 		'Africa/Abidjan',
 		'Africa/Accra',
@@ -809,8 +477,366 @@ $valid_timezones = [
 	]
 ];
 
-// Get user timezone
-function utc_date_to_user($utc, $hour = true) {
+$db = new mysqli(...array_values(SQL_CREDENTIALS));
+
+$result = $db->query("SHOW TABLES LIKE 'collections'");
+if( !$result || !$result->fetch_assoc() ){
+	include_once(__DIR__.'/schema.php');
+}
+
+session_start();
+
+// TODO - this should be cleaned up or deleted
+#set_error_handler("errorHandler");
+#function errorHandler($errno, $errstr, $errfile, $errline)
+#{
+#    error_log("$errstr in $errfile:$errline");
+#	echo $errstr.'<br><br>';
+#    #header('Location: /500');
+#}
+
+
+
+// GENERIC FUNCTIONS
+
+function pprint_internal( $var ){
+	echo '('.gettype($var).') ';
+	if( gettype($var) === 'string' ){
+		echo $var;
+	}
+	elseif( gettype($var) === 'array' ){
+		echo '[<div style="padding-left: 16px;">';
+		foreach( $var as $key => $subvar ){
+			echo '('.gettype($key).') ' . $key . ' => ';
+			pprint_internal($subvar);
+			echo '<br />';
+		}
+		echo '</div>]';
+	}
+	elseif( gettype($var) === 'boolean' ){
+		echo $var ? 'true' : 'false';
+	}
+	elseif( gettype($var) === 'integer' ){
+		echo $var;
+	}
+	else {
+		echo '<pre>';
+		var_dump($var);
+		echo '</pre>';
+	}
+}
+
+function pprint( ...$mixed ){
+	foreach( $mixed as $var ){
+		echo '<div style="background: black; color: yellow; padding: 5px; margin: 5px;">';
+		pprint_internal($var);
+		echo '</div>';
+	}
+}
+
+function to_int($s) {
+	return intval(round($s));
+}
+
+// Formats text that is retrieved from SQL database.
+function format_user_text($s) {
+	// encode BB here
+	return nl2br(htmlspecialchars($s));
+}
+
+// Gets the last element of the array, starting from index 1 (last)
+function nth_last( array $arr, int $nth = 1 ){
+	return $arr[count($arr)-$nth];
+}
+
+// This function purely exists because the builtin array_filter() does not re-number array indexes
+function remove_empties( array $arr ): array {
+	$filtered_arr = [];
+	foreach( $arr as $item ){
+		if( trim($item) === '' || $item === null ){
+			continue;
+		}
+		$filtered_arr[] = $item;
+	}
+	return $filtered_arr;
+}
+
+// Returns true if a regular expression would match the provided string, false if not.
+function preg_eval( string $pattern, string $string ): bool {
+	$matches = [];
+	preg_match($pattern, $string, $matches);
+	if( count($matches) > 0 ){
+		return true;
+	}
+	return false;
+}
+
+// simple function to simplify adding a data-autofill text for a variable that has an unknown value
+function autofill_if_set( $mixed ): string {
+	if( isset($mixed) ){
+		echo ' data-autofill="'.$mixed.'" ';
+	}
+	return '';
+}
+
+
+
+// AUTH SYSTEM
+
+class Authentication {
+	private $db;
+	
+	public function Authentication() {
+        $this->db = $GLOBALS['db']; // This is terrible. Don't do this.
+	}
+	
+	// Function called by user attempting login. Returns BOOL for success/fail.
+	public function login(string $post_name, string $post_pass) {
+		// Username is case insensitive.
+		$post_name_normalized = strtolower($post_name);
+
+		// Check user exists & get info
+		$stmt = sql('SELECT id, username, password FROM users WHERE username=?', ['s', $post_name_normalized]);
+		if( !$stmt->ok || $stmt->row_count < 1 ){
+			return false;
+		}
+		
+		$user_data = $stmt->rows[0];
+		
+		// Validate password
+		$valid = password_verify($post_pass, $user_data['password']);
+		if( !$valid ){
+			return false;
+		}
+
+		// Set expiry date in Unix time for use in database and cookies
+		$offset = 90 * 24 * 60 * 60; // days * hours * minutes * seconds
+		$expiry = time() + $offset;
+		
+		// Set other variables
+		$session = $this->generate_session_id();
+		$user_ip = $_SERVER['REMOTE_ADDR'];
+
+		// Create new user session
+		$stmt = sql('INSERT INTO sessions (id, user_id, expiry, user_ip) VALUES (?, ?, ?, ?)', ['siis', $session, $user_data['id'], $expiry, $user_ip]);
+		if( !$stmt->ok ){
+			return false;
+		}
+		
+		setcookie('session', $session, $expiry, '/');
+		return true;
+	}
+	
+	// Function called by user attempting register. Returns BOOL for success/fail.
+	public function register(string $post_name, string $post_pass, string $email = '') {
+		$post_name_normalized = strtolower($post_name);
+
+		// Check for existence & get info
+		$stmt = sql('SELECT id FROM users WHERE username=?', ['s', $post_name_normalized]);
+		if( !$stmt->ok || $stmt->row_count > 0 ){
+			return false;
+		}
+		
+		// Hash password
+		$pass_hashed = password_hash($post_pass, PASSWORD_BCRYPT);
+		
+		// Insert user into DB
+		sql('INSERT INTO users (username, nickname, email, password) VALUES (?, ?, ?, ?)', ['ssss', $post_name_normalized, $post_name, $email, $pass_hashed]);
+		
+		// Automatically login after registration.
+		$this->login($post_name, $post_pass);
+		
+		return true;
+	}
+	
+	// Function used internally to check if visitor has an active user session. Returns BOOL.
+	public function is_logged_in() {
+		if( !array_key_exists('session', $_COOKIE) ){
+			return false;
+		}
+		$session = sql('SELECT expiry FROM sessions WHERE id=?', ['s', $_COOKIE['session']]);
+		if( $session->row_count > 0 ){
+			if( $session->rows[0]['expiry'] < time() ){
+				sql('DELETE FROM sessions WHERE id=?', ['s', $_COOKIE['session']]);
+				setcookie('session', '', time() - 3600);
+				return false;
+			}
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	// Gets info about current user. Used after checking if they are logged in with is_logged_in(). Returns SQL_ASSOC or FALSE
+	public function get_current_user() {
+		# TODO: double check that this is not abusable with an expired session token
+		$stmt = sql('SELECT users.id, users.username, users.nickname, users.email, users.permission_level, users.profile_colour, users.timezone FROM users INNER JOIN sessions ON sessions.user_id = users.id WHERE sessions.id=?', ['s', $_COOKIE['session']]);
+
+		if( !$stmt->ok || $stmt->row_count < 1 ){
+			return false;
+		} else {
+			return $stmt->rows[0];
+		}
+	}
+	
+	// Logs out user via wiping their session. Provies option for wiping only your session or all sessions. Returns BOOL on success/failure.
+	public function logout($logout_all = false) {
+		if( !array_key_exists('session', $_COOKIE) ){
+			return false;
+		}
+		
+		// Remove session from the database
+		if( $logout_all ){
+			$user = $this->get_current_user();
+			$stmt = sql('DELETE FROM sessions WHERE user_id=?', ['s', $user['id']]);
+		} else {
+			$stmt = sql('DELETE FROM sessions WHERE id=?', ['s', $_COOKIE['session']]);
+		}
+		if( !$stmt->ok ){
+			return false;
+		}
+		
+		// Remove the cookie by setting expiry time to the past
+		setcookie('session', '', time() - 3600);
+		
+		return true;
+	}
+	
+	// Generate and return 32 character session ID.
+	private function generate_session_id() {
+		$id = bin2hex(random_bytes(16));
+		
+		// If ID exists, get new one
+		if( sql('SELECT id FROM sessions WHERE id=?', ['s', $id])->row_count > 0 ){
+			$id = generate_session_id();
+		}
+		
+		return $id;
+	}
+}
+
+// PAGINATION
+
+class Pagination {
+	public $offset;
+	public $increment;
+	public $total;
+
+	public function Pagination() {
+		$this->offset = isset($_GET['offset']) ? $_GET['offset'] : 0;
+		$this->increment = 20;
+		$this->total = 0;
+	}
+
+	public function Setup($increment, $total) {
+		$this->increment = $increment;
+		$this->total = $total;
+	}
+
+	public function Generate() {
+		if( $this->total <= $this->increment ){
+			return false;
+		}
+
+		// Get page count
+		$pages = $this->increment === 0 ? 0 : ceil($this->total / $this->increment);
+		// Replaces all "page=#" from URL query
+		$normalized_query = preg_replace("/\&offset\=.+?(?=(\&|$))/", "", $_SERVER['QUERY_STRING']);
+
+		// Begin HTML
+		echo '<div class="page-actions__pagination">Page:';
+				
+		if( $pages < 8 ){
+			$i = 0;
+			while($i < $pages) {
+				$o = $i * $this->increment;
+				$i++;
+				echo ' <a class="page-actions__pagination-link" href="?'.$normalized_query.'&offset='.$o.'">'.$i.'</a>';
+			}
+		}
+		else {
+			// Always displays first two and last two pages plus the closest pages to the user
+			$current_page = ceil($this->offset / $this->increment) + 1;
+			$pages_to_display = [1, $current_page, $pages];
+			$nearby_pages = [$current_page - 2, $current_page - 1, $current_page + 1, $current_page + 2];
+			foreach( $nearby_pages as $p ){
+				if( $p > 1 && $p < $pages ){
+					array_push($pages_to_display, $p);
+				}
+			}
+
+			$pages_to_display = array_unique($pages_to_display, SORT_NUMERIC);
+			sort($pages_to_display);
+			
+			$previous_page = 0;
+			
+			foreach( $pages_to_display as $page ){
+				$offset = ($page - 1) * $this->increment;
+
+				if( $page - 1 != $previous_page ){
+					echo ' … ';
+				}
+				
+				echo ' <a class="page-actions__pagination-link" href="?'.$normalized_query.'&offset='.$offset.'">'.$page.'</a>';
+
+				$previous_page = $page;
+			}
+		}
+		
+		echo '</div>';
+		// End HTML
+
+		return true;
+	}
+}
+
+function valid_name(string $str) {
+	$okay = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-_";
+
+	foreach( str_split($str) as $c ){
+		if( strpos($okay, $c) === False ){
+			return False;
+		}
+	}
+	
+	return true;
+}
+
+// Set user variables because god knows I'm checking if users are logged on literally every page
+
+$auth = new Authentication();
+$has_session = $auth->is_logged_in();
+if( $has_session ){
+	$user = $auth->get_current_user();
+	$permission_level = $user['permission_level'];
+} else {
+	$user = [];
+	$permission_level = 0;
+}
+if( !isset($user['timezone']) ){
+	$user['timezone'] = 'UTC';
+}
+
+// ACCESS LEVEL
+
+$stmt = sql('SELECT title, permission_level FROM permission_levels ORDER BY permission_level ASC');
+$permission_levels = [];
+
+if( $stmt->row_count > 0 ){	
+	foreach( $stmt->rows as $perm_pair ){
+		$title = $perm_pair['title'];
+		$level = $perm_pair['permission_level'];
+		
+		$permission_levels[$title] = $level;
+	}
+}
+
+
+
+// TIME FUNCTIONS
+
+// Get a date formatted to the user's preferred timezone
+function utc_date_to_user( string $utc, bool $hour = true ): string {
 	global $user;
 	$preferred_timezone = isset($user['timezone']) ? $user['timezone'] : 'UTC';
 	$timezone_utc = new DateTimeZone('UTC');
@@ -827,7 +853,7 @@ function utc_date_to_user($utc, $hour = true) {
 
 
 // Returns inputted date in a user-readable format i.e. 2 hours ago, 3 months ago
-function readable_date($date, $suffix = true, $verbose = false) {
+function readable_date( string $date, bool $suffix = true, bool $verbose = false ): string {
 	$now = new DateTime;
 	$then = new DateTime($date);
 	$diff = $now->diff($then);
@@ -860,20 +886,6 @@ function readable_date($date, $suffix = true, $verbose = false) {
 	}
     return $string ? implode(', ', $string) . ' ago' : 'just now';
 }
-
-
-
-// ACTIVITY
-
-$activity_types = [
-	'unspecified' => 0,
-	'current' => 1,
-	'completed' => 2,
-	'paused' => 3,
-	'dropped' => 4,
-	'planned' => 5,
-	'post' => 10
-];
 
 
 
@@ -970,7 +982,7 @@ function sql( string $stmt, array $params = [], bool $associate_names = true ){
 // User Notices
 
 class Notice {
-	private array $valid_codes = [
+	static array $valid_codes = [
 		// Successes
 		'login_success' => [
 			'type' => 'success',
@@ -1079,6 +1091,15 @@ class Notice {
 		]
 	];
 
+	static function from_mixed( string|array $mixed ){
+		if( gettype($mixed) === 'string' ){
+			return new Notice($mixed);
+		}
+		if( gettype($mixed) === 'array' ){
+			return new Notice($mixed[0], $mixed[1] ?? '');
+		}
+	}
+
 	public string $code;
 	public string $type;
 	public string $message;
@@ -1086,11 +1107,11 @@ class Notice {
 
 	public function __construct( string $code = 'default', string $details = '' ){
 		$this->details = $details;
-		if( array_key_exists($code, $this->valid_codes) ){
+		if( array_key_exists($code, Notice::$valid_codes) ){
 			$this->code = $code;
-			$this->type = $this->valid_codes[$code]['type'];
-			$this->message = $this->valid_codes[$code]['message'];
-			$this->details = $this->valid_codes[$code]['details'] ?? '';
+			$this->type = Notice::$valid_codes[$code]['type'];
+			$this->message =Notice::$valid_codes[$code]['message'];
+			$this->details = Notice::$valid_codes[$code]['details'] ?? '';
 		} else {
 			throw new ValueError("Invalid notice code: $response_code");
 		}
@@ -1098,18 +1119,18 @@ class Notice {
 }
 
 
-// For use on user POST pages. Closes relevant pieces and redirects user to a page.
-function finalize(string $page = '/', ...$input_notices) {
+// For use . Closes relevant pieces and redirects user to a page.
+# TODO: this is currently used for all page exists, but header redirects are not allowed after content is echo'd. This needs a rework.
+function bailout( string $page = '/', string|array|Notice ...$input_notices ){
 	global $db;
 	$db->close();
 
 	if( isset($input_notices) ){
-		$output_notices = [];
-
-		for( $i = 0; $i < count($input_notices); $i++ ){
-			$notice = new Notice($input_notices[$i][0], $input_notices[$i][2] ?? '');
-			$output_notices[$i] = $notice;
-		}
+		$output_notices = array_map(
+			fn($notice): Notice => $notice instanceof Notice
+				? $notice
+				: Notice::from_mixed($notice)
+			, $input_notices );
 
 		$_SESSION['notice'] = $output_notices;
 	}

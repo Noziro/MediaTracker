@@ -1,6 +1,6 @@
 <?php
 if( !$has_session ){
-	finalize('/', ['require_sign_in', 'error']);
+	bailout('/', 'require_sign_in');
 }
 
 $section = count(URL['PATH_ARRAY']) === 3 ? URL['PATH_ARRAY'][2] : '';
@@ -212,7 +212,7 @@ $user = array_merge($user, $user_extra->rows[0]);
 				
 				<label class="label">Change timezone</label>
 				<select class="select" form="form-settings" name="timezone">
-					<?php foreach($valid_timezones as $zone_group_label => $zone_group) : ?>
+					<?php foreach(VALID_TIMEZONES as $zone_group_label => $zone_group) : ?>
 					<optgroup label="<?=$zone_group_label?>">
 						<?php foreach($zone_group as $zone) : ?>
 						<option <?php if( isset($user['timezone']) && $zone === $user['timezone'] || $zone === 'UTC' ){ echo "selected"; } ?>>
