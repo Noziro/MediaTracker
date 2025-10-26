@@ -112,10 +112,15 @@ function setToday($id) {
 
 // Search Bar Function
 
-var searchBtn = document.getElementById('search-btn');
+function search( query ){
+	window.location.assign('/browse/search?q=' + query);
+}
 
-searchBtn.onclick = function () {
-    var query = document.getElementById('search').value;
-	// Todo: add more query operators such as year:2018 etc
-    window.location.assign('/browse/search?q=' + query);
+var searchBars = document.getElementsByClassName('js-search-bar');
+
+for( let bar of searchBars ){
+	input = bar.getElementsByTagName('input')[0];
+	button = bar.getElementsByTagName('button')[0];
+	button.addEventListener('pointerup', ev=>{ if( ev.pointerType !== 'mouse' || ev.button === 0 ){ search(input.value); } });
+	input.addEventListener('keyup', ev=>{ if( ev.key === 'Enter' ){ search(input.value); } });
 }

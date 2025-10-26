@@ -164,7 +164,7 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 
 		<table class="table">
 			<thead>
-				<tr>
+				<tr class="table__head-row">
 					<?php if($collection['display_image'] === 1) : ?>
 					<th class="table__cell"><b class="table__heading">Image</b></span></th>
 					<?php endif; ?>
@@ -481,44 +481,46 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 		else :
 		?>
 
-		<table class="table">
-			<thead>
-				<tr>
-					<th class="table__cell"><b class="table__heading">Name</b></th>
-					<th class="table__cell table__cell--extra-small"><b class="table__heading">Items</b></th>
-					<th class="table__cell table__cell--small"><b class="table__heading">Type</b></th>
-					<th class="table__cell table__cell--small"><b class="table__heading">Privacy</b></th>
-				</tr>
-			</thead>
-			<tbody>
-				<?php foreach($collections->rows as $collection) : ?>
+		<div class="l-leave-a-gap">
+			<table class="table">
+				<thead>
+					<tr class="table__head-row">
+						<th class="table__cell"><b class="table__heading">Name</b></th>
+						<th class="table__cell table__cell--extra-small"><b class="table__heading">Items</b></th>
+						<th class="table__cell table__cell--small"><b class="table__heading">Type</b></th>
+						<th class="table__cell table__cell--small"><b class="table__heading">Privacy</b></th>
+					</tr>
+				</thead>
+				<tbody>
+					<?php foreach($collections->rows as $collection) : ?>
 
-				<tr class="table__body-row">
-					<td class="table__cell">
-						<a class="u-bold" href="/collection/<?=$collection['id']?>">
-							<?=$collection['name']?>
-						</a>
-					</td>
-					<td class="table__cell">
-						<?php
-						echo reset(sql('SELECT COUNT(id) FROM media WHERE collection_id=?', ['i', $collection['id']])->rows[0]);
-						?>
-					</td>
-					<td class="table__cell">
-						<?=$collection['type']?>
-					</td>
-					<td class="table__cell">
-						<?php if($collection['private'] === 9) : ?>
-						Private
-						<?php else : ?>
-						Public
-						<?php endif; ?>
-					</td>
-				</tr>
+					<tr class="table__body-row">
+						<td class="table__cell">
+							<a class="u-bold" href="/collection/<?=$collection['id']?>">
+								<?=$collection['name']?>
+							</a>
+						</td>
+						<td class="table__cell">
+							<?php
+							echo reset(sql('SELECT COUNT(id) FROM media WHERE collection_id=?', ['i', $collection['id']])->rows[0]);
+							?>
+						</td>
+						<td class="table__cell">
+							<?=$collection['type']?>
+						</td>
+						<td class="table__cell">
+							<?php if($collection['private'] === 9) : ?>
+							Private
+							<?php else : ?>
+							Public
+							<?php endif; ?>
+						</td>
+					</tr>
 
-				<?php endforeach; ?>
-			</tbody>
-		</table>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+		</div>
 
 		<?php endif; ?>
 
@@ -529,36 +531,38 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 		if($orphaned_items_count > 0 && $user['id'] === $page_user['id']) :
 		?>
 
-		<h2 class="c-heading">Automatic Collections</h2>
+		<div class="l-leave-a-gap">
+			<h2 class="c-heading">Automatic Collections</h2>
 
-		<table class="table">
-			<thead>
-				<tr>
-					<th class="table__cell"><b class="table__heading">Name</b></th>
-					<th class="table__cell table__cell--extra-small"><b class="table__heading">Items</b></th>
-					<th class="table__cell table__cell--small"><b class="table__heading">Type</b></th>
-					<th class="table__cell table__cell--small"><b class="table__heading">Privacy</b></th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr class="table__body-row">
-					<td class="table__cell">
-						<a class="u-bold" href="/collection/orphans">
-							Orphaned Items
-						</a>
-					</td>
-					<td class="table__cell">
-						<?=$orphaned_items_count?>
-					</td>
-					<td class="table__cell">
-						Mixed
-					</td>
-					<td class="table__cell">
-						Private
-					</td>
-				</tr>
-			</tbody>
-		</table>
+			<table class="table">
+				<thead>
+					<tr class="table__head-row">
+						<th class="table__cell"><b class="table__heading">Name</b></th>
+						<th class="table__cell table__cell--extra-small"><b class="table__heading">Items</b></th>
+						<th class="table__cell table__cell--small"><b class="table__heading">Type</b></th>
+						<th class="table__cell table__cell--small"><b class="table__heading">Privacy</b></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr class="table__body-row">
+						<td class="table__cell">
+							<a class="u-bold" href="/collection/orphans">
+								Orphaned Items
+							</a>
+						</td>
+						<td class="table__cell">
+							<?=$orphaned_items_count?>
+						</td>
+						<td class="table__cell">
+							Mixed
+						</td>
+						<td class="table__cell">
+							Private
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
 
 		<?php endif; ?>
 

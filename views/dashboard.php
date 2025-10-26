@@ -11,8 +11,8 @@ $currently_watching = sql('
 ?>
 
 <main id="content" class="wrapper wrapper--content">
-	<div class="wrapper__inner split">
-		<div class="split__section">
+	<div class="wrapper__inner l-split">
+		<div class="c-module c-module--spacious l-split__section">
 			<?php if( $currently_watching->row_count > 0 ) : ?>
 			<h3 class="c-heading">From Your Lists</h3>
 			<div class="l-horizontal">

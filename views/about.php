@@ -93,7 +93,7 @@
 
 
 	<?php if(!$has_session) : ?>
-	<div class="c-about__section c-about__section--signup banner--pattern-plaid banner--palette-3"> <!-- TODO - using banner classes is a temp hack, should either change the CSS to be more generic or use something else -->
+	<div class="c-about__section c-about__section--signup">
 		<div class="wrapper__inner">
 			<div class="c-about__signup">
 				<div class="l-button-list">

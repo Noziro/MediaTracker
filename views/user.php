@@ -69,7 +69,6 @@ function ceil_decimal(float $float, int $precision = 1) {
 
 ?>
 
-<!-- TODO: Fix classes. Having two BEM blocks layered on top of each other is disgusting -->
 <div class="wrapper banner <?php
 if( empty($page_user['banner_image']) ){
 	$patterns = ['plaid', 'stripes-left', 'stripes-right', 'diamonds', 'half-square'];
@@ -94,48 +93,38 @@ if( empty($page_user['banner_image']) ){
 		<?php endif; ?>
 
 		<div class="content-header">
-			<h2 class="content-header__title">
-				<?php
-				$rank = 'User';
-				$rank_query = sql('SELECT title FROM permission_levels WHERE permission_level <= ? ORDER BY permission_level DESC LIMIT 1', ['i', $page_user['permission_level']]);
-				if( $rank_query->row_count > 0 ){
-					$rank = $rank_query->rows[0]['title'];
-				}
-				?>
-				<?=$page_user['nickname']?>
-				<span class="site-rank site-rank--<?=strtolower(str_replace(' ', '-', $rank))?>">
-					<?=$rank?>
-				</span>
-			</h2>
+			<h2 class="content-header__title"><?=$page_user['nickname']?></h2>
 		</div>
 	</div>
 </div>
 
 <main id="content" class="wrapper wrapper--content">
-	<div class="wrapper__inner profile" <?php if( $page_user_prefs !== null && isset($page_user_prefs['profile_colour']) ){ echo 'style="--profile-colour: '.$page_user_prefs['profile_colour'].'"'; } ?>>
-		<div class="profile__column profile__column--thin">
-			<div class="profile__section">
-				<span class="profile__section-header">Links</span>
+	<div class="wrapper__inner l-columns c-profile" <?php if( $page_user_prefs !== null && isset($page_user_prefs['profile_colour']) ){ echo 'style="--profile-colour: '.$page_user_prefs['profile_colour'].'"'; } ?>>
+		<div class="l-columns__column l-columns__column--thin">
+			<div class="l-columns__section c-module">
+				<h6 class="c-heading-minor">Links</h6>
 
-				<a class="profile__user-link profile__user-link--primary" href="/user/<?=$page_user['id']?>/collection">Collection</a>
-				<!-- TODO: List friends here -->
-				<?php if($has_session && $user['id'] !== $page_user['id']) : ?>
-				<div class="c-divider"></div>
-				<a class="profile__user-link">Add Friend</a>
-				<a class="profile__user-link" href="/report?user=<?=$page_user['id']?>">Report</a>
-				<?php endif; ?>
+				<span class="c-links-list c-links-list--emphasis">
+					<a class="c-links-list__link" href="/user/<?=$page_user['id']?>/collection">Collection</a>
+					<!-- TODO: List friends here -->
+					<?php if($has_session && $user['id'] !== $page_user['id']) : ?>
+					<div class="c-divider"></div>
+					<a class="c-links-list__link">Add Friend</a>
+					<a class="c-links-list__link" href="/report?user=<?=$page_user['id']?>">Report</a>
+					<?php endif; ?>
+				</span>
 			</div>
 
-			<div class="profile__section">
-				<span class="profile__section-header">Details</span>
+			<div class="l-columns__section c-module">
+				<h6 class="c-heading-minor">Details</h6>
 
 				<span title="User since <?=utc_date_to_user($page_user['created_at'])?>.">
 					User for <?=readable_date($page_user['created_at'], false)?>
 				</span>
 			</div>
 
-			<div class="profile__section">
-				<span class="profile__section-header">History</span>
+			<div class="l-columns__section c-module">
+				<h6 class="c-heading-minor">History</h6>
 
 				<?php if($activity->row_count > 0) : ?>
 				<div class="c-user-history">
@@ -212,21 +201,21 @@ if( empty($page_user['banner_image']) ){
 			</div>
 		</div>
 		
-		<div class="profile__column profile__column--large">
+		<div class="l-columns__column l-columns__column--large">
 			<?php if(strlen(trim($page_user['about'])) !== 0) : ?>
-			<div class="profile__section">
-				<span class="profile__section-header">About</span>
+			<div class="l-columns__section c-module">
+				<h6 class="c-heading-minor">About</h6>
 
-				<p class="profile__about">
+				<p class="c-about">
 					<?=format_user_text($page_user['about'])?>
 				</p>
 			</div>
 			<?php endif; ?>
 
-			<div class="profile__section">
+			<div class="l-columns__section c-module">
 				<?php $pg->Generate() ?>
 				
-				<span class="profile__section-header">Activity</span>
+				<h6 class="c-heading-minor">Activity</h6>
 
 				<?php
 				$i = 0;
@@ -306,9 +295,9 @@ if( empty($page_user['banner_image']) ){
 			</div>
 		</div>
 
-		<div class="profile__column profile__column--medium">
-			<div class="profile__section">
-				<span class="profile__section-header">Stats</span>
+		<div class="l-columns__column l-columns__column--medium">
+			<div class="l-columns__section c-module">
+				<h6 class="c-heading-minor">Stats</h6>
 
 				<?php
 
@@ -394,8 +383,8 @@ if( empty($page_user['banner_image']) ){
 				</div>
 			</div>
 
-			<div class="profile__section">
-				<span class="profile__section-header">Favourites</span>
+			<div class="l-columns__section c-module">
+				<h6 class="c-heading-minor">Favourites</h6>
 
 				<?php
 				$favs = sql('SELECT media.id, media.name, media.image FROM media INNER JOIN collections ON collections.id = media.collection_id WHERE media.user_id=? AND media.favourite=1 AND collections.private <= ? ORDER BY name ASC', ['ii', $page_user['id'], $friendship]);

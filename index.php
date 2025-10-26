@@ -156,8 +156,12 @@ if( in_array($file, ['login', 'register']) && $has_session ){
 				</div>
 				
 				<div class="site-nav__section site-nav--search">
-					<input id="search" type="search" autocomplete="off" class="search-bar" placeholder="Search for Movies, Games, TV, Books, Anime, and more...">
-					<button id="search-btn" type="button" class="button">Search</button>
+					<div class="c-search">
+						<div class="c-search__bar js-search-bar">
+							<input class="c-search__input" type="search" autocomplete="off" placeholder="Search for Movies, Games, TV, Books, Anime, and more...">
+							<button class="button c-search__submit" type="button">Search</button>
+						</div>
+					</div>
 				</div>
 				
 				<div class="site-nav__section">

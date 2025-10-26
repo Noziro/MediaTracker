@@ -1,0 +1,60 @@
+.c-mega-image {
+	width: 100%;
+	aspect-ratio: 2/3;
+	float: left;
+	object-fit: cover;
+	border-radius: calc(var(--rounding) + 6px);
+	border: 6px solid var(--backing-content);
+	clear: both;
+}
+
+/* Date Ranges */
+
+.c-date-range {
+	display: flex;
+	flex-flow: row nowrap;
+	padding-top: 10px;
+	align-items: center;
+	margin-top: 10px;
+}
+.c-date-range__dot {
+	position: relative;
+	width: 6px;
+	height: 6px;
+	border-radius: 999px;
+	background: var(--border-medium);
+	flex: 0 0 auto;
+}
+.c-date-range__dot--selected {
+	background: var(--text-regular);
+}
+.c-date-range__dot::before {
+	content: attr(data-dot);
+	font-size: 9px;
+	position: absolute;
+	top: -10px;
+	left: 50%;
+	transform: translateX(-50%);
+}
+.c-date-range__dot--selected::before {
+	font-weight: bold;
+}
+.c-date-range__line {
+	background: var(--border-light);
+	height: 2px;
+	flex: 2 1 auto;
+}
+.c-date-range__line--selected {
+	background: var(--text-regular);
+}
+.c-date-range__line:first-child {
+	flex-grow: 1;
+	mask-image: linear-gradient(to right, transparent, black);
+}
+.c-date-range__line:last-child {
+	flex-grow: 1;
+	mask-image: linear-gradient(to left, transparent, black);
+}
+.c-date-range__line.c-date-range__line--long {
+	flex-grow: 2;
+}

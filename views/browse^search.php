@@ -2,7 +2,7 @@
 // class to combine SQL queries dependent on data provided and return results from media table 
 class Search {
 	private string $query = '
-		SELECT id, name, image
+		SELECT id, user_id, status, name, image
 		FROM media
 		WHERE %criteria%
 		%limit%
@@ -125,13 +125,18 @@ $search_result = $search->execute();
 			<h2 class="content-header__title">Search <?=isset($_GET['q']) === 0 ? 'Results' : ''?></h2>
 		</div>
 
-		<div class="database-search">
-			<input type="search" autocomplete="off" class="search-bar js-autofill" placeholder="Search for Movies, Games, TV, Books, Anime, and more..." data-autofill="<?=$_GET['q']?>">
+		<div class="l-leave-a-gap">
+			<div class="c-search">
+				<div class="c-search__bar js-search-bar">
+					<input class="c-search__input js-autofill" type="search" autocomplete="off" placeholder="Search for Movies, Games, TV, Books, Anime, and more..." data-autofill="<?=$_GET['q']?>">
+					<button class="button c-search__submit" type="button">Search</button>
+				</div>
+			</div>
 		</div>
 
 		<?php if( $pagination->total > $pagination->increment ) : ?>
-		<div class="page-actions">
-			<?php $pagination->Generate() ?>
+		<div class="page-actions l-leave-a-gap">
+			<?php $pagination->Generate(); ?>
 		</div>
 		<?php endif; ?>
 
@@ -141,25 +146,17 @@ $search_result = $search->execute();
 
 		<?php else : ?>
 
-		<div class="c-media-browse">
+		<div class="l-card-layout l-leave-a-gap">
 			<?php
-			if($search_result->row_count < 1) :
-
-			echo 'No results.';
-
-			else:
-
-			$results = $search_result->rows;
-			foreach($results as $media) :
+			if( $search_result->row_count < 1 ){
+				echo 'No results.';
+			} else {
+				$results = $search_result->rows;
+				foreach( $results as $module_media ){
+					include(PATH.'modules/media_card.php');
+				}
+			}
 			?>
-
-			<a class="c-media" href="/item/<?=$media['id']?>">
-				<div class="c-media__inner" <?php if(strlen($media['image']) > 0) : ?> style="background-image: url(<?=$media['image']?>)" <?php endif; ?>>
-					<?=$media['name']?>
-				</div>
-			</a>
-
-			<?php endforeach; endif; ?>
 		</div>
 
 		<?php endif; ?>

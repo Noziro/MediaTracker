@@ -153,9 +153,120 @@ a {
 
 
 .c-heading {
-	margin: 30px 0 15px;
+	margin: 0 0 15px;
 	font-size: 18px;
 	font-weight: 600;
+}
+
+
+.c-simple__row {
+	display: flex;
+}
+.c-simple__section {
+	background: var(--backing-content);
+	padding: 10px;
+	flex: 0 1 auto;
+}
+
+
+.c-heading-minor {
+	margin: 0 0 10px;
+	font-size: 16px;
+	font-weight: 600;
+}
+
+
+.c-links-list {
+	display: block;
+}
+.c-links-list--emphasis {
+	font-size: 16px;
+}
+.c-links-list__link {
+	display: block;
+	width: fit-content;
+	line-height: 1.3em;
+}
+.c-links-list__link--one-line {
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+
+
+.l-leave-a-gap ~ .l-leave-a-gap {
+	margin-top: 20px;
+}
+
+/* .l-v-blocks-w-gap {
+	display: flex;
+	flex-flow: column nowrap;
+	align-items: flex-start;
+	gap: 10px;
+} */
+
+
+
+.l-rows {
+	display: flex;
+	flex-flow: row wrap;
+	justify-content: flex-start;
+	align-items: stretch;
+	gap: 10px;
+}
+
+
+
+.l-card-layout {
+	display: flex;
+	flex-flow: row wrap;
+	align-items: flex-start;
+	gap: 10px;
+}
+
+
+.l-columns {
+	display: flex;
+	flex-flow: row nowrap;
+}
+.l-columns__column {
+	display: flex;
+	width: 25%;
+	flex: 1 1 auto;
+	flex-flow: column nowrap;
+	gap: 10px;
+}
+.l-columns__column--thin {
+	width: 200px;
+	flex: 0 0 auto;
+}
+.l-columns__column--medium {
+	width: 500px;
+	flex-grow: 0;
+}
+.l-columns__column--large {
+	width: 500px;
+	flex: 2 0 auto;
+}
+.l-columns__column ~ .l-columns__column {
+	margin-left: 15px;
+}
+
+.l-columns__section {
+	width: 100%;
+}
+
+
+
+.c-module {
+	padding: 10px;
+	background: var(--backing-content);
+	border-radius: var(--rounding);
+	box-shadow: 0 3px 3px var(--shadow-1);
+}
+.c-module--spacious {
+	padding: 20px;
 }
 
 
@@ -638,18 +749,33 @@ html {
 
 /* Search Bar */
 
-.search-bar {
+.c-search {
+	width: 100%;
+}
+.c-search__bar {
+	display: flex;
+	height: 32px;
+}
+.c-search__input {
 	min-width: 100px;
 	width: 100%;
 	max-width: 450px;
-	height: 32px;
 	padding: 5px 10px;
-	border-radius: var(--rounding);
-	border: 2px solid var(--backing-input);
+	border-radius: var(--rounding) 0 0 var(--rounding);
+	border-width: 2px;
+	border-style: solid;
+	border-color: var(--border-medium) var(--backing-input) var(--border-medium) var(--border-medium);
 	background: var(--backing-input);
 	color: var(--text-regular);
-} .search-bar:focus {
+} .c-search__input:focus {
 	border-color: var(--border-active);
+}
+.c-search__submit {
+	height: 32px;
+	border-width: 2px;
+	border-style: solid;
+	border-color: var(--border-medium) var(--border-medium) var(--border-medium) var(--backing-button);
+	border-radius: 0 var(--rounding) var(--rounding) 0;
 }
 
 
@@ -679,6 +805,7 @@ html {
 	display: flex;
 	flex-flow: column nowrap;
 	justify-content: space-between;
+	align-items: flex-start;
 }
 .c-user-card__avatar {
 	position: absolute;
@@ -709,6 +836,8 @@ html {
 	background:
 		var(--cover, none) center / cover,
 		var(--backing-subcontent);
+	border-radius: var(--rounding);
+	overflow: hidden;
 }
 .c-media-card__status {
 	position: absolute;
@@ -737,10 +866,6 @@ html {
 	text-align: left;
 	border-collapse: collapse;
 }
-
-/* .table__head-row {
-
-} */
 
 .table__body-row {
 	background: var(--backing-content);
@@ -858,139 +983,6 @@ html {
 	font-size: 16px;
 }
 
-/* BANNER */
-
-.banner {
-	position: relative;
-	background: var(--backing-content) center / cover;
-}
-.banner--palette-1 {
-	--color-1: 0, 0%, 6%;
-	--color-2: 0, 0%, 94%;
-}
-.banner--palette-2 {
-	--color-1: 0, 80%, 30%;
-	--color-2: 90, 100%, 80%;
-}
-.banner--palette-3 {
-	--color-1: 213, 96%, 11%;
-	--color-2: 212, 17%, 33%;
-}
-.banner--palette-4 {
-	--color-1: 213, 96%, 11%;
-	--color-2: 212, 17%, 33%;
-}
-.banner--palette-5 {
-	--color-1: 202, 95%, 41%;
-	--color-2: 28, 100%, 89%;
-}
-.banner--pattern-plaid {
-	--size: 25px;
-	--opacity: 0.13;
-	background-image:
-		repeating-linear-gradient(
-			45deg,
-			hsla(var(--color-1), var(--opacity)) 0px,
-			hsla(var(--color-1), var(--opacity)) var(--size),
-			hsla(var(--color-2), var(--opacity)) var(--size),
-			hsla(var(--color-2), var(--opacity)) calc(var(--size) * 2)
-		),
-		repeating-linear-gradient(
-			135deg,
-			hsla(var(--color-1), var(--opacity)) 0px,
-			hsla(var(--color-1), var(--opacity)) var(--size),
-			hsla(var(--color-2), var(--opacity)) var(--size),
-			hsla(var(--color-2), var(--opacity)) calc(var(--size) * 2)
-		);
-}
-/* ugly
-.banner--pattern-squares {
-	--size: 20px;
-	background-color: var(--color-2);
-	background-image:
-		repeating-linear-gradient(
-			0deg,
-			hsla(var(--color-1), 100%) 0px,
-			hsla(var(--color-1), 100%) calc(var(--size) * 0.7),
-			hsla(var(--color-1), 0%) calc(var(--size) * 0.7),
-			hsla(var(--color-1), 0%) calc(var(--size) * 1.3),
-			hsla(var(--color-1), 100%) calc(var(--size) * 1.3),
-			hsla(var(--color-1), 100%) var(--size)
-		),
-		repeating-linear-gradient(
-			90deg,
-			hsla(var(--color-1), 100%) 0px,
-			hsla(var(--color-1), 100%) calc(var(--size) * 0.7),
-			hsla(var(--color-1), 0%) calc(var(--size) * 0.7),
-			hsla(var(--color-1), 0%) calc(var(--size) * 1.3),
-			hsla(var(--color-1), 100%) calc(var(--size) * 1.3),
-			hsla(var(--color-1), 100%) var(--size)
-		);
-} */
-.banner--pattern-stripes-left {
-	--size: 30px;
-	--opacity: 0.3;
-	background-color: hsla(var(--color-2), var(--opacity));
-	background-image:
-		repeating-linear-gradient(
-			45deg,
-			hsla(var(--color-1), var(--opacity)) 0px,
-			hsla(var(--color-1), var(--opacity)) var(--size),
-			hsla(var(--color-2), var(--opacity)) var(--size),
-			hsla(var(--color-2), var(--opacity)) calc(var(--size) * 2)
-		);
-}
-.banner--pattern-stripes-right {
-	--size: 30px;
-	--opacity: 0.3;
-	background-color: hsla(var(--color-2), var(--opacity));
-	background-image:
-		repeating-linear-gradient(
-			135deg,
-			hsla(var(--color-1), var(--opacity)) 0px,
-			hsla(var(--color-1), var(--opacity)) var(--size),
-			hsla(var(--color-2), var(--opacity)) var(--size),
-			hsla(var(--color-2), var(--opacity)) calc(var(--size) * 2)
-		);
-}
-.banner--pattern-diamonds {
-	--opacity: 0.2;
-	background-color: hsla(var(--color-2), var(--opacity));
-	background-image:
-		repeating-linear-gradient(60deg, hsla(var(--color-1), var(--opacity)) 25%, transparent 25%, transparent 75%, hsla(var(--color-1), var(--opacity)) 75%, hsla(var(--color-1), var(--opacity))),
-		repeating-linear-gradient(120deg, hsla(var(--color-1), var(--opacity)) 25%, transparent 25%, transparent 75%, hsla(var(--color-1), var(--opacity)) 75%, hsla(var(--color-1), var(--opacity)));
-	background-size: 70px 120px;
-}
-.banner--pattern-half-square {
-	--opacity: 0.13;
-	background-image:
-		repeating-linear-gradient(
-			45deg,
-			hsla(var(--color-1), var(--opacity)) 0%,
-			hsla(var(--color-1), var(--opacity)) 50%,
-			hsla(var(--color-2), var(--opacity)) 50%,
-			hsla(var(--color-2), var(--opacity)) 100%
-		);
-	background-size: 50px 50px;
-}
-
-.banner::after {
-	content: "";
-	background-image: linear-gradient(to top, var(--backing-page), transparent);
-	display: block;
-	width: 100%;
-	height: 20px;
-	margin-top: -20px;
-}
-
-.banner__contents {
-	position: relative;
-	display: flex;
-	flex-flow: column nowrap;
-	justify-content: flex-end;
-	min-height: 300px;
-}
-
 /* PAGE HEADER */
 
 .content-header {
@@ -1052,39 +1044,42 @@ html {
 
 /* COMMON TEMPLATES */
 
-.split {
+.l-split {
 	display: flex;
 	flex-flow: row nowrap;
 }
 
-.split__section {
+.l-split__section {
 	width: 50%;
-	padding: 20px;
-	background: var(--backing-content);
 	flex: 1 1 auto;
 }
-.split__section--sidebar {
+.l-split__section--sidebar {
 	width: 180px;
 	flex: 0 0 auto;
 }
-.split__section--primary {
+.l-split__section--image {
+	min-width: 180px;
+	max-width: min(18vw, 250px);
+	flex: 1 1 auto;
+}
+.l-split__section--primary {
 	width: 80%;
 }
-.split__section ~ .split__section {
+.l-split__section ~ .l-split__section {
 	margin-left: 20px;
 }
 
-.split__sidebar-header {
+.l-split__sidebar-header {
 	display: block;
 	margin-bottom: 10px;
 	font-size: 16px;
 	font-weight: 600;
 }
 
-.split__sidebar-item {
+.l-split__sidebar-item {
 	display: block;
 }
-.split__sidebar-item ~ .split__sidebar-item {
+.l-split__sidebar-item ~ .l-split__sidebar-item {
 	margin-top: 6px;
 }
 

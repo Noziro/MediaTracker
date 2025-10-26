@@ -6,6 +6,7 @@ This module requires:
   - name
   - image
   - status
+- Optionally, also include these:
   - progress
   - episodes
 */ ?>
