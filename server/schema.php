@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 $db_root = new mysqli(
 	SQL_CREDENTIALS['host'],

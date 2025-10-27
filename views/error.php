@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 $response = new HttpResponse(intval(URL['PATH_ARRAY'][0]));
 http_response_code($response->code);
 ?>

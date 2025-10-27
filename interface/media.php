@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 require_once $_SERVER["DOCUMENT_ROOT"].'/server/server.php';
 
 if( API_ACTION === "/media/create" || API_ACTION === "/media/edit" ){
@@ -71,19 +71,19 @@ if( API_ACTION === "/media/create" || API_ACTION === "/media/edit" ){
 	}
 
 	// Rating System for Scoring
-	$rating_system = $collection['rating_system'];
+	$rating_system = (int) $collection['rating_system'];
 	if( isset($_POST['rating_system']) ){
-		$rating_system = $_POST['rating_system'];
+		$rating_system = (int) $_POST['rating_system'];
 
 		// If not valid input
-		if( !in_array((int)$rating_system, [3,5,10,20,100], True) ){
+		if( !in_array($rating_system, [3,5,10,20,100], True) ){
 			bailout($return_to, 'invalid_value');
 		}
 	}
 
 	// Validate Score
 	if( array_key_exists('score', $_POST) ){
-		$score = (int)$_POST['score'];
+		$score = (int) $_POST['score'];
 		if( $score < 0 || $score > $rating_system ){
 			bailout($return_to, 'invalid_value');
 		}
@@ -102,6 +102,7 @@ if( API_ACTION === "/media/create" || API_ACTION === "/media/edit" ){
 	}
 	// If image not set, check for an image_url. This key is used on item/add pages when cloning.
 	elseif( isset($_POST['image_url']) ){
+		require_once PATH.'server/upload.php';
 		$old_relative_path = (string) $_POST['image_url'];
 		$base_path = rtrim(getenv('DATA_DIR') !== false ? getenv('DATA_DIR') : PATH, '/');
 		$old_full_path = $base_path.$old_relative_path;

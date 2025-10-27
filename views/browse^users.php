@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 require_once PATH."server/classes/pagination.inc";
 
 $stmt = sql('SELECT COUNT(id) FROM users', [], false);

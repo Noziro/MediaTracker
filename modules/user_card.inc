@@ -1,4 +1,4 @@
-<?php /*
+<?php declare(strict_types=1); /*
 This module expects a variable called $module_user with valid user data of:
 - id
 - banner_image

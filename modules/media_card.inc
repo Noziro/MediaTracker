@@ -1,4 +1,4 @@
-<?php /*
+<?php declare(strict_types=1); /*
 This module requires:
 - A $module_media variable with the following valid media data:
   - id

@@ -1,10 +1,10 @@
-<!-- if USER SETUP == completed -->
-
-<?php
+<?php declare(strict_types=1);
 if( !$has_session ){
 	bailout('/');
 }
 ?>
+
+<!-- if USER SETUP == completed -->
 
 <main id="content" class="wrapper wrapper--content">
 	<div class="wrapper__inner">

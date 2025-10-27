@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 require_once PATH."server/classes/pagination.inc";
 
 if( count(URL['PATH_ARRAY']) < 2 && !$has_session ){
@@ -343,7 +343,7 @@ if( empty($page_user['banner_image']) ){
 						WHERE user_id = ?
 						AND score != 0
 					', ['i', $page_user['id']], false);
-				$stat_avg_score = round($stmt->rows[0][0] ?? 0, 2);
+				$stat_avg_score = round((int) $stmt->rows[0][0] ?? 0, 2);
 
 				?>
 

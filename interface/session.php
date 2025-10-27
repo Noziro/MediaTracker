@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 require_once $_SERVER["DOCUMENT_ROOT"].'/server/server.php';
 
 $return_to_login = '/login';

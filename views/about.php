@@ -1,3 +1,5 @@
+<?php declare(strict_types=1); ?>
+
 <main id="content" class="wrapper wrapper--about c-about t-light">
 	<div class="c-about__section c-about__section--primary">
 		<div class="wrapper__inner">

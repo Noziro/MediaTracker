@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 class HttpResponse {
 	public int $code;
 	public string $message;

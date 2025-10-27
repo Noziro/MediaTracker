@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 # Determine which page to load based on URL
 if( URL['PATH_ARRAY'][0] === 'collection' ){
 	$page = 'specific_collection';

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 define("PATH", $_SERVER["DOCUMENT_ROOT"] . "/");
 # the URL as displayed in the client browser

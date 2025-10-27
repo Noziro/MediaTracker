@@ -1,3 +1,5 @@
+<?php declare(strict_types=1); ?>
+
 <main id="content" class="wrapper wrapper--content">
 	<div class="wrapper__inner login-flow">
 		

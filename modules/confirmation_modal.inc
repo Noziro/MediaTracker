@@ -1,3 +1,5 @@
+<?php declare(strict_types=1); ?>
+
 <div id="modal--confirmation" class="modal modal--hidden" role="dialog" aria-modal="true">
 	<button class="modal__background" onclick="toggleModal('modal--confirmation', false)"></button>
 	<div class="modal__inner">

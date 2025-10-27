@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 $item_id = URL['PATH_ARRAY'][1];
 if( !preg_eval('/\d+/', $item_id) ){
 	bailout('/404');

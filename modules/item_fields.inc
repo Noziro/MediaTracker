@@ -1,4 +1,4 @@
-<?php /*
+<?php declare(strict_types=1); /*
 This module requires:
 - a $module_item array that is either empty or contains valid item data
 - a $module_collection array with a valid $rating_system key

@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 require_once PATH."server/classes/pagination.inc";
 
 // class to combine SQL queries dependent on data provided and return results from media table 

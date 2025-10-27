@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 
 if( count(URL['PATH_ARRAY']) < 2 ){
 	bailout('/404');
