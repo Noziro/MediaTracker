@@ -53,7 +53,7 @@ if( $collections->row_count < 1 ){
 			<?php
 			$module_item = $item;
 			$module_collection = ['rating_system' => 100];
-			include(PATH.'modules/item_fields.php');
+			require PATH.'modules/item_fields.inc';
 			?>
 		</form>
 
@@ -68,5 +68,5 @@ if( $collections->row_count < 1 ){
 
 
 
-	<?php include PATH.'server/includes/modal-confirmation.inc'; ?>
+	<?php require PATH.'modules/confirmation_modal.inc'; ?>
 </main>

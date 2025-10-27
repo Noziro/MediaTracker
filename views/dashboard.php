@@ -17,7 +17,7 @@ $currently_watching = sql('
 			<h3 class="c-heading">From Your Lists</h3>
 			<div class="l-horizontal">
 				<?php foreach( $currently_watching->rows as $module_media ){
-					include(PATH.'modules/media_card.php');
+					require PATH.'modules/media_card.inc';
 				}
 				endif; ?>
 			</div>

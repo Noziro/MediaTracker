@@ -1,4 +1,6 @@
 <?php
+require_once PATH."server/classes/pagination.inc";
+
 $stmt = sql('SELECT COUNT(id) FROM users', [], false);
 $total_users = $stmt->rows[0][0];
 
@@ -35,7 +37,7 @@ $user_count = $stmt->row_count
 			<?php
 			if( $user_count > 0 ) {
 				foreach($users as $module_user) {
-					include(PATH.'modules/user_card.php');
+					require PATH.'modules/user_card.inc';
 				}
 			}
 			?>

@@ -37,7 +37,7 @@ $random_media = sql('
 				<?php
 				if( $random_media->row_count > 0 ){
 					foreach( $random_media->rows as $module_media ){
-						include(PATH.'modules/media_card.php');
+						require PATH.'modules/media_card.inc';
 					}
 				}
 				?>

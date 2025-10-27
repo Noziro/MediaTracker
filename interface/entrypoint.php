@@ -40,47 +40,47 @@ const ACTIONS = [
 	'/user/settings/update' => [
 		'method' => 'POST',
 		'auth' => true,
-		'file' => 'generic'
+		'file' => 'account'
 	],
 	'/media/create' => [
 		'method' => 'POST',
 		'auth' => true,
-		'file' => 'generic'
+		'file' => 'media'
 	],
 	'/media/edit' => [
 		'method' => 'POST',
 		'auth' => true,
-		'file' => 'generic'
+		'file' => 'media'
 	],
 	'/media/delete' => [
 		'method' => 'POST',
 		'auth' => true,
-		'file' => 'generic'
+		'file' => 'media'
 	],
 	'/media/undelete' => [
 		'method' => 'POST',
 		'auth' => true,
-		'file' => 'generic'
+		'file' => 'media'
 	],
 	'/collection/create' => [
 		'method' => 'POST',
 		'auth' => true,
-		'file' => 'generic'
+		'file' => 'collection'
 	],
 	'/collection/edit' => [
 		'method' => 'POST',
 		'auth' => true,
-		'file' => 'generic'
+		'file' => 'collection'
 	],
 	'/collection/delete' => [
 		'method' => 'POST',
 		'auth' => true,
-		'file' => 'generic'
+		'file' => 'collection'
 	],
 	'/collection/undelete' => [
 		'method' => 'POST',
 		'auth' => true,
-		'file' => 'generic'
+		'file' => 'collection'
 	],
 	'/import' => [
 		'method' => 'POST',

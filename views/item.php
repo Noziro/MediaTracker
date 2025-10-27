@@ -131,7 +131,7 @@ $collection = $stmt->rows[0];
 				<h6 class="c-heading-minor">From the library of...</h6>
 				<?php
 				$stmt = sql('SELECT u.id, u.nickname, u.created_at, u.profile_image, u.banner_image FROM users AS u INNER JOIN media AS m ON m.user_id = u.id WHERE u.id=? LIMIT 1', ['i', $item['user_id']]);
-				$module_user = $stmt->rows[0]; include(PATH.'modules/user_card.php');
+				$module_user = $stmt->rows[0]; require PATH.'modules/user_card.inc';
 				?>
 
 				<?php if( $has_session ) : ?>

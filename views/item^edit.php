@@ -32,7 +32,7 @@ if( !$has_session || $user['id'] !== $item['user_id'] ){
 			<?php
 			$module_item = $item;
 			$module_collection = $collection;
-			include(PATH.'modules/item_fields.php');
+			require PATH.'modules/item_fields.inc';
 			?>
 		</form>
 
@@ -48,5 +48,5 @@ if( !$has_session || $user['id'] !== $item['user_id'] ){
 
 
 
-	<?php include PATH.'server/includes/modal-confirmation.inc'; ?>
+	<?php require PATH.'modules/confirmation_modal.inc'; ?>
 </main>

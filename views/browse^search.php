@@ -1,4 +1,6 @@
 <?php
+require_once PATH."server/classes/pagination.inc";
+
 // class to combine SQL queries dependent on data provided and return results from media table 
 class Search {
 	private string $query = '
@@ -153,7 +155,7 @@ $search_result = $search->execute();
 			} else {
 				$results = $search_result->rows;
 				foreach( $results as $module_media ){
-					include(PATH.'modules/media_card.php');
+					require PATH.'modules/media_card.inc';
 				}
 			}
 			?>

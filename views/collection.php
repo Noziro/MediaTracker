@@ -393,7 +393,7 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 					<?php
 					$module_item = [];
 					$module_collection = $collection;
-					include(PATH.'modules/item_fields.php');
+					require PATH.'modules/item_fields.inc';
 					?>
 				</form>
 
@@ -618,7 +618,7 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 
 
 		<?php if( $has_session && $user['id'] === $page_user['id'] ){
-			include PATH.'server/includes/modal-confirmation.inc';
+			require PATH.'modules/confirmation_modal.inc';
 		} ?>
 	</div>
 </main>

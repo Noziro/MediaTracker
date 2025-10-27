@@ -3,10 +3,10 @@
 // SETUP
 
 # Includes various important variables and functions
-include $_SERVER["DOCUMENT_ROOT"]."/server/server.php";
+require_once $_SERVER["DOCUMENT_ROOT"]."/server/server.php";
 
 # Include HttpResponse class for error redirection
-include PATH."server/http_response.php";
+require_once PATH."server/classes/http_response.inc";
 
 
 

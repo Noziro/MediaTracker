@@ -1,4 +1,6 @@
 <?php
+require_once PATH."server/classes/pagination.inc";
+
 if( count(URL['PATH_ARRAY']) < 2 && !$has_session ){
 	bailout('/404');
 }

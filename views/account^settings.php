@@ -338,7 +338,7 @@ $user = array_merge($user, $user_extra->rows[0]);
 
 
 
-			<?php include PATH.'server/includes/modal-confirmation.inc'; ?>
+			<?php require PATH.'modules/confirmation_modal.inc'; ?>
 		</div>
 		</div>
 	</div>
