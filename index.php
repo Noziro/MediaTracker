@@ -2,17 +2,8 @@
 
 // SETUP
 
-# Defines basic PATH for easy use across both client & server
-define("PATH", $_SERVER["DOCUMENT_ROOT"] . "/");
-
 # Includes various important variables and functions
-include PATH."server/server.php";
-
-# the URL as displayed in the client browse
-DEFINE("URL", [
-	'PATH_STRING' => strtok($_SERVER["REQUEST_URI"], '?'),
-	'PATH_ARRAY' => remove_empties(explode('/', strtok($_SERVER["REQUEST_URI"], '?')))
-]);
+include $_SERVER["DOCUMENT_ROOT"]."/server/server.php";
 
 # Include HttpResponse class for error redirection
 include PATH."server/http_response.php";
@@ -188,8 +179,7 @@ if( in_array($file, ['login', 'register']) && $has_session ){
 							<a class="site-nav__item" href="<?="/user/".$user["id"]?>">Profile</a>
 							<a class="site-nav__item" href="/account/settings">Settings</a>
 							
-							<form id="form-logout"style="display:none" action="/interface/session" method="POST">
-								<input type="hidden" name="action" value="logout">
+							<form id="form-logout"style="display:none" action="/interface/session/logout" method="POST">
 								<input type="hidden" name="return_to" value="<?=$_SERVER["REQUEST_URI"]?>">
 							</form>
 							

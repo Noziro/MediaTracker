@@ -4,9 +4,7 @@
 		<div class="login-flow__form">
 			<h3 class="login-flow__title">Register</h5>
 			
-			<form action="/interface/session" method="POST">
-				<input type="hidden" name="action" value="register">
-				
+			<form action="/interface/session/register" method="POST">
 				<label class="login-flow__label label" for="login-username">Username</label>
 				<input
 					id="login-username"

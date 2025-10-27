@@ -30,8 +30,7 @@ if( $collections->row_count < 1 ){
 
 <main id="content" class="wrapper wrapper--content">
 	<div class="wrapper__inner">
-		<form id="collection-item-add" action="/interface/generic" method="POST" enctype="multipart/form-data">
-			<input type="hidden" name="action" value="collection_item_create">
+		<form id="collection-item-add" action="/interface/media/create" method="POST" enctype="multipart/form-data">
 			<input type="hidden" name="rating_system" value="100">
 			<?php
 			if( isset($_GET['return_to']) ){

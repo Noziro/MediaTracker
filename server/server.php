@@ -1,5 +1,11 @@
 <?php
 
+define("PATH", $_SERVER["DOCUMENT_ROOT"] . "/");
+# the URL as displayed in the client browser
+DEFINE("URL", [
+	'PATH_STRING' => strtok($_SERVER["REQUEST_URI"], '?'),
+	'PATH_ARRAY' => remove_empties(explode('/', strtok($_SERVER["REQUEST_URI"], '?')))
+]);
 define("SITE_NAME", "MediaTracker");
 define("SQL_CREDENTIALS", [
 	'host' => getenv('DB_HOST') ?: 'localhost',
@@ -1060,6 +1066,10 @@ class Notice {
 			'type' => 'error',
 			'message' => "Attempted to perform an invalid or unrecognized action."
 		],
+		'incorrect_method' => [
+			'type' => 'error',
+			'message' => "Page was accessed by the wrong method. Try switching from POST to GET or vice versa."
+		],
 		'unauthorized' => [
 			'type' => 'error',
 			'message' => "Attempted operation outside of user authority."
@@ -1098,6 +1108,10 @@ class Notice {
 		'blank' => [
 			'type' => 'generic',
 			'message' => ''
+		],
+		'unimplemented' => [
+			'type' => 'generic',
+			'message' => "This feature has yet to be implemented."
 		],
 		'default' => [
 			'type' => 'generic',

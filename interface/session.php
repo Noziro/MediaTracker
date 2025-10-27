@@ -1,36 +1,30 @@
 <?php
-define("PATH", $_SERVER["DOCUMENT_ROOT"] . "/");
-include PATH.'server/server.php';
+require_once $_SERVER["DOCUMENT_ROOT"].'/server/server.php';
 
-$action = $_POST['action'];
-
-if( isset($_POST['return_to']) ){
-	$r2prev = $_POST['return_to'];
-	$r2login = '/login?return_to='.urlencode($r2prev);
-} else {
-	$r2prev = '/';
-	$r2login = '/login';
+$return_to_login = '/login';
+$return_to_register = '/register';
+if( $return_to !== '/' ){
+	$return_to_login = $return_to_login.'?return_to='.urlencode($return_to);
+	$return_to_register = $return_to_register.'?return_to='.urlencode($return_to);
 }
 
-if( $action === "login" ){
+if( API_ACTION === "/session/login" ){
 	if(	   !array_key_exists('username', $_POST)
 		|| !array_key_exists('password', $_POST)
 	) {
-		bailout($r2login, 'required_field');
+		bailout($return_to_login, 'required_field');
 	}
 
 	$login = $auth->login($_POST['username'], $_POST['password']);
 	
 	if( $login ){
-		bailout($r2prev, 'login_success');
+		bailout($return_to, 'login_success');
 	} else {
-		bailout($r2login, 'login_bad');
+		bailout($return_to_login, 'login_bad');
 	}
 }
 
-elseif( $action === "register" ){
-	$r2 = '/register';
-
+elseif( API_ACTION === "/session/register" ){
 	// Check all required fields filled
 	if(	   !array_key_exists('username', $_POST)
 		|| !array_key_exists('password', $_POST)
@@ -39,7 +33,7 @@ elseif( $action === "register" ){
 		|| strlen($_POST['password']) == 0
 		|| strlen($_POST['password-confirm']) == 0
 	) {
-		bailout($r2, 'required_field');
+		bailout($return_to_register, 'required_field');
 	}
 
 	// Set variables
@@ -55,16 +49,16 @@ elseif( $action === "register" ){
 	
 	// Confirm user password
 	if( strlen($post_pass) < 6 || strlen($post_pass) > 72 ){
-		bailout($r2, 'invalid_pass');
+		bailout($return_to_register, 'invalid_pass');
 	}
 
 	if( $post_pass != $post_pass_confirm ){
-		bailout($r2, 'register_match');
+		bailout($return_to_register, 'register_match');
 	}
 
 	// Validate username
 	if( !valid_name($post_user) ){
-		bailout($r2, 'invalid_name');
+		bailout($return_to_register, 'invalid_name');
 	}
 
 	// Carry on if all fields good
@@ -72,33 +66,33 @@ elseif( $action === "register" ){
 		$register = $auth->register($post_user, $post_pass, $post_email);
 		
 		if( !$register ){
-			bailout($r2, 'register_exists');
+			bailout($return_to_register, 'register_exists');
 		} else {
 			bailout('/welcome');
 		}
 	}
 }
 
-elseif( $action === "logout" ){
+elseif( API_ACTION === "/session/logout" ){
 	$logout = $auth->logout();
 	
 	if( $logout ){
-		bailout($r2prev, 'logout_success');
+		bailout($return_to, 'logout_success');
 	} else {
-		bailout($r2prev, 'logout_failure');
+		bailout($return_to, 'logout_failure');
 	}
 }
 
-elseif( $action === "logout_all" ){
+elseif( API_ACTION === "/session/logout_all" ){
 	$logout = $auth->logout(true);
 	
 	if( $logout ){
-		bailout($r2prev, 'logout_success');
+		bailout($return_to, 'logout_success');
 	} else {
-		bailout($r2prev, 'logout_failure');
+		bailout($return_to, 'logout_failure');
 	}
 }
 
 // File should only reach this point if no other actions have reached finalization.
-bailout($r2login, 'disallowed_action');
+bailout($return_to_login, 'disallowed_action');
 ?>

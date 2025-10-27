@@ -21,8 +21,7 @@ if( !$has_session || $user['id'] !== $item['user_id'] ){
 
 <main id="content" class="wrapper wrapper--content">
 	<div class="wrapper__inner">
-		<form id="collection-item-edit" action="/interface/generic" method="POST" enctype="multipart/form-data">
-			<input type="hidden" name="action" value="collection_item_edit">
+		<form id="collection-item-edit" action="/interface/media/edit" method="POST" enctype="multipart/form-data">
 			<?php
 			if( isset($_GET['return_to']) ){
 				echo '<input type="hidden" name="return_to" value="'.$_GET['return_to'].'">';
@@ -39,7 +38,7 @@ if( !$has_session || $user['id'] !== $item['user_id'] ){
 
 		<div class="l-button-list">
 			<button form="collection-item-edit" class="l-button-list__button button button--spaced" type="submit">Edit</button>
-			<button class="l-button-list__button button button--spaced" onclick="modalConfirmation('Are you sure you wish to delete this item?', 'collection_item_delete', 'item_id', <?=$item['id']?>)">Delete</button>
+			<button class="l-button-list__button button button--spaced" onclick="modalConfirmation('Are you sure you wish to delete this item?', '/collection/delete', 'item_id', <?=$item['id']?>)">Delete</button>
 		</div>
 
 		<div class="dialog-box dialog-box--subcontent">

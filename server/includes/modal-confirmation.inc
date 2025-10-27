@@ -3,8 +3,7 @@
 	<div class="modal__inner">
 		<h3 id="js-confirmation-msg" class="modal__header"></h3>
 		<div class="js-confirmation-preview"><!-- TODO - unused atm - plan to put post content here to display what user is deleting --></div>
-		<form id="form-confirmation" action="/interface/generic" method="POST" style="display:none">
-			<input id="js-confirmation-action" type="hidden" name="action">
+		<form id="form-confirmation" action="/interface" method="POST" style="display:none">
 			<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 			<input id="js-confirmation-data" type="hidden">
 		</form>

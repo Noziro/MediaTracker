@@ -3,8 +3,7 @@
 		<div class="login-flow__form">
 			<h5 class="login-flow__title">Login</h5>
 			
-			<form action="/interface/session" method="POST">
-				<input type="hidden" name="action" value="login">
+			<form action="/interface/session/login" method="POST">
 				<?php if(isset($_GET['return_to'])) : ?>
 				<input type="hidden" name="return_to" value="<?=$_GET['return_to']?>">
 				<?php endif; ?>

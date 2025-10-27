@@ -24,8 +24,7 @@ $user = array_merge($user, $user_extra->rows[0]);
 
 
 		<div class="c-module c-module--spacious l-split__section c-module c-module--spacious l-split__section--primary">
-			<form id="form-settings" style="display:none" action="/interface/generic" method="POST" enctype="multipart/form-data">
-				<input type="hidden" name="action" value="change_settings">
+			<form id="form-settings" style="display:none" action="/interface/user/settings/update" method="POST" enctype="multipart/form-data">
 				<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 			</form>
 			
@@ -200,12 +199,11 @@ $user = array_merge($user, $user_extra->rows[0]);
 					<?php endforeach; ?>
 				</table>
 
-				<form id="form-logout-all" style="display:none" action="/interface/session" method="POST">
-					<input type="hidden" name="action" value="logout_all">
+				<form id="form-logout-all" style="display:none" action="/interface/session/logout_all" method="POST">
 					<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 				</form>
 				
-				<button class="settings__button button button--spaced" onclick="modalConfirmation('Are you sure you wish to logout all sessions?', 'logout_all', '', '', '/interface/session')">
+				<button class="settings__button button button--spaced" onclick="modalConfirmation('Are you sure you wish to logout all sessions?', '/session/logout_all')">
 					Logout All Sessions
 				</button>
 			</div>
@@ -276,8 +274,7 @@ $user = array_merge($user, $user_extra->rows[0]);
 			<div class="l-leave-a-gap">
 				<h3 class="c-heading-minor">Import/Export Lists</h3>
 
-				<form action="/interface/generic" method="POST">
-					<input type="hidden" name="action" value="import_list">
+				<form action="/interface/import" method="POST">
 					<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 
 					<label class="settings__label label">File to import</label>
@@ -321,8 +318,7 @@ $user = array_merge($user, $user_extra->rows[0]);
 				<span class="settings__notice">List exporting coming soon.</span>
 				<!--
 
-				<form action="/interface/generic" method="POST">
-					<input type="hidden" name="action" value="export-list">
+				<form action="/interface/export" method="POST">
 					<button class="settings__button button button--spaced" type="submit">
 						Export
 					</button>
@@ -336,9 +332,7 @@ $user = array_merge($user, $user_extra->rows[0]);
 			
 			<?php
 			else :
-				// TODO - this fails
-				#bailout('/404');
-			
+			bailout('/404');
 			endif;
 			?>
 

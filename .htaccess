@@ -8,17 +8,13 @@ RewriteCond %{REQUEST_FILENAME} -f
 ## sends request unchanged
 RewriteRule ^(static|upload)\/ - [L]
 
-# Redirect "/interface/example" URLs to "/interface/example.php"
-## do not redirect if this points to a directory
-RewriteCond %{REQUEST_FILENAME} !-d
-## as this is rewriting the path, it will start again from the top then go to the next rule
-RewriteRule ^interface\/(.*?)(\.php)?$ interface/$1.php [NC]
-
-# Catches valid interface requests and serves them.
+# Catches interface requests and serves them.
+## re-routes all interface queries to the entrypoint
+RewriteRule ^interface\/ interface/entrypoint.php [L,NC]
 ## must be valid file
 RewriteCond %{REQUEST_FILENAME} -f
 ## sends request unchanged
-RewriteRule ^interface\/ - [L,NC]
+RewriteRule interface/entrypoint.php - [L,NC]
 
 # Redirects everything not caught by earlier rules to index
 RewriteRule . index.php

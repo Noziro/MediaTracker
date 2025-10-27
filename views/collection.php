@@ -136,7 +136,7 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 				</button>
 
 				<?php if( isset($collection_id) ) : ?>
-				<button class="page-actions__action button" type="button" onclick="modalConfirmation('Are you sure you wish to delete this collection?', 'collection_delete', 'collection_id', <?=$collection['id']?>)">
+				<button class="page-actions__action button" type="button" onclick="modalConfirmation('Are you sure you wish to delete this collection?', '/collection/delete', 'collection_id', <?=$collection['id']?>)">
 					Delete Collection
 				</button>
 				<?php endif; ?>
@@ -316,8 +316,7 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 				<h3 class="modal__header">
 					Edit Collection
 				</h3>
-				<form action="/interface/generic" method="POST">
-					<input type="hidden" name="action" value="collection_edit">
+				<form action="/interface/collection/edit" method="POST">
 					<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 					<input type="hidden" name="collection_id" value="<?=$collection['id']?>">
 					
@@ -387,8 +386,7 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 				<h3 class="modal__header">
 					Add Item
 				</h3>
-				<form id="collection-item-add" action="/interface/generic" method="POST" enctype="multipart/form-data">
-					<input type="hidden" name="action" value="collection_item_create">
+				<form id="collection-item-add" action="/interface/media/create" method="POST" enctype="multipart/form-data">
 					<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 					<input type="hidden" name="collection_id" value="<?=$collection['id']?>">
 
@@ -578,8 +576,7 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 					Create Collection
 				</h3>
 
-				<form action="/interface/generic" method="POST">
-					<input type="hidden" name="action" value="collection_create">
+				<form action="/interface/collection/create" method="POST">
 					<input type="hidden" name="return_to" value="<?=$_SERVER['REQUEST_URI']?>">
 					
 					<label class="label" for="collection-name">Name</label>
