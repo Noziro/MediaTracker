@@ -32,7 +32,7 @@ if( API_ACTION === "/media/create" || API_ACTION === "/media/edit" ){
 
 	// Check user authority
 	if( $user['id'] !== $collection['user_id'] ){
-		bailout('/collection', 'unauthorized');
+		bailout('/my/collection', 'unauthorized');
 	}
 	
 	// Required fields
