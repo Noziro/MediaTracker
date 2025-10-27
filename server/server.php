@@ -615,7 +615,7 @@ class Authentication {
 		
 		// Set other variables
 		$session = $this->generate_session_id();
-		$user_ip = $_SERVER['REMOTE_ADDR'];
+		$user_ip = json_encode([$_SERVER['REMOTE_ADDR']]);
 
 		// Create new user session
 		$stmt = sql('INSERT INTO sessions (id, user_id, expiry, user_ip) VALUES (?, ?, ?, ?)', ['siis', $session, $user_data['id'], $expiry, $user_ip]);
@@ -654,12 +654,19 @@ class Authentication {
 		if( !array_key_exists('session', $_COOKIE) ){
 			return false;
 		}
-		$session = sql('SELECT expiry FROM sessions WHERE id=?', ['s', $_COOKIE['session']]);
+		$session = sql('SELECT user_ip, expiry FROM sessions WHERE id=?', ['s', $_COOKIE['session']]);
 		if( $session->row_count > 0 ){
+			// Delete session if it has expired
 			if( $session->rows[0]['expiry'] < time() ){
 				sql('DELETE FROM sessions WHERE id=?', ['s', $_COOKIE['session']]);
 				setcookie('session', '', time() - 3600);
 				return false;
+			}
+			// Log user IP if different than before, for security purposes
+			$user_ips = (array) json_decode($session->rows[0]['user_ip']);
+			if( !in_array($_SERVER['REMOTE_ADDR'], $user_ips, false) ){
+				array_push($user_ips, $_SERVER['REMOTE_ADDR']);
+				sql('UPDATE sessions SET user_ip=? WHERE id=?', ['ss', json_encode($user_ips), $_COOKIE['session']]);
 			}
 			return true;
 		} else {
@@ -669,7 +676,6 @@ class Authentication {
 	
 	// Gets info about current user. Used after checking if they are logged in with is_logged_in(). Returns SQL_ASSOC or FALSE
 	public function get_current_user() {
-		# TODO: double check that this is not abusable with an expired session token
 		$stmt = sql('SELECT users.id, users.username, users.nickname, users.email, users.permission_level, users.profile_colour, users.timezone FROM users INNER JOIN sessions ON sessions.user_id = users.id WHERE sessions.id=?', ['s', $_COOKIE['session']]);
 
 		if( !$stmt->ok || $stmt->row_count < 1 ){

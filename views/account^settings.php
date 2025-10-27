@@ -171,9 +171,10 @@ $user = array_merge($user, $user_extra->rows[0]);
 					</tr>
 					
 					<?php
-					$profile__active_sessions = sql('SELECT id, started, expiry, user_ip FROM sessions WHERE user_id=? ORDER BY started DESC', ['i', $user['id']])->rows;
+					$active_sessions = sql('SELECT id, started, expiry, user_ip FROM sessions WHERE user_id=? ORDER BY started DESC', ['i', $user['id']]);
 					
-					foreach($profile__active_sessions as $session) : ?>
+					# there should always be at least one session active if viewing this menu, hence no check
+					foreach( $active_sessions->rows as $session ) : ?>
 					
 					<tr class="active-sesions__row">
 						<td class="active-sessions__cell active-sessions__cell--content">
@@ -186,7 +187,13 @@ $user = array_merge($user, $user_extra->rows[0]);
 							<?=utc_date_to_user(gmdate("Y-m-d H:i:s", $session['expiry']))?>
 						</td>
 						<td class="active-sessions__cell active-sessions__cell--content">
-							<?=$session['user_ip']?>
+							<?php 
+							$user_ips = (array) json_decode($session['user_ip']);
+
+							foreach( $user_ips as $ip ){
+								echo '<div>'.$ip.'</div>';
+							}
+							?>
 						</td>
 					</tr>
 					

@@ -113,7 +113,7 @@ CREATE TABLE `sessions` (
   `started` timestamp NOT NULL DEFAULT current_timestamp(),
   `expiry` int(11) NOT NULL DEFAULT 0,
   `user_id` int(11) NOT NULL,
-  `user_ip` varchar(45) NOT NULL
+  `user_ip` json NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 ALTER TABLE `sessions`
   ADD UNIQUE KEY `id` (`id`);
