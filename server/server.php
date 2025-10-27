@@ -485,9 +485,9 @@ const VALID_TIMEZONES = [
 
 $db = new mysqli(...array_values(SQL_CREDENTIALS));
 
-$result = $db->query("SHOW TABLES LIKE 'collections'");
+$result = $db->query("SHOW TABLES");
 if( !$result || !$result->fetch_assoc() ){
-	require_once __DIR__.'/schema.php';
+	require_once PATH.'server/schema.php';
 }
 
 session_start();

@@ -26,7 +26,7 @@ CREATE TABLE `users` (
 
 
 CREATE TABLE `collections` (
-  `id` int(11) NOT NULL,
+  `id` int(11) NOT NULL PRIMARY KEY AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `name` varchar(50) NOT NULL,
   `type` varchar(50) NOT NULL,
@@ -38,17 +38,14 @@ CREATE TABLE `collections` (
   `display_days` tinyint NOT NULL DEFAULT 1,
   `rating_system` tinyint NOT NULL DEFAULT 10,
   `private` tinyint NOT NULL DEFAULT 0,
-  `deleted` tinyint NOT NULL DEFAULT 0
+  `deleted` tinyint NOT NULL DEFAULT 0,
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`),
+  INDEX `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-ALTER TABLE `collections`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `user_id` (`user_id`);
-ALTER TABLE `collections`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 
 CREATE TABLE `media` (
-  `id` int(15) NOT NULL,
+  `id` int(15) NOT NULL PRIMARY KEY AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,
   `collection_id` int(11) NOT NULL,
   `status` tinytext NOT NULL DEFAULT 'planned',
@@ -65,26 +62,27 @@ CREATE TABLE `media` (
   `finished_at` date DEFAULT NULL,
   `description` text NOT NULL DEFAULT '',
   `comments` text NOT NULL DEFAULT '',
-  `credits` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
-  `links` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
+  `credits` json DEFAULT NULL,
+  `links` json DEFAULT NULL,
   `adult` tinyint NOT NULL DEFAULT 0,
   `favourite` tinyint NOT NULL DEFAULT 0,
   `private` tinyint NOT NULL DEFAULT 0,
   `deleted` tinyint NOT NULL DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`),
+  FOREIGN KEY (`collection_id`) REFERENCES `collections`(`id`),
+  INDEX `user_id` (`user_id`),
+  INDEX `collection_id` (`collection_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-ALTER TABLE `media`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `collection_id` (`collection_id`);
-ALTER TABLE `media`
-  MODIFY `id` int(15) NOT NULL AUTO_INCREMENT;
 
 
 CREATE TABLE `media_name` (
   `media_id` int(15) NOT NULL,
   `type` tinytext NOT NULL,
   `name` tinytext NOT NULL,
-  `is_default` tinyint NOT NULL
+  `is_default` tinyint NOT NULL,
+  FOREIGN KEY (`media_id`) REFERENCES `media`(`id`),
+  INDEX `media_id` (`media_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 
@@ -93,27 +91,25 @@ CREATE TABLE `activity` (
   `type` tinyint NOT NULL DEFAULT 0,
   `media_id` int(15) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`),
+  INDEX `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-ALTER TABLE `activity`
-  ADD KEY `user_id` (`user_id`);
 
 
 CREATE TABLE `permission_levels` (
-  `permission_level` int(2) NOT NULL,
+  `permission_level` int(2) NOT NULL PRIMARY KEY,
   `title` varchar(50) NOT NULL,
   `description` text NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-ALTER TABLE `permission_levels`
-  ADD UNIQUE KEY `permission_level` (`permission_level`);
 
 
 CREATE TABLE `sessions` (
-  `id` varchar(32) NOT NULL,
+  `id` varchar(32) NOT NULL PRIMARY KEY,
   `started` timestamp NOT NULL DEFAULT current_timestamp(),
   `expiry` int(11) NOT NULL DEFAULT 0,
   `user_id` int(11) NOT NULL,
-  `user_ip` json NOT NULL
+  `user_ip` json NOT NULL,
+  FOREIGN KEY (`user_id`) REFERENCES `users`(`id`),
+  INDEX `user_id` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-ALTER TABLE `sessions`
-  ADD UNIQUE KEY `id` (`id`);
