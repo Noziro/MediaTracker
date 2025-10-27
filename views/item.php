@@ -1,33 +1,33 @@
 <?php
 
 if( count(URL['PATH_ARRAY']) < 2 ){
-	finalize('/404');
+	bailout('/404');
 }
 
 $item_id = URL['PATH_ARRAY'][1];
 if( !preg_eval('/\d+/', $item_id) ){
-	finalize('/404');
+	bailout('/404');
 }
 $item_id = intval($item_id);
 
 $stmt = sql('SELECT id, user_id, collection_id, image, name, episodes, release_date, started_at, finished_at, links, adult, private, deleted FROM media WHERE id=? LIMIT 1', ['i', $item_id]);
 if( !$stmt->ok || $stmt->row_count === 0 ){
-	finalize('/404');
+	bailout('/404');
 }
 $item = $stmt->rows[0];
 
 if( $item['deleted'] === 1 ){
-	finalize('/404');
+	bailout('/404');
 }
 
 if($item['private'] === 1 && !$has_session ||
    $item['private'] === 1 && $user['id'] !== $item['user_id']) {
-	finalize('/403');
+	bailout('/403');
 }
 
 $stmt = sql('SELECT id, user_id, name, type, private FROM collections WHERE id=?', ['s', $item['collection_id']]);
 if( !$stmt->ok || $stmt->row_count === 0 ){
-	finalize('/404');
+	bailout('/404');
 }
 $collection = $stmt->rows[0];
 ?>
@@ -134,11 +134,16 @@ $collection = $stmt->rows[0];
 				$module_user = $stmt->rows[0]; include(PATH.'modules/user_card.php');
 				?>
 
-				<?php if($has_session && $collection['user_id'] === $user['id']) : ?>
+				<?php if( $has_session ) : ?>
 				<div class="page-actions">
 					<div class="page-actions__button-list">
-						<a class="page-actions__action button" href="/item/<?=$item['id']?>/edit?return_to=/item/<?=$item['id']?>" style="float:right;">
+						<?php if( $collection['user_id'] === $user['id'] ) : ?>
+						<a class="page-actions__action button" href="/item/<?=$item['id']?>/edit?return_to=/item/<?=$item['id']?>">
 							Edit
+						</a>
+						<?php endif; ?>
+						<a class="page-actions__action button" href="/item/add?from=<?=$item['id']?>&return_to=/item/<?=$item['id']?>">
+							Clone
 						</a>
 					</div>
 				</div>

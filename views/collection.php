@@ -5,11 +5,11 @@ if( URL['PATH_ARRAY'][0] === 'collection' ){
 	$is_orphanage = nth_last(URL['PATH_ARRAY']) === 'orphans';
 	if( !$is_orphanage ){
 		if( count(URL['PATH_ARRAY']) < 2 ){
-			finalize('/404');
+			bailout('/404');
 		}
 		$collection_id = URL['PATH_ARRAY'][1];
 		if( !preg_eval('/\d+/', $collection_id) ){
-			finalize('/404');
+			bailout('/404');
 		}
 		$collection_id = intval($collection_id);
 	}
@@ -23,13 +23,13 @@ elseif( URL['PATH_STRING'] === '/my/collection' ||
 	else {
 		$page_user_id = URL['PATH_ARRAY'][1];
 		if( !preg_eval('/\d+/', $page_user_id) ){
-			finalize('/404');
+			bailout('/404');
 		}
 		$page_user_id = intval($page_user_id);
 	}
 }
 else {
-	finalize('/404');
+	bailout('/404');
 }
 
 if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
@@ -77,11 +77,11 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 				WHERE id=?',
 				['i', $collection_id]);
 			if( $stmt->row_count < 1 ){
-				finalize('/404');
+				bailout('/404');
 			}
 			$collection = $stmt->rows[0];
 			if( $collection['deleted'] === 1 ){
-				finalize('/403');
+				bailout('/403');
 			}
 
 			$items = sql('
@@ -418,7 +418,7 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 		// If user is not specified, redirect to own page.
 		elseif(!isset($_GET['u']) && $has_session || isset($_GET['u'])) :
 			$stmt = sql('SELECT id, nickname FROM users WHERE id=?', ['i', $page_user_id]);
-			if( !$stmt->ok || $stmt->row_count < 1 ){ finalize('/404'); }
+			if( !$stmt->ok || $stmt->row_count < 1 ){ bailout('/404'); }
 			$page_user = $stmt->rows[0];
 
 			if( $user['id'] === $page_user['id'] ){

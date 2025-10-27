@@ -40,17 +40,21 @@ elseif( URL['PATH_STRING'] === '/my/collection' ||
 	$file = 'collection';
 	$page_title = 'Collection';
 }
+elseif( URL['PATH_STRING'] === '/item/add' ){
+	$file = 'item^add';
+	$page_title = 'Add Item';
+}
 elseif( count(URL['PATH_ARRAY']) === 2 && URL['PATH_ARRAY'][0] === 'item' ){
 	$file = 'item';
 	$page_title = 'Item';
 }
-elseif( count(URL['PATH_ARRAY']) === 2 && URL['PATH_ARRAY'][0] === 'user' ){
-	$file = 'user';
-	$page_title = 'User';
-}
 elseif( count(URL['PATH_ARRAY']) === 3 && URL['PATH_ARRAY'][0] === 'item' && URL['PATH_ARRAY'][2] === 'edit' ){
 	$file = 'item^edit';
 	$page_title = 'Edit Item';
+}
+elseif( count(URL['PATH_ARRAY']) === 2 && URL['PATH_ARRAY'][0] === 'user' ){
+	$file = 'user';
+	$page_title = 'User';
 }
 elseif( count(URL['PATH_ARRAY']) === 3 && URL['PATH_ARRAY'][0] === 'account' && URL['PATH_ARRAY'][1] === 'settings' ){
 	$file = 'account^settings';
@@ -93,15 +97,15 @@ $page_title = isset($page_title) ? $page_title : ucfirst(nth_last(URL['PATH_ARRA
 
 # SQL connection must be OK
 if( mysqli_connect_errno() ){
-	finalize('/500');
+	bailout('/500');
 }
 # file must exist
 if( file_exists("views/$file.php") === false ){
-	finalize('/404');
+	bailout('/404');
 }
 # user cannot re-login
 if( in_array($file, ['login', 'register']) && $has_session ){
-	finalize('/');
+	bailout('/');
 }
 ?>
 

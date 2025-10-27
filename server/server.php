@@ -1075,6 +1075,14 @@ class Notice {
 			'message' => "The server has insufficient file system permissions to perform this action.",
 			'details' => 'The admin must make changes to the app environment to resolve this error.'
 		],
+		'file_copy_failure' => [
+			'type' => 'error',
+			'message' => "Failed to copy a local file."
+		],
+		'must_complete_prior' => [
+			'type' => 'generic',
+			'message' => "This action cannot be taken until you complete a prior action."
+		],
 
 		// Neutral
 		'no_change_detected' => [
@@ -1110,8 +1118,8 @@ class Notice {
 		if( array_key_exists($code, Notice::$valid_codes) ){
 			$this->code = $code;
 			$this->type = Notice::$valid_codes[$code]['type'];
-			$this->message =Notice::$valid_codes[$code]['message'];
-			$this->details = Notice::$valid_codes[$code]['details'] ?? '';
+			$this->message = Notice::$valid_codes[$code]['message'];
+			$this->details = $details ?? Notice::$valid_codes[$code]['details'] ?? '';
 		} else {
 			throw new ValueError("Invalid notice code: $response_code");
 		}

@@ -1,13 +1,13 @@
 <?php
 $item_id = URL['PATH_ARRAY'][1];
 if( !preg_eval('/\d+/', $item_id) ){
-	finalize('/404');
+	bailout('/404');
 }
 $item_id = intval($item_id);
 
 $item = sql('SELECT id, user_id, collection_id, status, image, name, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments, links, adult, favourite, private FROM media WHERE id=? LIMIT 1', ['s', $item_id]);
 if( $item->row_count < 1 ){
-	finalize('/404');
+	bailout('/404');
 }
 $item = $item->rows[0];
 
@@ -15,7 +15,7 @@ $collection = sql('SELECT id, user_id, name, type, display_image, display_score,
 
 // User authority
 if( !$has_session || $user['id'] !== $item['user_id'] ){
-	finalize('/403');
+	bailout('/403');
 }
 ?>
 

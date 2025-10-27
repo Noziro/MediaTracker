@@ -345,13 +345,24 @@ elseif( $action === "collection_item_create" || $action === "collection_item_edi
 		}
 	}
 
+	// Rating System for Scoring
+	$rating_system = $collection['rating_system'];
+	if( isset($_POST['rating_system']) ){
+		$rating_system = $_POST['rating_system'];
+
+		// If not valid input
+		if( !in_array((int)$rating_system, [3,5,10,20,100], True) ){
+			bailout($r2, 'invalid_value');
+		}
+	}
+
 	// Validate Score
 	if( array_key_exists('score', $_POST) ){
 		$score = (int)$_POST['score'];
-		if( $score < 0 || $score > $collection['rating_system'] ){
+		if( $score < 0 || $score > $rating_system ){
 			bailout($r2, 'invalid_value');
 		}
-		$score = score_normalize($score, $collection['rating_system']);
+		$score = score_normalize($score, $rating_system);
 	}
 
 	// Validate and upload image
@@ -361,6 +372,21 @@ elseif( $action === "collection_item_create" || $action === "collection_item_edi
 			bailout($r2, $uploaded->notice->code, $uploaded->notice->details);
 		} else {
 			$image_location = $uploaded->path;
+		}
+	}
+	// If image not set, check for an image_url. This key is used on item/add pages when cloning.
+	elseif( isset($_POST['image_url']) ){
+		$old_relative_path = (string) $_POST['image_url'];
+		$base_path = rtrim(getenv('DATA_DIR') !== false ? getenv('DATA_DIR') : PATH, '/');
+		$old_full_path = $base_path.$old_relative_path;
+		if( is_file($old_full_path) ){
+			$ext = '.'.nth_last(explode('.', $old_relative_path));
+			$new_relative_path = '/upload/media_cover/'.generate_random_characters(64).$ext;
+			$new_full_path = $base_path.$new_relative_path;
+			if( !copy($old_full_path, $new_full_path) ){
+				bailout($r2, 'file_copy_failure');
+			}
+			$image_location = $new_relative_path;
 		}
 	}
 
@@ -687,7 +713,7 @@ elseif( $action === 'change_settings' ){
 	//   ]	
 	// ]
 
-	// $error_list contains multiple sub-arrays containing error code/type/detail combinations to be fed to finalize()
+	// $error_list contains multiple sub-arrays containing error code/type/detail combinations to be fed to bailout()
 	//
 	// $error_list = [
 	// 	 ['database_failure', 'error', 'About was not updated.'],
@@ -909,13 +935,13 @@ elseif( $action === 'change_settings' ){
 		$changed = false;
 	}
 
-	// Finalize
+	// bailout
 	if( $changed && count($error_list) > 0 ){
-		finalize($r2, ['partial_success'], ...$error_list);
+		bailout($r2, ['partial_success'], ...$error_list);
 	} elseif( $changed ){
 		bailout($r2, 'success');
 	} else {
-		finalize($r2, ['no_change_detected'], ...$error_list);
+		bailout($r2, ['no_change_detected'], ...$error_list);
 	}
 }
 

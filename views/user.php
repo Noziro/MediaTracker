@@ -1,6 +1,6 @@
 <?php
 if( count(URL['PATH_ARRAY']) < 2 && !$has_session ){
-	finalize('/404');
+	bailout('/404');
 }
 elseif( count(URL['PATH_ARRAY']) < 2 ){
 	$page_user_id = $user['id'];
@@ -9,7 +9,7 @@ else {
 	$page_user_id = URL['PATH_ARRAY'][1];
 	if( !preg_eval('/\d+/', $page_user_id) ){
 		pprint($page_user_id);
-		finalize('/404');
+		bailout('/404');
 	}
 	$page_user_id = intval($page_user_id);
 }
@@ -17,7 +17,7 @@ else {
 $page_user = sql('SELECT id, username, nickname, created_at, permission_level, profile_image, banner_image, about FROM users WHERE id=?', ['i', $page_user_id]);
 
 if( $page_user->row_count < 1 ){
-	finalize('/404');
+	bailout('/404');
 }
 
 $page_user = $page_user->rows[0];

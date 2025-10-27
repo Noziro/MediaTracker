@@ -1,7 +1,7 @@
 <?php /*
 This module requires:
 - a $module_item array that is either empty or contains valid item data
-- a $module_collection array with valid collection data
+- a $module_collection array with a valid $rating_system key
 */ ?>
 
 <div class="item-fields">
@@ -59,6 +59,7 @@ This module requires:
 
 		<?php if(!empty($module_item['image'])) : ?>
 		<img src="<?=$module_item['image']?>" style="width: 30px; height: 30px; object-fit: cover;" />
+		<input type="hidden" name="image_url" value="<?=$module_item['image']?>">
 		<?php endif; ?>
 
 		<input class="file-upload" type="file" name="image" accept=".jpg,.png">

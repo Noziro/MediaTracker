@@ -1,6 +1,6 @@
 <?php
 if( !$has_session ){
-	finalize('/403');
+	bailout('/403');
 }
 
 $currently_watching = sql('

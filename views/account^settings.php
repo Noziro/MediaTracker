@@ -330,7 +330,7 @@ $user = array_merge($user, $user_extra->rows[0]);
 			<?php
 			else :
 				// TODO - this fails
-				#finalize('/404');
+				#bailout('/404');
 			
 			endif;
 			?>

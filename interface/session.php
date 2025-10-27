@@ -74,7 +74,7 @@ elseif( $action === "register" ){
 		if( !$register ){
 			bailout($r2, 'register_exists');
 		} else {
-			finalize('/welcome');
+			bailout('/welcome');
 		}
 	}
 }

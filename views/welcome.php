@@ -2,7 +2,7 @@
 
 <?php
 if( !$has_session ){
-	finalize('/');
+	bailout('/');
 }
 ?>
 
