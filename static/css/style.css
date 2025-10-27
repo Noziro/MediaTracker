@@ -35,30 +35,6 @@
 	--identity: hsl(0, 57%, 50%);
 }
 
-.t-dark {
-	--backing-page: hsl(0, 10%, 11%);
-	--backing-head: hsl(0, 30%, 5%);
-	--backing-footer: hsl(0, 10%, 7%);
-	--backing-content: hsl(0, 10%, 17%);
-	--backing-subcontent: hsl(0, 10%, 7%);
-	--backing-button:  hsl(0, 10%, 21%);
-	--backing-negative:  rgb(90, 25, 25);
-	--backing-input: hsl(0, 30%, 15%);
-
-	--border-light: hsl(0, 10%, 20%);
-	--border-medium: hsl(0, 7%, 30%);
-	--border-head: hsl(0, 90%, 20%);
-	--border-active: hsl(0, 39%, 44%);
-	
-	--text-regular: hsl(0, 0%, 75%);
-	--text-medium: hsl(0, 0%, 69%);
-	--text-light: hsl(0, 0%, 60%);
-	--text-active: var(--accent-1);
-	
-	--accent-1: hsl(0, 100%, 60%);
-	--accent-pastel: hsl(0, 72%, 76%);
-}
-
 /* provides a fallback for any non-set theme value */
 .t-light, :root {
 	--backing-page: hsl(0, 0%, 94%);
@@ -82,6 +58,30 @@
 	
 	--accent-1: hsl(0, 100%, 60%);
 	--accent-pastel: hsl(0, 30%, 70%);
+}
+
+.t-dark {
+	--backing-page: hsl(0, 10%, 11%);
+	--backing-head: hsl(0, 30%, 5%);
+	--backing-footer: hsl(0, 10%, 7%);
+	--backing-content: hsl(0, 10%, 17%);
+	--backing-subcontent: hsl(0, 10%, 7%);
+	--backing-button:  hsl(0, 10%, 21%);
+	--backing-negative:  rgb(90, 25, 25);
+	--backing-input: hsl(0, 30%, 15%);
+
+	--border-light: hsl(0, 10%, 20%);
+	--border-medium: hsl(0, 7%, 30%);
+	--border-head: hsl(0, 90%, 20%);
+	--border-active: hsl(0, 39%, 44%);
+	
+	--text-regular: hsl(0, 0%, 75%);
+	--text-medium: hsl(0, 0%, 69%);
+	--text-light: hsl(0, 0%, 60%);
+	--text-active: var(--accent-1);
+	
+	--accent-1: hsl(0, 100%, 60%);
+	--accent-pastel: hsl(0, 72%, 76%);
 }
 
 .t-blackout {
