@@ -757,7 +757,7 @@ if( $has_session ){
 	$user = $auth->get_current_user();
 	$permission_level = $user['permission_level'];
 } else {
-	$user = [];
+	$user = ['id' => -1];
 	$permission_level = 0;
 }
 if( !isset($user['timezone']) ){
