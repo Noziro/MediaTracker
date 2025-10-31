@@ -1,5 +1,7 @@
 <?php declare(strict_types=1);
 
+session_start();
+
 define("PATH", $_SERVER["DOCUMENT_ROOT"] . "/");
 # the URL as displayed in the client browser
 DEFINE("URL", [
@@ -14,6 +16,8 @@ define("SQL_CREDENTIALS", [
 	'dbname' => getenv('DB_DATABASE') ?: 'mediatracker',
 	'port' => getenv('DB_PORT') ? intval(getenv('DB_PORT')) : 3306
 ]);
+
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 $pl_timer_start = hrtime(True);
 
@@ -483,14 +487,20 @@ const VALID_TIMEZONES = [
 	]
 ];
 
-$db = new mysqli(...array_values(SQL_CREDENTIALS));
+try {
+	# the @ suppresses error output, you may want to remove this for debugging
+	$db = @ new mysqli(...array_values(SQL_CREDENTIALS));
+}
+catch( mysqli_sql_exception $e ){
+	http_response_code(503);
+	exit();
+}
+
 
 $result = $db->query("SHOW TABLES");
 if( !$result || !$result->fetch_assoc() ){
 	require_once PATH.'server/schema.php';
 }
-
-session_start();
 
 // TODO - this should be cleaned up or deleted
 #set_error_handler("errorHandler");
