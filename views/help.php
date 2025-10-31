@@ -1,12 +1,15 @@
-<?php declare(strict_types=1); ?>
+<?php declare(strict_types=1);
+
+$page = isset(URL['PATH_ARRAY'][1]) ? URL['PATH_ARRAY'][1] : '';
+?>
 
 <main id="content" class="wrapper wrapper--content">
 	<div class="wrapper__inner">
-		<?php if(!isset($_GET['section'])):  ?>
+		<?php if( $page === '' ) : ?>
 		
 		Add support/help section here.
 		
-		<?php elseif($_GET['section'] == 'bbcode') : ?>
+		<?php elseif( $page === 'bbcode') : ?>
 		
 		Add bbcode info here after BBCode is added
 		

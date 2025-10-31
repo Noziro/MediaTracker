@@ -236,6 +236,7 @@ if( in_array($file, ['login', 'register']) && $has_session ){
 					<!-- <span class="footer__item">A project by Noziro Red</span> -->
 					<a class="footer__item" href="/about">About</a>
 					<a class="footer__item" href="https://github.com/Noziro/MediaTracker">Source</a>
+					<a class="footer__item" href="/help">Help</a>
 				</div>
 				
 				<div class="footer__section">
