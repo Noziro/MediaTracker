@@ -1,3 +1,5 @@
+'use strict';
+
 // Header Scroll
 
 var $navObj = document.getElementById('nav');
@@ -118,8 +120,16 @@ function search( query ){
 var searchBars = document.getElementsByClassName('js-search-bar');
 
 for( let bar of searchBars ){
-	input = bar.getElementsByTagName('input')[0];
-	button = bar.getElementsByTagName('button')[0];
-	button.addEventListener('pointerup', ev=>{ if( ev.pointerType !== 'mouse' || ev.button === 0 ){ search(input.value); } });
-	input.addEventListener('keyup', ev=>{ if( ev.key === 'Enter' ){ search(input.value); } });
+	let input = bar.getElementsByTagName('input')[0];
+	let button = bar.getElementsByTagName('button')[0];
+	button.addEventListener('pointerup', ev=>{
+		if( ev.pointerType !== 'mouse' || ev.button === 0 ){
+			search(input.value);
+		}
+	});
+	input.addEventListener('keyup', ev=>{
+		if( ev.key === 'Enter' ){
+			search(input.value);
+		}
+	});
 }
