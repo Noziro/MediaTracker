@@ -51,11 +51,14 @@ if( API_ACTION === "/media/create" || API_ACTION === "/media/edit" ){
 	$rewatched = 0;
 	$user_started_at = null;
 	$user_finished_at = null;
-	$release_date = null;
 	$started_at = null;
 	$finished_at = null;
 	$comments = '';
-	$links = '';
+	$anilist_type = null;
+	$anilist = null;
+	$myanimelist = null;
+	$imdb = null;
+	$tmdb = null;
 	$adult = 0;
 	$favourite = 0;
 	$private = 0;
@@ -195,10 +198,6 @@ if( API_ACTION === "/media/create" || API_ACTION === "/media/edit" ){
 		$user_finished_at = validate_date($_POST['user_finished_at']);
 	}
 
-	if( array_key_exists('release_date', $_POST) && $_POST['release_date'] !== '' ){
-		$release_date = validate_date($_POST['release_date']);
-	}
-
 	if( array_key_exists('started_at', $_POST) && $_POST['started_at'] !== '' ){
 		$started_at = validate_date($_POST['started_at']);
 	}
@@ -216,18 +215,40 @@ if( API_ACTION === "/media/create" || API_ACTION === "/media/edit" ){
 		}
 	}
 
-	// Links
-	if( array_key_exists('links', $_POST) && is_array($_POST['links']) ){
-		$validatedLinks = [];
-		foreach( $_POST['links'] as $link ){
-			$link = trim($link);
-			if($link !== ""
-			&& filter_var($link, FILTER_VALIDATE_URL) === False
-			&& strpos($link, 'http') === 0) {
-				$validatedLinks[] = $link;
-			}
+	// Connections
+
+	if( array_key_exists('anilist_type', $_POST) && array_key_exists('anilist_id', $_POST) && strlen((string) $_POST['anilist_id']) > 0 ){
+		$anilist_type = (string) $_POST['anilist_type'];
+		$anilist_id = (int) $_POST['anilist_id'];
+		if( $anilist_type !== 'anime' && $anilist_type !== 'manga' || $anilist_id < 1 ){
+			bailout($return_to, 'invalid_value');
 		}
-		$links = json_encode($validatedLinks);
+		$anilist = $anilist_type.'/'.$anilist_id;
+	}
+
+	if( array_key_exists('myanimelist_type', $_POST) && array_key_exists('myanimelist_id', $_POST) && strlen((string) $_POST['myanimelist_id']) > 0 ){
+		$myanimelist_type = (string) $_POST['myanimelist_type'];
+		$myanimelist_id = (int) $_POST['anilist_id'];
+		if( $myanimelist_type !== 'anime' && $myanimelist_type !== 'manga' || $myanimelist_id < 1 ){
+			bailout($return_to, 'invalid_value');
+		}
+		$myanimelist = $myanimelist_type.'/'.$myanimelist_id;
+	}
+
+	if( array_key_exists('imdb_id', $_POST) && $_POST['imdb_id'] !== null && strlen($_POST['imdb_id']) > 0 ){
+		$imdb = (string) $_POST['imdb_id'];
+		if( !preg_eval('/^tt\d+$/', $imdb) ){
+			bailout($return_to, 'invalid_value');
+		}
+	}
+
+	if( array_key_exists('tmdb_type', $_POST) && array_key_exists('tmdb_id', $_POST) && strlen((string) $_POST['tmdb_id']) > 0 ){
+		$tmdb_type = (string) $_POST['tmdb_type'];
+		$tmdb_id = (int) $_POST['tmdb_id'];
+		if( $tmdb_type !== 'movie' && $tmdb_type !== 'tv' || $tmdb_id < 1 ){
+			bailout($return_to, 'invalid_value');
+		}
+		$tmdb = $tmdb_type.'/'.$tmdb_id;
 	}
 
 	// Flags
@@ -268,18 +289,20 @@ if( API_ACTION === "/media/create" || API_ACTION === "/media/edit" ){
 				rewatched,
 				user_started_at,
 				user_finished_at,
-				release_date,
 				started_at,
 				finished_at,
 				comments,
-				links,
+				anilist,
+				myanimelist,
+				imdb,
+				tmdb,
 				adult,
 				favourite,
 				private
 			)
-			VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+			VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
 		', [
-			'iisssiiiisssssssiii',
+			'iisssiiiisssssssssiii',
 			$user['id'],
 			$collection['id'],
 			$status,
@@ -291,11 +314,13 @@ if( API_ACTION === "/media/create" || API_ACTION === "/media/edit" ){
 			$rewatched,
 			$user_started_at,
 			$user_finished_at,
-			$release_date,
 			$started_at,
 			$finished_at,
 			$comments,
-			$links,
+			$anilist,
+			$myanimelist,
+			$imdb,
+			$tmdb,
 			$adult,
 			$favourite,
 			$private
@@ -312,17 +337,19 @@ if( API_ACTION === "/media/create" || API_ACTION === "/media/edit" ){
 				rewatched=?,
 				user_started_at=?,
 				user_finished_at=?,
-				release_date=?,
 				started_at=?,
 				finished_at=?,
 				comments=?,
-				links=?,
+				anilist=?,
+				myanimelist=?,
+				imdb=?,
+				tmdb=?,
 				adult=?,
 				favourite=?,
 				private=?
 			WHERE id=?
 		', [
-			'sssiiiisssssssiiii',
+			'sssiiiisssssssssiiii',
 			$status,
 			$image_location,
 			$name,
@@ -332,11 +359,13 @@ if( API_ACTION === "/media/create" || API_ACTION === "/media/edit" ){
 			$rewatched,
 			$user_started_at,
 			$user_finished_at,
-			$release_date,
 			$started_at,
 			$finished_at,
 			$comments,
-			$links,
+			$anilist,
+			$myanimelist,
+			$imdb,
+			$tmdb,
 			$adult,
 			$favourite,
 			$private,

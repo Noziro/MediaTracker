@@ -579,7 +579,7 @@ function preg_eval( string $pattern, string $string ): bool {
 
 // simple function to simplify adding a data-autofill text for a variable that has an unknown value
 function autofill_if_set( $mixed ): string {
-	if( isset($mixed) ){
+	if( $mixed !== null && strlen((string) $mixed) > 0 ){
 		echo ' data-autofill="'.$mixed.'" ';
 	}
 	return '';

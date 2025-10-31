@@ -10,7 +10,7 @@ if( !preg_eval('/\d+/', $item_id) ){
 }
 $item_id = intval($item_id);
 
-$stmt = sql('SELECT id, user_id, collection_id, image, name, episodes, release_date, started_at, finished_at, links, adult, private, deleted FROM media WHERE id=? LIMIT 1', ['i', $item_id]);
+$stmt = sql('SELECT id, user_id, collection_id, image, name, episodes, started_at, finished_at, anilist, myanimelist, imdb, tmdb, adult, private, deleted FROM media WHERE id=? LIMIT 1', ['i', $item_id]);
 if( !$stmt->ok || $stmt->row_count === 0 ){
 	bailout('/404');
 }
@@ -125,6 +125,45 @@ $collection = $stmt->rows[0];
 
 					?>
 				</div>
+
+				<?php
+				$anilist = strlen((string) $item['anilist']) > 0 ? 'https://anilist.co/'.$item['anilist'] : null;
+				$myanimelist = strlen((string) $item['myanimelist']) > 0 ? 'https://myanimelist.net/'.$item['myanimelist'] : null;
+				$imdb = strlen((string) $item['imdb']) > 0 ? 'https://imdb.com/title/'.$item['imdb'] : null;
+				$tmdb = strlen((string) $item['tmdb']) > 0 ? 'https://themoviedb.org/'.$item['tmdb'] : null;
+				if( isset($anilist) || isset($myanimelist) || isset($imdb) || isset($tmdb) ) :
+				?>
+				<div class="c-module">
+					<h6 class="c-heading-minor">External Links</h6>
+
+					<div class="c-external-links">
+						<?php if( isset($anilist) ) : ?>
+						<a class="c-external-links__link" href="<?=$anilist?>" target="_blank">
+							<img src="https://www.google.com/s2/favicons?domain=anilist.co&sz=24" class="c-external-links__favicon"></img>
+							Anilist
+						</a>
+						<?php endif; ?>
+						<?php if( isset($myanimelist) ) : ?>
+						<a class="c-external-links__link" href="<?=$myanimelist?>" target="_blank">
+							<img src="https://www.google.com/s2/favicons?domain=myanimelist.net&sz=24" class="c-external-links__favicon"></img>
+							MyAnimeList
+						</a>
+						<?php endif; ?>
+						<?php if( isset($imdb) ) : ?>
+						<a class="c-external-links__link" href="<?=$imdb?>" target="_blank">
+							<img src="https://www.google.com/s2/favicons?domain=imdb.com&sz=24" class="c-external-links__favicon"></img>
+							IMDb
+						</a>
+						<?php endif; ?>
+						<?php if( isset($tmdb) ) : ?>
+						<a class="c-external-links__link" href="<?=$tmdb?>" target="_blank">
+							<img src="https://www.google.com/s2/favicons?domain=themoviedb.org&sz=24" class="c-external-links__favicon"></img>
+							TMDb
+						</a>
+						<?php endif; ?>
+					</div>
+				</div>
+				<?php endif; ?>
 			</div>
 			
 			<div class="l-leave-a-gap">
@@ -150,25 +189,5 @@ $collection = $stmt->rows[0];
 				<?php endif; ?>
 			</div>
 		</div>
-		
-
-
-		<?php
-		$links = json_decode($item['links']);
-		if($links !== null && count($links) !== 0) : ?>
-
-		<br />
-
-		<div>
-			Links:<br />
-
-			<?php
-			foreach( $links as $link ){
-				echo '<a href="'.$link.'">'.$link.'</a><br />';
-			}
-			?>
-		</div>
-
-		<?php endif; ?>
 	</div>
 </main>

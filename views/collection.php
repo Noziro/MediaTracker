@@ -61,7 +61,7 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 				'rating_system' => 100
 			];
 			$items = sql('
-				SELECT m.id, m.status, m.name, m.image, m.score, m.episodes, m.progress, m.rewatched, m.user_started_at, m.user_finished_at, m.release_date, m.started_at, m.finished_at, m.comments, m.favourite
+				SELECT m.id, m.status, m.name, m.image, m.score, m.episodes, m.progress, m.rewatched, m.user_started_at, m.user_finished_at, m.started_at, m.finished_at, m.comments, m.favourite
 				FROM media AS m
 				JOIN collections AS c ON m.collection_id = c.id
 				WHERE m.user_id=? AND c.deleted=1
@@ -85,7 +85,7 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 			}
 
 			$items = sql('
-				SELECT id, status, name, image, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments, favourite
+				SELECT id, status, name, image, score, episodes, progress, rewatched, user_started_at, user_finished_at, started_at, finished_at, comments, favourite
 				FROM media
 				WHERE collection_id=? AND deleted=0
 				ORDER BY status ASC, name ASC',

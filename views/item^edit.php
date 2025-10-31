@@ -5,7 +5,7 @@ if( !preg_eval('/\d+/', $item_id) ){
 }
 $item_id = intval($item_id);
 
-$item = sql('SELECT id, user_id, collection_id, status, image, name, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments, links, adult, favourite, private FROM media WHERE id=? LIMIT 1', ['s', $item_id]);
+$item = sql('SELECT id, user_id, collection_id, status, image, name, score, episodes, progress, rewatched, user_started_at, user_finished_at, started_at, finished_at, comments, anilist, myanimelist, imdb, tmdb, adult, favourite, private FROM media WHERE id=? LIMIT 1', ['s', $item_id]);
 if( $item->row_count < 1 ){
 	bailout('/404');
 }

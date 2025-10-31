@@ -9,7 +9,7 @@ if( $inherit_from_id ){
 		bailout('/404');
 	}
 	$inherit_from_id = intval($inherit_from_id);
-	$stmt = sql('SELECT id, user_id, collection_id, status, image, name, score, episodes, progress, rewatched, user_started_at, user_finished_at, release_date, started_at, finished_at, comments, links, adult, favourite, private FROM media WHERE id=? LIMIT 1', ['s', $inherit_from_id]);
+	$stmt = sql('SELECT id, user_id, collection_id, status, image, name, score, episodes, progress, rewatched, user_started_at, user_finished_at, started_at, finished_at, comments, anilist, myanimelist, imdb, tmdb, adult, favourite, private FROM media WHERE id=? LIMIT 1', ['s', $inherit_from_id]);
 	if( $stmt->row_count < 1 ){
 		bailout('/404');
 	}

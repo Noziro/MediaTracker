@@ -222,6 +222,25 @@ a {
 }
 
 
+.c-external-links {
+	display: flex;
+	flex-flow: row nowrap;
+	gap: 6px;
+}
+.c-external-links__link {
+	display: flex;
+	flex-flow: row nowrap;
+	align-items: center;
+	gap: 3px;
+}
+.c-external-links__favicon {
+	display: block;
+	width: 24px;
+	height: 24px;
+	border-radius: var(--rounding);
+}
+
+
 
 .l-leave-a-gap ~ .l-leave-a-gap {
 	margin-top: 20px;
@@ -453,6 +472,12 @@ a {
 	outline: none;
 }
 
+.c-input-list {
+	display: flex;
+	gap: 10px;
+	flex-flow: row wrap;
+}
+
 .input {
 	display: block;
 	width: 250px;
@@ -482,6 +507,37 @@ a {
 .input:focus {
 	border-color: var(--border-active);
 	outline: none;
+}
+
+input[type="radio"] {
+	display: none;
+}
+.c-switch {
+	display: flex;
+	width: max-content;
+	gap: 3px;
+	margin: 5px 0;
+}
+.c-switch__option {
+	padding: 5px;
+	height: 24px;
+	background-color: var(--backing-subcontent);
+	border: 1px solid var(--border-light);
+	border-radius: var(--rounding) 0 0 var(--rounding);
+	color: var(--text-regular);
+	flex: 1 1 auto;
+}
+.c-switch__option ~ .c-switch__option {
+	border-radius: 0;
+}
+.c-switch__option:last-child {
+	border-radius: 0 var(--rounding) var(--rounding) 0;
+}
+input[type="radio"]:checked + .c-switch__option {
+	filter: invert(1);
+}
+.c-switch__option input {
+	display: none;
 }
 
 .checkbox-group {

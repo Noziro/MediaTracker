@@ -6,7 +6,7 @@ This module requires:
 
 <div class="item-fields">
 	<div class="item-fields__divider">
-		<span class="item-fields__header">Item Information</span>
+		<span class="item-fields__header">Media Information</span>
 	</div>
 
 	<div class="item-fields__field">
@@ -17,6 +17,18 @@ This module requires:
 	<div class="item-fields__field">
 		<label class="label">Total Episodes</label>
 		<input class="input input--thin js-autofill" name="episodes" type="number" min="0" <?=autofill_if_set($module_item['episodes'] ?? null)?>>
+	</div>
+
+	<div class="item-fields__field item-fields__field--date">
+		<label class="label">Media Started At</label>
+		<input id="js-set-today-3" class="input input--auto js-autofill" name="started_at" type="date" <?php if( isset($module_item['started_at']) ){ echo 'data-autofill="'.$module_item['started_at'].'"'; } ?>>
+		<a class="subtext" onclick="setToday('js-set-today-3')">Today</a>
+	</div>
+
+	<div class="item-fields__field item-fields__field--date">
+		<label class="label">Media Finished At</label>
+		<input id="js-set-today-4" class="input input--auto js-autofill" name="finished_at" type="date" <?php if( isset($module_item['finished_at']) ){ echo 'data-autofill="'.$module_item['finished_at'].'"'; } ?>>
+		<a class="subtext" onclick="setToday('js-set-today-4')">Today</a>
 	</div>
 	
 
@@ -32,29 +44,6 @@ This module requires:
 	</div>
 
 	<div class="item-fields__field">
-		<label class="label">Links</label>
-		<?php
-		if( isset($module_item['links']) ) :
-			$links = json_decode($module_item['links']);
-			if(is_array($links) && count($links) > 0) :
-				foreach($links as $link) :
-		?>
-		<input class="input js-autofill" type="text" name="links[]" data-autofill="<?=$link?>">
-		<?php
-				endforeach;
-			endif;
-		endif;
-		?>
-
-		<input class="input" type="text" name="links[]">
-		
-		<div class="l-button-list">
-			<button type="button" id="js-add-input" class="l-button-list__button button">+</button>
-			<button type="button" id="js-remove-input" class="l-button-list__button button button--disabled" disabled="disabled">-</button>
-		</div>
-	</div>
-
-	<div class="item-fields__field">
 		<label class="label">Image</label>
 
 		<?php if(!empty($module_item['image'])) : ?>
@@ -63,22 +52,6 @@ This module requires:
 		<?php endif; ?>
 
 		<input class="file-upload" type="file" name="image" accept=".jpg,.png">
-	</div>
-</div>
-
-<button type="button" class="button" onclick="toggleElement('advanced-item-fields')">Show/hide advanced</button>
-
-<div id="advanced-item-fields" class="item-fields u-hidden">
-	<div class="item-fields__field item-fields__field--date">
-		<label class="label">Media Started At</label>
-		<input id="js-set-today-3" class="input input--auto js-autofill" name="started_at" type="date" <?php if( isset($module_item['started_at']) ){ echo 'data-autofill="'.$module_item['started_at'].'"'; } ?>>
-		<a class="subtext" onclick="setToday('js-set-today-3')">Today</a>
-	</div>
-
-	<div class="item-fields__field item-fields__field--date">
-		<label class="label">Media Finished At</label>
-		<input id="js-set-today-4" class="input input--auto js-autofill" name="finished_at" type="date" <?php if( isset($module_item['finished_at']) ){ echo 'data-autofill="'.$module_item['finished_at'].'"'; } ?>>
-		<a class="subtext" onclick="setToday('js-set-today-4')">Today</a>
 	</div>
 </div>
 
@@ -148,5 +121,105 @@ This module requires:
 	<div class="item-fields__field">
 		<label class="label">Comments</label>
 		<textarea class="text-input js-autofill" name="comments" <?php if( isset($module_item['comments']) ){ echo 'data-autofill="'.$module_item['comments'].'"'; } ?>></textarea>
+	</div>
+</div>
+
+<div class="item-fields">
+	<div class="item-fields__divider">
+		<span class="item-fields__header">Connections</span>
+	</div>
+
+	<div class="item-fields__field">
+		<?php
+		if( isset($module_item['anilist']) && strlen($module_item['anilist']) > 0 ){
+			$anilist_parts = explode('/', $module_item['anilist']);
+			$anilist_type = $anilist_parts[0];
+			$anilist_id = $anilist_parts[1];
+		} else {
+			$anilist_type = 'anime';
+			$anilist_id = '';
+		}
+		?>
+		<label class="label">Anilist</label>
+		<div class="c-input-list">
+			<div class="c-switch">
+				<input id="al1" type="radio" value="anime" name="anilist_type" <?=$anilist_type === 'anime' ? 'checked' : ''?>>
+				<label for="al1" class="c-switch__option">
+					Anime
+				</label>
+				<input id="al2" type="radio" value="manga" name="anilist_type" <?=$anilist_type === 'manga' ? 'checked' : ''?>>
+				<label for="al2" class="c-switch__option">
+					Manga
+				</label>
+			</div>
+			<input class="input input--thin js-autofill" type="text" name="anilist_id" placeholder="123456" <?=autofill_if_set($anilist_id)?>>
+		</div>
+	</div>
+
+	<div class="item-fields__field">
+		<?php
+		if( isset($module_item['myanimelist']) && strlen($module_item['myanimelist']) > 0 ){
+			$myanimelist_parts = explode('/', $module_item['myanimelist']);
+			$myanimelist_type = $myanimelist_parts[0];
+			$myanimelist_id = $myanimelist_parts[1];
+		} else {
+			$myanimelist_type = 'anime';
+			$myanimelist_id = '';
+		}
+		?>
+		<label class="label">MyAnimeList</label>
+		<div class="c-input-list">
+			<div class="c-switch">
+				<input id="mal1" type="radio" value="anime" name="myanimelist_type" <?=$myanimelist_type === 'anime' ? 'checked' : ''?>>
+				<label for="mal1" class="c-switch__option">
+					Anime
+				</label>
+				<input id="mal2" type="radio" value="manga" name="myanimelist_type" <?=$myanimelist_type === 'manga' ? 'checked' : ''?>>
+				<label for="mal2" class="c-switch__option">
+					Manga
+				</label>
+			</div>
+			<input class="input input--thin js-autofill" type="text" name="myanimelist_id" placeholder="123456" <?=autofill_if_set($myanimelist_id)?>>
+		</div>
+	</div>
+
+	<div class="item-fields__field">
+		<label class="label">IMDB</label>
+		<div class="c-input-list">
+			<input class="input input--thin  js-autofill" type="text" name="imdb_id" placeholder="tt1234567" <?autofill_if_set($module_item['imdb'] ?? null)?>>
+		</div>
+	</div>
+
+	<div class="item-fields__field">
+		<?php
+		if( isset($module_item['tmdb']) && strlen($module_item['tmdb']) > 0 ){
+			$tmdb_parts = explode('/', $module_item['tmdb']);
+			$tmdb_type = $tmdb_parts[0];
+			$tmdb_id = $tmdb_parts[1];
+		} else {
+			$tmdb_type = 'movie';
+			$tmdb_id = '';
+		}
+		?>
+		<label class="label">TMDB</label>
+		<div class="c-input-list">
+			<div class="c-switch">
+				<input id="tmdb1" type="radio" value="movie" name="tmdb_type" <?=$tmdb_type === 'movie' ? 'checked' : ''?>>
+				<label for="tmdb1" class="c-switch__option">
+					Movie
+				</label>
+				<input id="tmdb2" type="radio" value="tv" name="tmdb_type" <?=$tmdb_type === 'tv' ? 'checked' : ''?>>
+				<label for="tmdb2" class="c-switch__option">
+					TV
+				</label>
+			</div>
+			<input class="input input--thin js-autofill" type="text" name="tmdb_id" placeholder="12345" <?=autofill_if_set($tmdb_id)?>>
+		</div>
+	</div>
+
+	<div class="item-fields__field">
+		<label class="label">Auto-update from</label>
+		<select class="select" name="auto_update_source" disabled></select>
+		<span class="subtext">Not implemented yet.</span>
 	</div>
 </div>
