@@ -1,4 +1,5 @@
 <?php declare(strict_types=1);
+$page_user_id = 0;
 # Determine which page to load based on URL
 if( URL['PATH_ARRAY'][0] === 'collection' ){
 	$page = 'specific_collection';
@@ -18,6 +19,10 @@ elseif( URL['PATH_STRING'] === '/my/collection' ||
 	URL['PATH_ARRAY'][0] === 'user' && URL['PATH_ARRAY'][2] === 'collection' ){
 	$page = 'entire_collection';
 	if( URL['PATH_ARRAY'][0] === 'my' ){
+		if( !$has_session ){
+			soft_error(403);
+			return;
+		}
 		$page_user_id = $user['id'];
 	}
 	else {
@@ -69,6 +74,7 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 				['i', $user['id']]);
 
 			$page_user = $user;
+			$page_title = 'Orphaned Items';
 		}
 		else {
 			$stmt = sql('
@@ -81,7 +87,7 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 			}
 			$collection = $stmt->rows[0];
 			if( $collection['deleted'] === 1 ){
-				bailout('/403');
+				bailout('/410');
 			}
 
 			$items = sql('
@@ -92,6 +98,8 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 				['i', $collection['id']]);
 		
 			$page_user = sql('SELECT id, nickname FROM users WHERE id=?', ['i', $collection['user_id']])->rows[0];
+			$page_nickname = $page_user['id'] === $user['id'] ? 'Your' : $page_user['nickname']."'s";
+			$page_title = $page_nickname.' Collection';$page_title = $collection['name'].' • '.$page_nickname.' Collection';
 		}
 
 
@@ -308,7 +316,7 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 
 
 
-		<?php if($has_session && $user['id'] === $page_user['id']) : ?>
+		<?php if( $has_session && $user['id'] === $page_user['id'] ) : ?>
 		<div id="modal--collection-edit" class="modal modal--hidden" role="dialog" aria-modal="true">
 			<button class="modal__background" onclick="toggleModal('modal--collection-edit', false)"></button>
 			<div class="modal__inner">
@@ -414,7 +422,7 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 
 		<?php
 		// If user is not specified, redirect to own page.
-		elseif(!isset($_GET['u']) && $has_session || isset($_GET['u'])) :
+		elseif( $page === 'entire_collection' ) :
 			$stmt = sql('SELECT id, nickname FROM users WHERE id=?', ['i', $page_user_id]);
 			if( !$stmt->ok || $stmt->row_count < 1 ){ bailout('/404'); }
 			$page_user = $stmt->rows[0];
@@ -428,6 +436,9 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 			}
 
 			$collections = sql('SELECT id, user_id, name, type, private FROM collections WHERE user_id=? AND deleted=0 AND private<=? ORDER BY name ASC', ['ii', $page_user['id'], $friendship]);
+			
+			$page_nickname = $page_user['id'] === $user['id'] ? 'Your' : $page_user['nickname']."'s";
+			$page_title = $page_nickname.' Collection';
 		?>
 
 
@@ -566,7 +577,7 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 
 
 
-		<?php if($has_session && $user['id'] === $page_user['id']) : ?>
+		<?php if( $has_session && $user['id'] === $page_user['id'] ) : ?>
 
 		<div id="modal--collection-create" class="modal modal--hidden" role="dialog" aria-modal="true">
 			<button class="modal__background" onclick="toggleModal('modal--collection-create', false)"></button>
@@ -608,8 +619,7 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 
 		<?php
 		else :
-			header('Location: /404');
-			exit();
+			soft_error(404);
 		
 		endif;
 		?>
@@ -618,7 +628,7 @@ if( (isset($is_orphanage) && $is_orphanage) || $page === 'entire_collection' ){
 
 
 		<?php if( $has_session && $user['id'] === $page_user['id'] ){
-			require PATH.'modules/confirmation_modal.inc';
+			require_once PATH.'modules/confirmation_modal.inc';
 		} ?>
 	</div>
 </main>

@@ -10,7 +10,6 @@ elseif( count(URL['PATH_ARRAY']) < 2 ){
 else {
 	$page_user_id = URL['PATH_ARRAY'][1];
 	if( !preg_eval('/\d+/', $page_user_id) ){
-		pprint($page_user_id);
 		bailout('/404');
 	}
 	$page_user_id = intval($page_user_id);
@@ -68,6 +67,9 @@ function ceil_decimal(float $float, int $precision = 1) {
 		return ceil($float * $precision) / $precision;
 	}
 }
+
+# Set title
+$page_title = $page_user['nickname'].'\'s Profile';
 
 ?>
 

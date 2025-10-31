@@ -115,6 +115,8 @@ $pagination->Setup(30, $total);
 $search->set_limit($pagination->offset, $pagination->increment);
 
 $search_result = $search->execute();
+
+$page_title = 'Search: '.$_GET['q'];
 ?>
 
 <main id="content" class="wrapper wrapper--content">

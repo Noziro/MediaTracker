@@ -131,7 +131,7 @@ class HttpResponse {
 		],
 		410 => [
 			'message' => 'Gone',
-			'details' => ''
+			'details' => 'The resource you are trying to access has been removed.'
 		],
 		411 => [
 			'message' => 'Length Required',
@@ -252,6 +252,9 @@ class HttpResponse {
 	];
 
 	function __construct( int $code ){
+		if( !array_key_exists($code, HttpResponse::$error_codes) ){
+			throw new ValueError("Invalid HTTP response code: $code");
+		}
 		$this->code = $code;
 		$this->message = HttpResponse::$error_codes[$this->code]['message'];
 		$this->details = HttpResponse::$error_codes[$this->code]['details'];

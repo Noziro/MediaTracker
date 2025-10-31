@@ -1,6 +1,21 @@
 <?php declare(strict_types=1);
-$response = new HttpResponse(intval(URL['PATH_ARRAY'][0]));
+# check current code, which made have been set by another script already
+$error = http_response_code();
+if( $error === 200 ){
+	# if code is 200, then try to get the error from the path.
+	# Any non-valid results, such as non-int-like paths, will get caught later with the try/catch
+	$error = count(URL['PATH_ARRAY']) > 0 ? intval(URL['PATH_ARRAY'][0]) : 404;
+}
+
+# if the path is not a valid error, default to 404
+try {
+	$response = new HttpResponse($error);
+}
+catch( ValueError ){
+	$response = new HttpResponse(404);
+}
 http_response_code($response->code);
+$page_title = "{$response->code} {$response->message}";
 ?>
 
 <main id="content" class="wrapper wrapper--content c-page-failure">

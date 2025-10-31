@@ -1082,8 +1082,7 @@ class Notice {
 }
 
 
-// For use . Closes relevant pieces and redirects user to a page.
-# TODO: this is currently used for all page exists, but header redirects are not allowed after content is echo'd. This needs a rework.
+// Immediately ceases page exection, closes relevant pieces, and redirects user to a page of choice.
 function bailout( string $page = '/', string|array|Notice ...$input_notices ){
 	global $db;
 	$db->close();
@@ -1100,6 +1099,23 @@ function bailout( string $page = '/', string|array|Notice ...$input_notices ){
 	
 	header('Location: '.$page);
 	exit();
+}
+
+// Loads an error page while retaining the same URL. Useful for impermanent status codes where the resource does actually exist.
+function soft_error( int $error = 404 ){
+	# checks which ob level we are in and runs appropriate code.
+	# the first level is activated as soon as possible and incudes the header and footer
+	# the second level is activated in index.php right before loading the views/* files
+	# find "ob_start()" in the index to see for yourself
+	global $file;
+	$file = 'error';
+	if( ob_get_level() > 1 ){
+		ob_clean();
+		http_response_code($error);
+	}
+	else { # ob_get_level() === 0
+		throw new Exception("soft_error() called without output buffering active.");
+	}
 }
 
 

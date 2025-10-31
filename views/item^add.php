@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 if( !$has_session ){
-	bailout('/403');
+	soft_error(403);
+	return;
 }
 
 $inherit_from_id = isset($_GET['from']) ? $_GET['from'] : false;
@@ -15,7 +16,8 @@ if( $inherit_from_id ){
 	}
 	$item = $stmt->rows[0];
 	if( $item['private'] > 0 && $user['id'] !== $item['id'] ){
-		bailout('/403');
+		soft_error(403);
+		return;
 	}
 }
 else {

@@ -64,12 +64,10 @@ else {
 
 $static_files_to_load = [
 	'css' => [
-		'style',
-		$file
+		'style'
 	],
 	'js' => [
-		'scripts',
-		$file
+		'scripts'
 	]
 ];
 if( count(URL['PATH_ARRAY']) > 0 && URL['PATH_ARRAY'][0] === 'register' ){
@@ -103,7 +101,7 @@ if( in_array($file, ['login', 'register']) && $has_session ){
 <!DOCTYPE HTML>
 <html lang="en" class="t-light">
 	<head>
-		<title><?=SITE_NAME." - ".$page_title?></title>
+		<title><?=SITE_NAME?></title>
 		<meta charset="utf-8">
 		<meta name="description" content="Placeholder">
 		<meta name="keywords" content="Placeholder">
@@ -111,18 +109,7 @@ if( in_array($file, ['login', 'register']) && $has_session ){
 		<link rel="icon" type="image/png" href="/static/img/favicon-32.png" sizes="32x32">
 		<link rel="icon" type="image/png" href="/static/img/favicon-256.png" sizes="256x256">
 		
-		<?php
-		foreach( $static_files_to_load['css'] as $css_file ){
-			if( file_exists(PATH."static/css/".$css_file.".css") ){
-				echo '<link rel="stylesheet" href="/static/css/'.$css_file.'.css">';
-			}
-		}
-		foreach( $static_files_to_load['js'] as $js_file ){
-			if( file_exists(PATH."static/js/".$js_file.".js") ){
-				echo '<script type="text/javascript" src="/static/js/'.$js_file.'.js" defer></script>';
-			}
-		}
-		?>
+		<!-- %SCRIPTS% -->
 		
 		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Montserrat:400,400i,600,600i|Roboto+Mono">
 		
@@ -161,6 +148,8 @@ if( in_array($file, ['login', 'register']) && $has_session ){
 				
 				<div class="site-nav__section">
 					<?php if($has_session) : ?>
+					
+					<a class="site-nav__item" href="/item/add">Add</a>
 					
 					<a class="site-nav__item" href="/my/collection">Collection</a>
 					
@@ -227,8 +216,16 @@ if( in_array($file, ['login', 'register']) && $has_session ){
 		endif;
 		?>
 		
-		<?php 
+		<?php
+		ob_start();
 		include PATH."views/$file.php";
+		$view_content = ob_get_clean();
+		if( trim($view_content) === '' ){
+			include PATH."views/error.php";
+		}
+		else {
+			echo $view_content;
+		}
 		?>
 		
 		<?php if(!isset($_GET['frame'])) : ?> 
@@ -301,5 +298,31 @@ $_SESSION['notice'] = null;
 
 // Close DB
 $db->close();
+
+// Modify page output after files have run and variables are accurate
+
+$output = ob_get_clean();
+
+# title
+$page_title = $page_title.' • '.SITE_NAME;
+$output = str_replace('<title>'.SITE_NAME.'</title>', '<title>'.$page_title.'</title>', $output);
+
+# scripts
+$scripts = '';
+$static_files_to_load['css'][] = $file;
+$static_files_to_load['js'][] = $file;
+foreach( $static_files_to_load['css'] as $css_file ){
+	if( file_exists(PATH."static/css/".$css_file.".css") ){
+		$scripts .= '<link rel="stylesheet" href="/static/css/'.$css_file.'.css">';
+	}
+}
+foreach( $static_files_to_load['js'] as $js_file ){
+	if( file_exists(PATH."static/js/".$js_file.".js") ){
+		$scripts .= '<script type="text/javascript" src="/static/js/'.$js_file.'.js" defer></script>';
+	}
+}
+$output = str_replace('<!-- %SCRIPTS% -->', $scripts, $output);
+
+echo $output;
 
 ?>

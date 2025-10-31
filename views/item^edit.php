@@ -15,7 +15,8 @@ $collection = sql('SELECT id, user_id, name, type, display_image, display_score,
 
 // User authority
 if( !$has_session || $user['id'] !== $item['user_id'] ){
-	bailout('/403');
+	soft_error(403);
+	return;
 }
 ?>
 

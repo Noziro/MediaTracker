@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 if( !$has_session ){
-	bailout('/403');
+	soft_error(403);
+	return;
 }
 
 $currently_watching = sql('

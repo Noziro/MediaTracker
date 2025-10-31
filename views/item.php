@@ -22,7 +22,8 @@ if( $item['deleted'] === 1 ){
 
 if($item['private'] === 1 && !$has_session ||
    $item['private'] === 1 && $user['id'] !== $item['user_id']) {
-	bailout('/403');
+	soft_error(403);
+	return;
 }
 
 $stmt = sql('SELECT id, user_id, name, type, private FROM collections WHERE id=?', ['s', $item['collection_id']]);
@@ -30,6 +31,8 @@ if( !$stmt->ok || $stmt->row_count === 0 ){
 	bailout('/404');
 }
 $collection = $stmt->rows[0];
+
+$page_title = $item['name'];
 ?>
 
 <main id="content" class="wrapper wrapper--content">
