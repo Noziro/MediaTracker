@@ -8,7 +8,7 @@ require_once $_SERVER["DOCUMENT_ROOT"]."/server/server.php";
 # Include HttpResponse class for error redirection
 require_once PATH."server/classes/http_response.inc";
 
-
+ob_start();
 
 // INDEX-SPECIFIC SETUP
 
